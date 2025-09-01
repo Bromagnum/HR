@@ -1,0 +1,184 @@
+@model EducationDetailViewModel
+
+@{
+    ViewBag.Title = "Eğitim Bilgisini Sil";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>@ViewBag.Title
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Dikkat!</strong> Bu eğitim bilgisini silmek istediğinizden emin misiniz? 
+                        Bu işlem geri alınamaz.
+                    </div>
+
+                    <div class="row">
+                        <!-- Sol Sütun -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-university me-2"></i>Silinecek Eğitim Bilgileri
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">@Html.DisplayNameFor(m => m.SchoolName)</label>
+                                <div class="border rounded p-2 bg-light">
+                                    <i class="fas fa-university me-2"></i>@Model.SchoolName
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">@Html.DisplayNameFor(m => m.Degree)</label>
+                                        <div class="border rounded p-2 bg-light">
+                                            <span class="badge bg-info fs-6">@Model.Degree</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">@Html.DisplayNameFor(m => m.FieldOfStudy)</label>
+                                        <div class="border rounded p-2 bg-light">
+                                            @if (!string.IsNullOrEmpty(Model.FieldOfStudy))
+                                            {
+                                                <i class="fas fa-book me-2"></i>@Model.FieldOfStudy
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Belirtilmemiş</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">@Html.DisplayNameFor(m => m.StartDate)</label>
+                                        <div class="border rounded p-2 bg-light">
+                                            <i class="fas fa-calendar-plus me-2"></i>@Model.StartDate.ToString("dd.MM.yyyy")
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">@Html.DisplayNameFor(m => m.EndDate)</label>
+                                        <div class="border rounded p-2 bg-light">
+                                            @if (Model.IsOngoing)
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-clock me-1"></i>Devam Ediyor
+                                                </span>
+                                            }
+                                            else if (Model.EndDate.HasValue)
+                                            {
+                                                <i class="fas fa-calendar-check me-2"></i>@Model.EndDate.Value.ToString("dd.MM.yyyy")
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Belirtilmemiş</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (Model.GPA.HasValue)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">@Html.DisplayNameFor(m => m.GPA)</label>
+                                    <div class="border rounded p-2 bg-light">
+                                        <span class="badge @(Model.GPA >= 3.0m ? "bg-success" : Model.GPA >= 2.5m ? "bg-warning" : "bg-danger") fs-6">
+                                            <i class="fas fa-chart-line me-1"></i>@Model.GPA.Value.ToString("F2")
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(Model.Location))
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">@Html.DisplayNameFor(m => m.Location)</label>
+                                    <div class="border rounded p-2 bg-light">
+                                        <i class="fas fa-map-marker-alt me-2"></i>@Model.Location
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Sağ Sütun -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-user me-2"></i>İlgili Personel
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">@Html.DisplayNameFor(m => m.PersonName)</label>
+                                <div class="border rounded p-2 bg-light">
+                                    <i class="fas fa-user me-2"></i>@Model.PersonName
+                                    @if (!string.IsNullOrEmpty(Model.PersonEmployeeNumber))
+                                    {
+                                        <small class="text-muted">(@Model.PersonEmployeeNumber)</small>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.PersonDepartmentName))
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">@Html.DisplayNameFor(m => m.PersonDepartmentName)</label>
+                                    <div class="border rounded p-2 bg-light">
+                                        <i class="fas fa-building me-2"></i>@Model.PersonDepartmentName
+                                    </div>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(Model.Description))
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">@Html.DisplayNameFor(m => m.Description)</label>
+                                    <div class="border rounded p-2 bg-light">
+                                        <i class="fas fa-file-alt me-2"></i>@Model.Description
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Oluşturma Tarihi</label>
+                                <div class="border rounded p-2 bg-light">
+                                    <i class="fas fa-clock me-2"></i>@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-info">
+                                <i class="fas fa-eye me-1"></i>Detayları Görüntüle
+                            </a>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>İptal
+                            </a>
+                            <button type="submit" class="btn btn-danger" 
+                                    onclick="return confirm('Bu eğitim bilgisini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')">
+                                <i class="fas fa-trash me-1"></i>Evet, Sil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

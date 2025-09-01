@@ -1,0 +1,202 @@
+@model MVC.Models.DepartmentDetailViewModel
+
+@{
+    ViewData["Title"] = "Departman Detayı";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <div>
+        <a asp-action="ExportDetail" asp-route-id="@Model.Id" class="btn btn-success me-2">
+            <i class="fas fa-download"></i> Rapor Oluştur
+        </a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
+            <i class="fas fa-edit"></i> Düzenle
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Geri Dön
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-building"></i> @Model.Name
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge bg-success ms-2">Aktif</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary ms-2">Pasif</span>
+                    }
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.Name)</dt>
+                        <dd>@Html.DisplayFor(model => model.Name)</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.ParentDepartmentName)</dt>
+                        <dd>
+                            @if (!string.IsNullOrEmpty(Model.ParentDepartmentName))
+                            {
+                                <span class="badge bg-primary">@Model.ParentDepartmentName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Ana Departman</span>
+                            }
+                        </dd>
+                    </div>
+                    
+                    <div class="col-12">
+                        <dt>@Html.DisplayNameFor(model => model.Description)</dt>
+                        <dd>
+                            @if (!string.IsNullOrEmpty(Model.Description))
+                            {
+                                @Model.Description
+                            }
+                            else
+                            {
+                                <span class="text-muted">Açıklama bulunmamaktadır</span>
+                            }
+                        </dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.CreatedAt)</dt>
+                        <dd>@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.UpdatedAt)</dt>
+                        <dd>@(Model.UpdatedAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</dd>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alt Departmanlar -->
+        @if (Model.SubDepartments.Any())
+        {
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-sitemap"></i> Alt Departmanlar (@Model.SubDepartments.Count)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var subDept in Model.SubDepartments)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-folder"></i> @subDept.Name
+                                            @if (subDept.IsActive)
+                                            {
+                                                <span class="badge bg-success">Aktif</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Pasif</span>
+                                            }
+                                        </h6>
+                                        <p class="card-text small">@subDept.Description</p>
+                                        <p class="card-text">
+                                            <small class="text-muted">
+                                                <i class="fas fa-users"></i> @subDept.EmployeeCount personel
+                                            </small>
+                                        </p>
+                                        <a asp-action="Details" asp-route-id="@subDept.Id" class="btn btn-sm btn-outline-primary">Detay</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Personeller -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users"></i> Personeller (@Model.Employees.Count)
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Employees.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var employee in Model.Employees)
+                        {
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">@employee.FullName</h6>
+                                    <p class="mb-1 small text-muted">@employee.Position</p>
+                                    <small>@employee.EmployeeNumber</small>
+                                </div>
+                                <div>
+                                    <a asp-controller="Person" asp-action="Details" asp-route-id="@employee.Id" 
+                                       class="btn btn-sm btn-outline-primary" title="Personel Detayı">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    
+                    <div class="mt-3">
+                        <a asp-action="Employees" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-list"></i> Tüm Personelleri Görüntüle
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-3">
+                        <i class="fas fa-user-slash fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">Bu departmanda henüz personel bulunmamaktadır.</p>
+                        <a asp-controller="Person" asp-action="Create" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-user-plus"></i> Personel Ekle
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <!-- İstatistikler -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> İstatistikler</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="border-end">
+                            <h4 class="text-primary">@Model.SubDepartments.Count</h4>
+                            <small class="text-muted">Alt Departman</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">@Model.Employees.Count</h4>
+                        <small class="text-muted">Personel</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+}

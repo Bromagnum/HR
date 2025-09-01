@@ -1,0 +1,76 @@
+@model MVC.Models.DepartmentTreeViewModel
+
+<div class="card @(Model.IsActive ? "" : "border-secondary")">
+    <div class="card-header @(Model.IsActive ? "bg-primary text-white" : "bg-secondary text-white")">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                @if (Model.Children.Any())
+                {
+                    <button class="btn btn-sm btn-outline-light me-2 tree-toggle" 
+                            type="button" 
+                            data-target="#children-@Model.Id">
+                        <i class="fas fa-plus-square"></i>
+                    </button>
+                }
+                else
+                {
+                    <i class="fas fa-folder me-2"></i>
+                }
+                <h6 class="mb-0">@Model.Name</h6>
+                @if (!Model.IsActive)
+                {
+                    <span class="badge bg-warning ms-2">Pasif</span>
+                }
+            </div>
+            <div class="btn-group">
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-light" title="Detay">
+                    <i class="fas fa-eye"></i>
+                </a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-light" title="Düzenle">
+                    <i class="fas fa-edit"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p class="card-text small text-muted">@Model.Description</p>
+        }
+        
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                <i class="fas fa-users"></i> @Model.EmployeeCount personel
+            </small>
+            
+            <div>
+                <a asp-action="Employees" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary" title="Personelleri Görüntüle">
+                    <i class="fas fa-users"></i> @Model.EmployeeCount
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    @if (Model.Children.Any())
+    {
+        <div class="collapse" id="children-@Model.Id">
+            <div class="card-body border-top">
+                <h6 class="text-muted mb-3">
+                    <i class="fas fa-sitemap"></i> Alt Departmanlar (@Model.Children.Count)
+                </h6>
+                
+                <div class="row">
+                    @foreach (var child in Model.Children)
+                    {
+                        <div class="col-12 mb-3">
+                            <div class="ms-3">
+                                @await Html.PartialAsync("_DepartmentTreeNode", child)
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

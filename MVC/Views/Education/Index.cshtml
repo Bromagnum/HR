@@ -1,0 +1,207 @@
+@model IEnumerable<EducationListViewModel>
+
+@{
+    ViewBag.Title = ViewBag.Title ?? "Eğitim Yönetimi";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">
+                            <i class="fas fa-graduation-cap me-2"></i>@ViewBag.Title
+                        </h3>
+                        <div class="btn-group">
+                            <a href="@Url.Action("Create")" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Yeni Eğitim Ekle
+                            </a>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="fas fa-filter me-1"></i>Filtrele
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="@Url.Action("Index")">
+                                        <i class="fas fa-list me-1"></i>Tümü</a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Ongoing")">
+                                        <i class="fas fa-clock me-1"></i>Devam Eden</a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Completed")">
+                                        <i class="fas fa-check-circle me-1"></i>Tamamlanan</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("ByDegree", new { degree = "Lisans" })">
+                                        <i class="fas fa-university me-1"></i>Lisans</a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("ByDegree", new { degree = "Yüksek Lisans" })">
+                                        <i class="fas fa-user-graduate me-1"></i>Yüksek Lisans</a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("ByDegree", new { degree = "Doktora" })">
+                                        <i class="fas fa-medal me-1"></i>Doktora</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.PersonName != null)
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-user me-1"></i>
+                            <strong>@ViewBag.PersonName</strong> adlı personelin eğitim bilgileri gösteriliyor.
+                            <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-primary ms-2">
+                                <i class="fas fa-list me-1"></i>Tüm Eğitimleri Göster
+                            </a>
+                        </div>
+                    }
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Okul Adı</th>
+                                        <th>Derece</th>
+                                        <th>Bölüm</th>
+                                        <th>Personel</th>
+                                        <th>Başlangıç</th>
+                                        <th>Bitiş</th>
+                                        <th>Durum</th>
+                                        <th>GPA</th>
+                                        <th>Lokasyon</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var education in Model)
+                                    {
+                                        <tr class="@(education.IsActive ? "" : "table-secondary")">
+                                            <td>
+                                                <strong>@education.SchoolName</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@education.Degree</span>
+                                            </td>
+                                            <td>@education.FieldOfStudy</td>
+                                            <td>
+                                                <a href="@Url.Action("ByPerson", new { personId = education.PersonId })" 
+                                                   class="text-decoration-none">
+                                                    @education.PersonName
+                                                    @if (!string.IsNullOrEmpty(education.PersonEmployeeNumber))
+                                                    {
+                                                        <small class="text-muted">(@education.PersonEmployeeNumber)</small>
+                                                    }
+                                                </a>
+                                            </td>
+                                            <td>@education.StartDate.ToString("MM/yyyy")</td>
+                                            <td>
+                                                @if (education.IsOngoing)
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="fas fa-clock me-1"></i>Devam Ediyor
+                                                    </span>
+                                                }
+                                                else if (education.EndDate.HasValue)
+                                                {
+                                                    @education.EndDate.Value.ToString("MM/yyyy")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (education.IsActive)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Aktif
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-times me-1"></i>Pasif
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (education.GPA.HasValue)
+                                                {
+                                                    <span class="badge @(education.GPA >= 3.0m ? "bg-success" : education.GPA >= 2.5m ? "bg-warning" : "bg-danger")">
+                                                        @education.GPA.Value.ToString("F2")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(education.Location))
+                                                {
+                                                    <i class="fas fa-map-marker-alt me-1"></i>@education.Location
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@education.Id" class="btn btn-info btn-sm" title="Detay">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@education.Id" class="btn btn-warning btn-sm" title="Düzenle">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    @if (education.IsActive)
+                                                    {
+                                                        <form asp-action="ChangeStatus" method="post" style="display: inline;">
+                                                            <input type="hidden" name="id" value="@education.Id" />
+                                                            <input type="hidden" name="isActive" value="false" />
+                                                            <button type="submit" class="btn btn-secondary btn-sm" title="Pasif Yap" 
+                                                                    onclick="return confirm('Bu eğitim bilgisini pasif yapmak istediğinize emin misiniz?')">
+                                                                <i class="fas fa-ban"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    else
+                                                    {
+                                                        <form asp-action="ChangeStatus" method="post" style="display: inline;">
+                                                            <input type="hidden" name="id" value="@education.Id" />
+                                                            <input type="hidden" name="isActive" value="true" />
+                                                            <button type="submit" class="btn btn-success btn-sm" title="Aktif Yap">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    <a asp-action="Delete" asp-route-id="@education.Id" class="btn btn-danger btn-sm" title="Sil">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Henüz eğitim bilgisi bulunmuyor</h5>
+                            <p class="text-muted">İlk eğitim bilgisini eklemek için aşağıdaki butona tıklayın.</p>
+                            <a href="@Url.Action("Create")" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>İlk Eğitim Bilgisini Ekle
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+}
+

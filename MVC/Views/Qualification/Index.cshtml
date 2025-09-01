@@ -1,0 +1,277 @@
+@model QualificationIndexViewModel
+@{
+    ViewData["Title"] = "Yeterlilik Yönetimi";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-certificate me-2"></i>Yeterlilik Yönetimi
+                    </h3>
+                    <div>
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Yeni Yeterlilik Ekle
+                        </a>
+                        <div class="btn-group ms-2">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-filter me-1"></i>Raporlar
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-action="ExpiringSoon">
+                                    <i class="fas fa-clock me-1"></i>Süresi Yaklaşanlar
+                                </a></li>
+                                <li><a class="dropdown-item" asp-action="Expired">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Süresi Dolmuşlar
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Filters -->
+                    <form method="get" class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label for="searchTerm" class="form-label">Arama</label>
+                            <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                                   value="@Model.SearchTerm" placeholder="Ad, kategori, kurum veya personel ara...">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="selectedCategory" class="form-label">Kategori</label>
+                            <select class="form-select" id="selectedCategory" name="selectedCategory">
+                                <option value="">Tüm Kategoriler</option>
+                                @foreach (var category in ViewBag.Categories as List<SelectListItem> ?? new List<SelectListItem>())
+                                {
+                                    <option value="@category.Value" selected="@(category.Value == Model.SelectedCategory)">
+                                        @category.Text
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Durum Filtresi</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="showExpiredOnly" 
+                                           name="showExpiredOnly" value="true" @(Model.ShowExpiredOnly ? "checked" : "")>
+                                    <label class="form-check-label" for="showExpiredOnly">
+                                        Süresi Dolmuş
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="showExpiringSoon" 
+                                           name="showExpiringSoon" value="true" @(Model.ShowExpiringSoon ? "checked" : "")>
+                                    <label class="form-check-label" for="showExpiringSoon">
+                                        Süresi Yaklaşan
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-search me-1"></i>Filtrele
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-undo me-1"></i>Temizle
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Results Summary -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Toplam <strong>@Model.Qualifications.Count()</strong> yeterlilik bulundu.
+                                @if (Model.Qualifications.Any(q => q.IsExpired))
+                                {
+                                    <span class="text-danger ms-2">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        @Model.Qualifications.Count(q => q.IsExpired) süresi dolmuş
+                                    </span>
+                                }
+                                @if (Model.Qualifications.Any(q => q.IsExpiringSoon))
+                                {
+                                    <span class="text-warning ms-2">
+                                        <i class="fas fa-clock"></i>
+                                        @Model.Qualifications.Count(q => q.IsExpiringSoon) süresi yaklaşan
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Qualifications Table -->
+                    @if (Model.Qualifications.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Yeterlilik</th>
+                                        <th>Personel</th>
+                                        <th>Kategori</th>
+                                        <th>Veren Kurum</th>
+                                        <th>Veriliş Tarihi</th>
+                                        <th>Süre Durumu</th>
+                                        <th>Seviye</th>
+                                        <th>Puan</th>
+                                        <th>Durum</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var qualification in Model.Qualifications)
+                                    {
+                                        <tr class="@(qualification.IsActive ? "" : "table-secondary")">
+                                            <td>
+                                                <strong>@qualification.Name</strong>
+                                                @if (!string.IsNullOrEmpty(qualification.CredentialNumber))
+                                                {
+                                                    <br />
+                                                    <small class="text-muted">Sertifika: @qualification.CredentialNumber</small>
+                                                }
+                                                @if (!string.IsNullOrEmpty(qualification.Location))
+                                                {
+                                                    <br />
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-map-marker-alt"></i> @qualification.Location
+                                                    </small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@qualification.PersonName</strong>
+                                                @if (!string.IsNullOrEmpty(qualification.DepartmentName))
+                                                {
+                                                    <br />
+                                                    <small class="text-muted">@qualification.DepartmentName</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">@qualification.Category</span>
+                                            </td>
+                                            <td>@qualification.IssuingAuthority</td>
+                                            <td>
+                                                @qualification.IssueDate.ToString("dd.MM.yyyy")
+                                            </td>
+                                            <td>
+                                                <span class="badge @qualification.ExpirationBadgeClass">
+                                                    @qualification.ExpirationStatus
+                                                </span>
+                                                @if (qualification.ExpirationDate.HasValue)
+                                                {
+                                                    <br />
+                                                    <small class="text-muted">@qualification.ExpirationDate.Value.ToString("dd.MM.yyyy")</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(qualification.Level))
+                                                {
+                                                    <span class="badge bg-info">@qualification.Level</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (qualification.Score.HasValue)
+                                                {
+                                                    <span class="badge @(qualification.Score >= 80 ? "bg-success" : qualification.Score >= 60 ? "bg-warning" : "bg-danger")">
+                                                        @qualification.Score
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (qualification.IsActive)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Aktif
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-times me-1"></i>Pasif
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@qualification.Id" class="btn btn-info btn-sm" title="Detay">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@qualification.Id" class="btn btn-warning btn-sm" title="Düzenle">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    @if (qualification.IsActive)
+                                                    {
+                                                        <form asp-action="ChangeStatus" method="post" style="display: inline;">
+                                                            <input type="hidden" name="id" value="@qualification.Id" />
+                                                            <input type="hidden" name="isActive" value="false" />
+                                                            <button type="submit" class="btn btn-secondary btn-sm" title="Pasif Yap" 
+                                                                    onclick="return confirm('Bu yeterlilik bilgisini pasif yapmak istediğinize emin misiniz?')">
+                                                                <i class="fas fa-ban"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    else
+                                                    {
+                                                        <form asp-action="ChangeStatus" method="post" style="display: inline;">
+                                                            <input type="hidden" name="id" value="@qualification.Id" />
+                                                            <input type="hidden" name="isActive" value="true" />
+                                                            <button type="submit" class="btn btn-success btn-sm" title="Aktif Yap">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    <a asp-action="Delete" asp-route-id="@qualification.Id" class="btn btn-danger btn-sm" title="Sil">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Henüz yeterlilik kaydı bulunmuyor</h4>
+                            <p class="text-muted">İlk yeterlilik kaydını eklemek için yukarıdaki "Yeni Yeterlilik Ekle" butonunu kullanın.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        // Real-time search with debouncing
+        let searchTimeout;
+        document.getElementById('searchTerm').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                this.form.submit();
+            }, 500);
+        });
+
+        // Auto-submit on category change
+        document.getElementById('selectedCategory').addEventListener('change', function() {
+            this.form.submit();
+        });
+    </script>
+}

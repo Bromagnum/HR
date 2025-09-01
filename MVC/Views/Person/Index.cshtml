@@ -1,0 +1,125 @@
+@model IEnumerable<MVC.Models.PersonListViewModel>
+
+@{
+    ViewData["Title"] = "Personel Listesi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Yeni Personel
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.TcKimlikNo)</th>
+                            <th>@Html.DisplayNameFor(model => model.FullName)</th>
+                            <th>@Html.DisplayNameFor(model => model.EmployeeNumber)</th>
+                            <th>@Html.DisplayNameFor(model => model.Position)</th>
+                            <th>@Html.DisplayNameFor(model => model.DepartmentName)</th>
+                            <th>@Html.DisplayNameFor(model => model.Email)</th>
+                            <th>@Html.DisplayNameFor(model => model.Phone)</th>
+                            <th>@Html.DisplayNameFor(model => model.HireDate)</th>
+                            <th>@Html.DisplayNameFor(model => model.IsActive)</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.IsActive ? "" : "table-secondary")">
+                                <td>@Html.DisplayFor(modelItem => item.TcKimlikNo)</td>
+                                <td>@Html.DisplayFor(modelItem => item.FullName)</td>
+                                <td>@Html.DisplayFor(modelItem => item.EmployeeNumber)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Position)</td>
+                                <td>@Html.DisplayFor(modelItem => item.DepartmentName)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Phone)</td>
+                                <td>@(item.HireDate?.ToString("dd.MM.yyyy"))</td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge bg-success">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Pasif</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Detay">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @if (item.IsActive)
+                                        {
+                                            <form asp-action="ToggleStatus" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <input type="hidden" name="isActive" value="false" />
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Pasif Yap" 
+                                                        onclick="return confirm('Bu personeli pasif yapmak istediğinize emin misiniz?')">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="ToggleStatus" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <input type="hidden" name="isActive" value="true" />
+                                                <button type="submit" class="btn btn-success btn-sm" title="Aktif Yap">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Henüz personel kaydı bulunmamaktadır</h4>
+                <p class="text-muted">İlk personel kaydını oluşturmak için "Yeni Personel" butonunu kullanın.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+}

@@ -1,0 +1,176 @@
+@model QualificationCreateViewModel
+@{
+    ViewData["Title"] = "Yeni Yeterlilik Ekle";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-plus me-2"></i>Yeni Yeterlilik Ekle
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label"></label>
+                                    <input asp-for="Name" class="form-control" placeholder="Örnek: Microsoft Azure Fundamentals" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Category" class="form-label"></label>
+                                    <select asp-for="Category" class="form-select">
+                                        <option value="">Kategori seçiniz...</option>
+                                        <option value="Teknik">Teknik</option>
+                                        <option value="Dil">Dil</option>
+                                        <option value="Güvenlik">Güvenlik</option>
+                                        <option value="Yönetim">Yönetim</option>
+                                        <option value="Sağlık">Sağlık</option>
+                                        <option value="Mesleki">Mesleki</option>
+                                        <option value="Diğer">Diğer</option>
+                                    </select>
+                                    <span asp-validation-for="Category" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="IssuingAuthority" class="form-label"></label>
+                                    <input asp-for="IssuingAuthority" class="form-control" placeholder="Örnek: Microsoft" />
+                                    <span asp-validation-for="IssuingAuthority" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="CredentialNumber" class="form-label"></label>
+                                    <input asp-for="CredentialNumber" class="form-control" placeholder="Sertifika veya kimlik numarası" />
+                                    <span asp-validation-for="CredentialNumber" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="PersonId" class="form-label"></label>
+                                    <select asp-for="PersonId" class="form-select" asp-items="@ViewBag.PersonSelectList">
+                                        <option value="">Personel Seçiniz...</option>
+                                    </select>
+                                    <span asp-validation-for="PersonId" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="IssueDate" class="form-label"></label>
+                                    <input asp-for="IssueDate" class="form-control" type="date" />
+                                    <span asp-validation-for="IssueDate" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check mb-2">
+                                        <input asp-for="HasExpiration" class="form-check-input" type="checkbox" id="hasExpiration">
+                                        <label asp-for="HasExpiration" class="form-check-label">
+                                            Bu yeterliliğin süre sınırı var
+                                        </label>
+                                    </div>
+                                    
+                                    <div id="expirationDateGroup" style="display: none;">
+                                        <label asp-for="ExpirationDate" class="form-label"></label>
+                                        <input asp-for="ExpirationDate" class="form-control" type="date" />
+                                        <span asp-validation-for="ExpirationDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Level" class="form-label"></label>
+                                    <select asp-for="Level" class="form-select">
+                                        <option value="">Seviye seçiniz...</option>
+                                        <option value="Başlangıç">Başlangıç</option>
+                                        <option value="Orta">Orta</option>
+                                        <option value="İleri">İleri</option>
+                                        <option value="Uzman">Uzman</option>
+                                        <option value="A1">A1</option>
+                                        <option value="A2">A2</option>
+                                        <option value="B1">B1</option>
+                                        <option value="B2">B2</option>
+                                        <option value="C1">C1</option>
+                                        <option value="C2">C2</option>
+                                    </select>
+                                    <span asp-validation-for="Level" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Score" class="form-label"></label>
+                                    <input asp-for="Score" class="form-control" type="number" min="0" max="100" placeholder="0-100 arası puan" />
+                                    <span asp-validation-for="Score" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Location" class="form-label"></label>
+                                    <input asp-for="Location" class="form-control" placeholder="Örnek: İstanbul" />
+                                    <span asp-validation-for="Location" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="form-label"></label>
+                                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Yeterlilik hakkında ek bilgiler..."></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a asp-action="Index" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i>Kaydet
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Toggle expiration date field based on checkbox
+        document.getElementById('hasExpiration').addEventListener('change', function() {
+            const expirationGroup = document.getElementById('expirationDateGroup');
+            const expirationInput = document.querySelector('input[name="ExpirationDate"]');
+            
+            if (this.checked) {
+                expirationGroup.style.display = 'block';
+            } else {
+                expirationGroup.style.display = 'none';
+                expirationInput.value = '';
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const hasExpirationCheckbox = document.getElementById('hasExpiration');
+            if (hasExpirationCheckbox.checked) {
+                document.getElementById('expirationDateGroup').style.display = 'block';
+            }
+        });
+    </script>
+}

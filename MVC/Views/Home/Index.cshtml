@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<div class="text-center">
+    <h1 class="display-4">İnsan Kaynakları Yönetim Sistemi</h1>
+    <p class="lead">İKYS'ye hoş geldiniz. Bu sistem ile personel yönetimi işlemlerinizi kolayca gerçekleştirebilirsiniz.</p>
+    
+    <div class="row mt-5">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Personel Yönetimi</h5>
+                    <p class="card-text">Personel kayıtları, kimlik bilgileri ve özlük işlemleri</p>
+                    <a asp-controller="Person" asp-action="Index" class="btn btn-primary">Personel Listesi</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-building fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Departman Yönetimi</h5>
+                    <p class="card-text">Organizasyon yapısı ve departman işlemleri</p>
+                    <a asp-controller="Department" asp-action="Index" class="btn btn-success">Departman Listesi</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-graduation-cap fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Eğitim Yönetimi</h5>
+                    <p class="card-text">Personel eğitim bilgileri ve sertifikalar</p>
+                    <a asp-controller="Education" asp-action="Index" class="btn btn-warning">Eğitim Listesi</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-briefcase fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Pozisyon Yönetimi</h5>
+                    <p class="card-text">İş pozisyonları, unvanlar ve maaş aralıkları</p>
+                    <a asp-controller="Position" asp-action="Index" class="btn btn-info">Pozisyon Listesi</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Hızlı İşlemler</h5>
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Person" asp-action="Create" class="btn btn-outline-primary mb-2">
+                            <i class="fas fa-user-plus"></i> Yeni Personel Ekle
+                        </a>
+                        <a asp-controller="Department" asp-action="Create" class="btn btn-outline-success mb-2">
+                            <i class="fas fa-plus"></i> Yeni Departman Ekle
+                        </a>
+                        <a asp-controller="Education" asp-action="Create" class="btn btn-outline-warning mb-2">
+                            <i class="fas fa-graduation-cap"></i> Yeni Eğitim Ekle
+                        </a>
+                        <a asp-controller="Position" asp-action="Create" class="btn btn-outline-info">
+                            <i class="fas fa-briefcase"></i> Yeni Pozisyon Ekle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+}

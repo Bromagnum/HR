@@ -1,0 +1,149 @@
+@model MVC.Models.DepartmentDetailViewModel
+
+@{
+    ViewData["Title"] = "Departman Sil";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+</div>
+
+<div class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i>
+    <strong>Dikkat!</strong> Bu departmanı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+</div>
+
+@if (Model.SubDepartments.Any() || Model.Employees.Any())
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-info-circle"></i>
+        <strong>Uyarı!</strong> Bu departmanın @Model.SubDepartments.Count alt departmanı ve @Model.Employees.Count personeli bulunmaktadır. 
+        Silme işlemi gerçekleştirilemeyebilir.
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">Silinecek Departman: @Model.Name</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.Name)</dt>
+                        <dd>@Html.DisplayFor(model => model.Name)</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.ParentDepartmentName)</dt>
+                        <dd>
+                            @if (!string.IsNullOrEmpty(Model.ParentDepartmentName))
+                            {
+                                @Model.ParentDepartmentName
+                            }
+                            else
+                            {
+                                <span class="text-muted">Ana Departman</span>
+                            }
+                        </dd>
+                    </div>
+                    
+                    <div class="col-12">
+                        <dt>@Html.DisplayNameFor(model => model.Description)</dt>
+                        <dd>@Html.DisplayFor(model => model.Description)</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>Alt Departman Sayısı</dt>
+                        <dd>@Model.SubDepartments.Count</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>Personel Sayısı</dt>
+                        <dd>@Model.Employees.Count</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.CreatedAt)</dt>
+                        <dd>@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.IsActive)</dt>
+                        <dd>
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Aktif</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Pasif</span>
+                            }
+                        </dd>
+                    </div>
+                </div>
+                
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-danger" 
+                                @(Model.SubDepartments.Any() || Model.Employees.Any() ? "disabled" : "")>
+                            <i class="fas fa-trash"></i> Evet, Sil
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info">
+                            <i class="fas fa-eye"></i> Detaya Dön
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Listeye Dön
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Silme Kuralları</h5>
+            </div>
+            <div class="card-body">
+                <h6>Departman Silme Koşulları</h6>
+                <ul class="small">
+                    <li class="@(Model.SubDepartments.Any() ? "text-danger" : "text-success")">
+                        <i class="fas fa-@(Model.SubDepartments.Any() ? "times" : "check")"></i>
+                        Alt departmanı bulunmamalı (@Model.SubDepartments.Count)
+                    </li>
+                    <li class="@(Model.Employees.Any() ? "text-danger" : "text-success")">
+                        <i class="fas fa-@(Model.Employees.Any() ? "times" : "check")"></i>
+                        Personeli bulunmamalı (@Model.Employees.Count)
+                    </li>
+                </ul>
+                
+                @if (Model.SubDepartments.Any() || Model.Employees.Any())
+                {
+                    <div class="alert alert-warning mt-3">
+                        <small>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Silme işlemi için önce alt departmanları ve personelleri başka departmanlara taşıyın veya silin.
+                        </small>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-success mt-3">
+                        <small>
+                            <i class="fas fa-check"></i>
+                            Bu departman silinmeye hazır.
+                        </small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+}

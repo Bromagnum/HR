@@ -1,0 +1,194 @@
+@model MVC.Models.PersonDetailViewModel
+
+@{
+    ViewData["Title"] = "Personel Detayı";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Düzenle
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Geri Dön
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">@Model.FullName</h4>
+                @if (Model.IsActive)
+                {
+                    <span class="badge bg-success">Aktif</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Pasif</span>
+                }
+            </div>
+            <div class="card-body">
+                <!-- Kimlik Bilgileri -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2 mb-3">Kimlik Bilgileri</h5>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <dt>@Html.DisplayNameFor(model => model.TcKimlikNo)</dt>
+                        <dd>@Html.DisplayFor(model => model.TcKimlikNo)</dd>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <dt>@Html.DisplayNameFor(model => model.EmployeeNumber)</dt>
+                        <dd>@Html.DisplayFor(model => model.EmployeeNumber)</dd>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <dt>@Html.DisplayNameFor(model => model.BirthDate)</dt>
+                        <dd>@(Model.BirthDate?.ToString("dd.MM.yyyy") ?? "-")</dd>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <dt>@Html.DisplayNameFor(model => model.FatherName)</dt>
+                        <dd>@Html.DisplayFor(model => model.FatherName)</dd>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <dt>@Html.DisplayNameFor(model => model.MotherName)</dt>
+                        <dd>@Html.DisplayFor(model => model.MotherName)</dd>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <dt>@Html.DisplayNameFor(model => model.BirthPlace)</dt>
+                        <dd>@Html.DisplayFor(model => model.BirthPlace)</dd>
+                    </div>
+                </div>
+                
+                <!-- İletişim Bilgileri -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2 mb-3">İletişim Bilgileri</h5>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.Email)</dt>
+                        <dd>
+                            @if (!string.IsNullOrEmpty(Model.Email))
+                            {
+                                <a href="mailto:@Model.Email">@Model.Email</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.Phone)</dt>
+                        <dd>@Html.DisplayFor(model => model.Phone)</dd>
+                    </div>
+                    
+                    <div class="col-12">
+                        <dt>@Html.DisplayNameFor(model => model.Address)</dt>
+                        <dd>@Html.DisplayFor(model => model.Address)</dd>
+                    </div>
+                </div>
+                
+                <!-- İş Bilgileri -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2 mb-3">İş Bilgileri</h5>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <dt>@Html.DisplayNameFor(model => model.Position)</dt>
+                        <dd>@Html.DisplayFor(model => model.Position)</dd>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <dt>@Html.DisplayNameFor(model => model.DepartmentName)</dt>
+                        <dd>@Html.DisplayFor(model => model.DepartmentName)</dd>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <dt>@Html.DisplayNameFor(model => model.HireDate)</dt>
+                        <dd>@(Model.HireDate?.ToString("dd.MM.yyyy") ?? "-")</dd>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <dt>@Html.DisplayNameFor(model => model.Salary)</dt>
+                        <dd>@(Model.Salary?.ToString("C", new System.Globalization.CultureInfo("tr-TR")) ?? "-")</dd>
+                    </div>
+                </div>
+                
+                <!-- Kişisel Bilgiler -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2 mb-3">Kişisel Bilgiler</h5>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <dt>@Html.DisplayNameFor(model => model.MaritalStatus)</dt>
+                        <dd>@Html.DisplayFor(model => model.MaritalStatus)</dd>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <dt>@Html.DisplayNameFor(model => model.BloodType)</dt>
+                        <dd>@Html.DisplayFor(model => model.BloodType)</dd>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <dt>@Html.DisplayNameFor(model => model.MilitaryStatus)</dt>
+                        <dd>@Html.DisplayFor(model => model.MilitaryStatus)</dd>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <dt>@Html.DisplayNameFor(model => model.DriverLicenseClass)</dt>
+                        <dd>@Html.DisplayFor(model => model.DriverLicenseClass)</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.Religion)</dt>
+                        <dd>@Html.DisplayFor(model => model.Religion)</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.SskNumber)</dt>
+                        <dd>@Html.DisplayFor(model => model.SskNumber)</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.SskStartDate)</dt>
+                        <dd>@(Model.SskStartDate?.ToString("dd.MM.yyyy") ?? "-")</dd>
+                    </div>
+                </div>
+                
+                <!-- Sistem Bilgileri -->
+                <div class="row">
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2 mb-3">Sistem Bilgileri</h5>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.CreatedAt)</dt>
+                        <dd>@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <dt>@Html.DisplayNameFor(model => model.UpdatedAt)</dt>
+                        <dd>@(Model.UpdatedAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</dd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+}

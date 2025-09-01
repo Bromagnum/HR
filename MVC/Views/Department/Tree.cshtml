@@ -1,0 +1,83 @@
+@model IEnumerable<MVC.Models.DepartmentTreeViewModel>
+
+@{
+    ViewData["Title"] = "Departman Ağaç Görünümü";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <div>
+        <a asp-action="ExportOrganizationChart" class="btn btn-success me-2">
+            <i class="fas fa-download"></i> Organizasyon Şeması Export
+        </a>
+        <a asp-action="Index" class="btn btn-info me-2">
+            <i class="fas fa-list"></i> Liste Görünümü
+        </a>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Yeni Departman
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var department in Model)
+                {
+                    <div class="col-md-6 mb-4">
+                        @await Html.PartialAsync("_DepartmentTreeNode", department)
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-sitemap fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Henüz departman kaydı bulunmamaktadır</h4>
+                <p class="text-muted">İlk departman kaydını oluşturmak için "Yeni Departman" butonunu kullanın.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        // Departman ağacını genişlet/daralt
+        $(document).ready(function() {
+            $('.tree-toggle').click(function() {
+                var target = $(this).data('target');
+                var icon = $(this).find('i');
+                
+                $(target).collapse('toggle');
+                
+                $(target).on('show.bs.collapse', function() {
+                    icon.removeClass('fa-plus-square').addClass('fa-minus-square');
+                });
+                
+                $(target).on('hide.bs.collapse', function() {
+                    icon.removeClass('fa-minus-square').addClass('fa-plus-square');
+                });
+            });
+        });
+    </script>
+}

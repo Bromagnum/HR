@@ -1,0 +1,79 @@
+@model MVC.Models.DepartmentCreateViewModel
+
+@{
+    ViewData["Title"] = "Yeni Departman";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Departman Bilgileri</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" placeholder="Departman adını giriniz" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Departman açıklamasını giriniz (isteğe bağlı)"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="ParentDepartmentId" class="form-label"></label>
+                        <select asp-for="ParentDepartmentId" class="form-select" asp-items="ViewBag.ParentDepartments">
+                            <option value="">-- Ana Departman (Üst departman yok) --</option>
+                        </select>
+                        <span asp-validation-for="ParentDepartmentId" class="text-danger"></span>
+                        <div class="form-text">Eğer bu departman başka bir departmanın alt departmanı ise üst departmanı seçiniz.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Kaydet
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Geri Dön
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Bilgi</h5>
+            </div>
+            <div class="card-body">
+                <h6>Departman Hiyerarşisi</h6>
+                <p class="small text-muted">
+                    Departmanlar hiyerarşik bir yapıya sahiptir. Ana departmanlar en üst seviyede yer alır ve alt departmanları olabilir.
+                </p>
+                
+                <h6>Önemli Notlar</h6>
+                <ul class="small text-muted">
+                    <li>Departman adı zorunludur ve benzersiz olmalıdır</li>
+                    <li>Açıklama alanı isteğe bağlıdır</li>
+                    <li>Üst departman seçimi isteğe bağlıdır</li>
+                    <li>Yeni departman varsayılan olarak aktif durumda oluşturulur</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+}
