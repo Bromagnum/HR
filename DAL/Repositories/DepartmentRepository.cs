@@ -14,6 +14,7 @@ public class DepartmentRepository : Repository<Department>, IDepartmentRepositor
     {
         return await _dbSet
             .Include(d => d.SubDepartments)
+            .Include(d => d.Employees)
             .Where(d => d.ParentDepartmentId == null && d.IsActive)
             .ToListAsync();
     }
@@ -22,6 +23,7 @@ public class DepartmentRepository : Repository<Department>, IDepartmentRepositor
     {
         return await _dbSet
             .Include(d => d.SubDepartments)
+            .Include(d => d.Employees)
             .Where(d => d.ParentDepartmentId == parentId && d.IsActive)
             .ToListAsync();
     }
@@ -31,6 +33,7 @@ public class DepartmentRepository : Repository<Department>, IDepartmentRepositor
         return await _dbSet
             .Include(d => d.ParentDepartment)
             .Include(d => d.SubDepartments)
+            .Include(d => d.Employees)
             .ToListAsync();
     }
 

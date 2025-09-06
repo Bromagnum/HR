@@ -24,11 +24,11 @@ public class PersonService : IPersonService
             var persons = await _unitOfWork.Persons.GetAllAsync();
             var personDtos = _mapper.Map<IEnumerable<PersonListDto>>(persons);
             
-            return Result<IEnumerable<PersonListDto>>.SuccessResult(personDtos);
+            return Result<IEnumerable<PersonListDto>>.Ok(personDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<PersonListDto>>.ErrorResult($"Personel listesi alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<PersonListDto>>.Fail($"Personel listesi alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -39,15 +39,15 @@ public class PersonService : IPersonService
             var person = await _unitOfWork.Persons.GetByIdAsync(id);
             if (person == null)
             {
-                return Result<PersonDetailDto>.ErrorResult("Personel bulunamadı.");
+                return Result<PersonDetailDto>.Fail("Personel bulunamadı.");
             }
 
             var personDto = _mapper.Map<PersonDetailDto>(person);
-            return Result<PersonDetailDto>.SuccessResult(personDto);
+            return Result<PersonDetailDto>.Ok(personDto);
         }
         catch (Exception ex)
         {
-            return Result<PersonDetailDto>.ErrorResult($"Personel getirilirken hata oluştu: {ex.Message}");
+            return Result<PersonDetailDto>.Fail($"Personel getirilirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -58,15 +58,15 @@ public class PersonService : IPersonService
             var person = await _unitOfWork.Persons.GetByTcKimlikNoAsync(tcKimlikNo);
             if (person == null)
             {
-                return Result<PersonDetailDto>.ErrorResult("Personel bulunamadı.");
+                return Result<PersonDetailDto>.Fail("Personel bulunamadı.");
             }
 
             var personDto = _mapper.Map<PersonDetailDto>(person);
-            return Result<PersonDetailDto>.SuccessResult(personDto);
+            return Result<PersonDetailDto>.Ok(personDto);
         }
         catch (Exception ex)
         {
-            return Result<PersonDetailDto>.ErrorResult($"Personel getirilirken hata oluştu: {ex.Message}");
+            return Result<PersonDetailDto>.Fail($"Personel getirilirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -77,11 +77,11 @@ public class PersonService : IPersonService
             var persons = await _unitOfWork.Persons.GetByDepartmentIdAsync(departmentId);
             var personDtos = _mapper.Map<IEnumerable<PersonListDto>>(persons);
             
-            return Result<IEnumerable<PersonListDto>>.SuccessResult(personDtos);
+            return Result<IEnumerable<PersonListDto>>.Ok(personDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<PersonListDto>>.ErrorResult($"Departman personelleri alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<PersonListDto>>.Fail($"Departman personelleri alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -92,11 +92,11 @@ public class PersonService : IPersonService
             var persons = await _unitOfWork.Persons.GetActiveEmployeesAsync();
             var personDtos = _mapper.Map<IEnumerable<PersonListDto>>(persons);
             
-            return Result<IEnumerable<PersonListDto>>.SuccessResult(personDtos);
+            return Result<IEnumerable<PersonListDto>>.Ok(personDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<PersonListDto>>.ErrorResult($"Aktif personeller alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<PersonListDto>>.Fail($"Aktif personeller alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -108,7 +108,7 @@ public class PersonService : IPersonService
             var existingPerson = await _unitOfWork.Persons.GetByTcKimlikNoAsync(dto.TcKimlikNo);
             if (existingPerson != null)
             {
-                return Result<PersonDetailDto>.ErrorResult("Bu TC Kimlik No ile kayıtlı personel zaten mevcut.");
+                return Result<PersonDetailDto>.Fail("Bu TC Kimlik No ile kayıtlı personel zaten mevcut.");
             }
 
             // Departman kontrolü
@@ -117,7 +117,7 @@ public class PersonService : IPersonService
                 var department = await _unitOfWork.Departments.GetByIdAsync(dto.DepartmentId.Value);
                 if (department == null)
                 {
-                    return Result<PersonDetailDto>.ErrorResult("Geçersiz departman seçimi.");
+                    return Result<PersonDetailDto>.Fail("Geçersiz departman seçimi.");
                 }
             }
 
@@ -128,11 +128,11 @@ public class PersonService : IPersonService
             var createdPerson = await _unitOfWork.Persons.GetByIdAsync(person.Id);
             var personDto = _mapper.Map<PersonDetailDto>(createdPerson);
 
-            return Result<PersonDetailDto>.SuccessResult(personDto, "Personel başarıyla oluşturuldu.");
+            return Result<PersonDetailDto>.Ok(personDto, "Personel başarıyla oluşturuldu.");
         }
         catch (Exception ex)
         {
-            return Result<PersonDetailDto>.ErrorResult($"Personel oluşturulurken hata oluştu: {ex.Message}");
+            return Result<PersonDetailDto>.Fail($"Personel oluşturulurken hata oluştu: {ex.Message}");
         }
     }
 
@@ -143,14 +143,14 @@ public class PersonService : IPersonService
             var person = await _unitOfWork.Persons.GetByIdAsync(dto.Id);
             if (person == null)
             {
-                return Result<PersonDetailDto>.ErrorResult("Personel bulunamadı.");
+                return Result<PersonDetailDto>.Fail("Personel bulunamadı.");
             }
 
             // TC Kimlik No kontrolü (kendisi hariç)
             var existingPerson = await _unitOfWork.Persons.GetByTcKimlikNoAsync(dto.TcKimlikNo);
             if (existingPerson != null && existingPerson.Id != dto.Id)
             {
-                return Result<PersonDetailDto>.ErrorResult("Bu TC Kimlik No ile kayıtlı başka bir personel mevcut.");
+                return Result<PersonDetailDto>.Fail("Bu TC Kimlik No ile kayıtlı başka bir personel mevcut.");
             }
 
             // Departman kontrolü
@@ -159,7 +159,7 @@ public class PersonService : IPersonService
                 var department = await _unitOfWork.Departments.GetByIdAsync(dto.DepartmentId.Value);
                 if (department == null)
                 {
-                    return Result<PersonDetailDto>.ErrorResult("Geçersiz departman seçimi.");
+                    return Result<PersonDetailDto>.Fail("Geçersiz departman seçimi.");
                 }
             }
 
@@ -170,11 +170,11 @@ public class PersonService : IPersonService
             var updatedPerson = await _unitOfWork.Persons.GetByIdAsync(person.Id);
             var personDto = _mapper.Map<PersonDetailDto>(updatedPerson);
 
-            return Result<PersonDetailDto>.SuccessResult(personDto, "Personel başarıyla güncellendi.");
+            return Result<PersonDetailDto>.Ok(personDto, "Personel başarıyla güncellendi.");
         }
         catch (Exception ex)
         {
-            return Result<PersonDetailDto>.ErrorResult($"Personel güncellenirken hata oluştu: {ex.Message}");
+            return Result<PersonDetailDto>.Fail($"Personel güncellenirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -185,17 +185,17 @@ public class PersonService : IPersonService
             var person = await _unitOfWork.Persons.GetByIdAsync(id);
             if (person == null)
             {
-                return Result.ErrorResult("Personel bulunamadı.");
+                return Result.Fail("Personel bulunamadı.");
             }
 
             _unitOfWork.Persons.Remove(person);
             await _unitOfWork.SaveChangesAsync();
 
-            return Result.SuccessResult("Personel başarıyla silindi.");
+            return Result.Ok("Personel başarıyla silindi.");
         }
         catch (Exception ex)
         {
-            return Result.ErrorResult($"Personel silinirken hata oluştu: {ex.Message}");
+            return Result.Fail($"Personel silinirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -206,7 +206,7 @@ public class PersonService : IPersonService
             var person = await _unitOfWork.Persons.GetByIdAsync(id);
             if (person == null)
             {
-                return Result.ErrorResult("Personel bulunamadı.");
+                return Result.Fail("Personel bulunamadı.");
             }
 
             person.IsActive = isActive;
@@ -214,11 +214,11 @@ public class PersonService : IPersonService
             await _unitOfWork.SaveChangesAsync();
 
             var statusText = isActive ? "aktif" : "pasif";
-            return Result.SuccessResult($"Personel durumu {statusText} olarak güncellendi.");
+            return Result.Ok($"Personel durumu {statusText} olarak güncellendi.");
         }
         catch (Exception ex)
         {
-            return Result.ErrorResult($"Personel durumu güncellenirken hata oluştu: {ex.Message}");
+            return Result.Fail($"Personel durumu güncellenirken hata oluştu: {ex.Message}");
         }
     }
 }

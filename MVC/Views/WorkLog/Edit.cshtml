@@ -1,0 +1,360 @@
+@model MVC.Models.WorkLogUpdateViewModel
+@{
+    ViewData["Title"] = "Çalışma Kaydını Düzenle";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-edit me-2"></i>
+                        Çalışma Kaydını Düzenle
+                    </h3>
+                </div>
+
+                <form asp-action="Edit" method="post" class="needs-validation" novalidate>
+                    @Html.HiddenFor(model => model.Id)
+                    
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Personel Selection -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PersonId" class="form-label required">
+                                    <i class="fas fa-user me-1"></i>@Html.DisplayNameFor(model => model.PersonId)
+                                </label>
+                                <select asp-for="PersonId" class="form-select" asp-items="Model.PersonSelectList" required>
+                                    <option value="">-- Personel Seçiniz --</option>
+                                </select>
+                                <span asp-validation-for="PersonId" class="text-danger"></span>
+                            </div>
+
+                            <!-- Date -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Date" class="form-label required">
+                                    <i class="fas fa-calendar me-1"></i>@Html.DisplayNameFor(model => model.Date)
+                                </label>
+                                <input asp-for="Date" type="date" class="form-control" required />
+                                <span asp-validation-for="Date" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Start Time -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="StartTime" class="form-label required">
+                                    <i class="fas fa-clock me-1"></i>@Html.DisplayNameFor(model => model.StartTime)
+                                </label>
+                                <input asp-for="StartTime" type="time" class="form-control" required />
+                                <span asp-validation-for="StartTime" class="text-danger"></span>
+                            </div>
+
+                            <!-- End Time -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EndTime" class="form-label">
+                                    <i class="fas fa-clock me-1"></i>@Html.DisplayNameFor(model => model.EndTime)
+                                </label>
+                                <input asp-for="EndTime" type="time" class="form-control" />
+                                <span asp-validation-for="EndTime" class="text-danger"></span>
+                                <div class="form-text">Çıkış saati daha sonra da eklenebilir</div>
+                            </div>
+                        </div>
+
+                        <!-- Break Times Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-coffee me-1"></i>
+                                    Mola Bilgileri
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label asp-for="BreakStartTime" class="form-label">
+                                            <i class="fas fa-pause me-1"></i>@Html.DisplayNameFor(model => model.BreakStartTime)
+                                        </label>
+                                        <input asp-for="BreakStartTime" type="time" class="form-control" />
+                                        <span asp-validation-for="BreakStartTime" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
+                                        <label asp-for="BreakEndTime" class="form-label">
+                                            <i class="fas fa-play me-1"></i>@Html.DisplayNameFor(model => model.BreakEndTime)
+                                        </label>
+                                        <input asp-for="BreakEndTime" type="time" class="form-control" />
+                                        <span asp-validation-for="BreakEndTime" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
+                                        <label asp-for="BreakDurationMinutes" class="form-label">
+                                            <i class="fas fa-stopwatch me-1"></i>@Html.DisplayNameFor(model => model.BreakDurationMinutes)
+                                        </label>
+                                        <div class="input-group">
+                                            <input asp-for="BreakDurationMinutes" type="number" class="form-control" min="0" max="480" />
+                                            <span class="input-group-text">dakika</span>
+                                        </div>
+                                        <span asp-validation-for="BreakDurationMinutes" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Work Type -->
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="WorkType" class="form-label required">
+                                    <i class="fas fa-briefcase me-1"></i>@Html.DisplayNameFor(model => model.WorkType)
+                                </label>
+                                <select asp-for="WorkType" class="form-select" asp-items="Model.WorkTypeSelectList" required>
+                                    <option value="">-- Çalışma Türü Seçiniz --</option>
+                                </select>
+                                <span asp-validation-for="WorkType" class="text-danger"></span>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Status" class="form-label">
+                                    <i class="fas fa-info-circle me-1"></i>@Html.DisplayNameFor(model => model.Status)
+                                </label>
+                                <select asp-for="Status" class="form-select" asp-items="Model.StatusSelectList">
+                                    <option value="">-- Durum Seçiniz --</option>
+                                </select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Location" class="form-label">
+                                    <i class="fas fa-map-marker-alt me-1"></i>@Html.DisplayNameFor(model => model.Location)
+                                </label>
+                                <input asp-for="Location" class="form-control" placeholder="Çalışma lokasyonu (opsiyonel)" />
+                                <span asp-validation-for="Location" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Checkboxes -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input asp-for="IsWeekend" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsWeekend" class="form-check-label">
+                                        <i class="fas fa-calendar-weekend me-1"></i>@Html.DisplayNameFor(model => model.IsWeekend)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input asp-for="IsHoliday" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsHoliday" class="form-check-label">
+                                        <i class="fas fa-star me-1"></i>@Html.DisplayNameFor(model => model.IsHoliday)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tasks Completed -->
+                        <div class="mb-3">
+                            <label asp-for="TasksCompleted" class="form-label">
+                                <i class="fas fa-tasks me-1"></i>@Html.DisplayNameFor(model => model.TasksCompleted)
+                            </label>
+                            <textarea asp-for="TasksCompleted" class="form-control" rows="3" placeholder="Tamamlanan görevleri buraya yazabilirsiniz..."></textarea>
+                            <span asp-validation-for="TasksCompleted" class="text-danger"></span>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">
+                                <i class="fas fa-sticky-note me-1"></i>@Html.DisplayNameFor(model => model.Notes)
+                            </label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Ek notlar ve açıklamalar..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <!-- Current Statistics (Read-only Info) -->
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-chart-bar me-1"></i>
+                                    Hesaplanan Değerler
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Toplam Çalışma Saati</small>
+                                        <div class="fw-bold" id="calculatedTotalHours">Hesaplanıyor...</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Normal Çalışma Saati</small>
+                                        <div class="fw-bold" id="calculatedRegularHours">Hesaplanıyor...</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Mesai Saati</small>
+                                        <div class="fw-bold text-warning" id="calculatedOvertimeHours">Hesaplanıyor...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Geri Dön
+                            </a>
+                            <div>
+                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info me-2">
+                                    <i class="fas fa-eye me-1"></i>
+                                    Detayları Görüntüle
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    Güncelle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .required::after {
+        content: " *";
+        color: red;
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+        color: white;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    #calculatedTotalHours, #calculatedRegularHours, #calculatedOvertimeHours {
+        font-size: 1.1em;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startTimeInput = document.getElementById('StartTime');
+        const endTimeInput = document.getElementById('EndTime');
+        const breakDurationInput = document.getElementById('BreakDurationMinutes');
+        const breakStartInput = document.getElementById('BreakStartTime');
+        const breakEndInput = document.getElementById('BreakEndTime');
+
+        // Auto-calculate break duration when break times are set
+        function calculateBreakDuration() {
+            if (breakStartInput.value && breakEndInput.value) {
+                const start = new Date('1970-01-01T' + breakStartInput.value + ':00');
+                const end = new Date('1970-01-01T' + breakEndInput.value + ':00');
+                
+                if (end > start) {
+                    const diffMs = end - start;
+                    const diffMins = Math.round(diffMs / 60000);
+                    breakDurationInput.value = diffMins;
+                }
+            }
+            calculateWorkHours();
+        }
+
+        // Calculate work hours and overtime
+        function calculateWorkHours() {
+            if (startTimeInput.value && endTimeInput.value) {
+                const start = new Date('1970-01-01T' + startTimeInput.value + ':00');
+                const end = new Date('1970-01-01T' + endTimeInput.value + ':00');
+                
+                if (end > start) {
+                    const diffMs = end - start;
+                    const totalMinutes = Math.round(diffMs / 60000);
+                    const breakMinutes = parseInt(breakDurationInput.value) || 0;
+                    const workMinutes = totalMinutes - breakMinutes;
+                    
+                    if (workMinutes > 0) {
+                        const totalHours = workMinutes / 60;
+                        const standardHours = 8;
+                        
+                        const regularHours = Math.min(totalHours, standardHours);
+                        const overtimeHours = Math.max(0, totalHours - standardHours);
+                        
+                        document.getElementById('calculatedTotalHours').textContent = totalHours.toFixed(1) + ' saat';
+                        document.getElementById('calculatedRegularHours').textContent = regularHours.toFixed(1) + ' saat';
+                        document.getElementById('calculatedOvertimeHours').textContent = overtimeHours.toFixed(1) + ' saat';
+                        
+                        // Update styling based on overtime
+                        const overtimeElement = document.getElementById('calculatedOvertimeHours');
+                        if (overtimeHours > 0) {
+                            overtimeElement.className = 'fw-bold text-warning';
+                        } else {
+                            overtimeElement.className = 'fw-bold text-muted';
+                        }
+                    } else {
+                        resetCalculations();
+                    }
+                } else {
+                    resetCalculations();
+                }
+            } else {
+                resetCalculations();
+            }
+        }
+
+        function resetCalculations() {
+            document.getElementById('calculatedTotalHours').textContent = 'Hesaplanıyor...';
+            document.getElementById('calculatedRegularHours').textContent = 'Hesaplanıyor...';
+            document.getElementById('calculatedOvertimeHours').textContent = 'Hesaplanıyor...';
+        }
+
+        // Event listeners
+        breakStartInput.addEventListener('change', calculateBreakDuration);
+        breakEndInput.addEventListener('change', calculateBreakDuration);
+        breakDurationInput.addEventListener('input', calculateWorkHours);
+        startTimeInput.addEventListener('change', calculateWorkHours);
+        endTimeInput.addEventListener('change', calculateWorkHours);
+
+        // Auto-detect weekend
+        const dateInput = document.getElementById('Date');
+        const weekendCheckbox = document.getElementById('IsWeekend');
+        
+        function checkWeekend() {
+            if (dateInput.value) {
+                const selectedDate = new Date(dateInput.value);
+                const dayOfWeek = selectedDate.getDay();
+                weekendCheckbox.checked = (dayOfWeek === 0 || dayOfWeek === 6); // Sunday or Saturday
+            }
+        }
+
+        dateInput.addEventListener('change', checkWeekend);
+        
+        // Calculate on page load
+        calculateWorkHours();
+
+        // Form validation
+        const form = document.querySelector('.needs-validation');
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

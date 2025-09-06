@@ -23,11 +23,11 @@ public class EducationService : IEducationService
         {
             var educations = await _unitOfWork.Educations.GetAllAsync();
             var educationDtos = _mapper.Map<IEnumerable<EducationListDto>>(educations);
-            return Result<IEnumerable<EducationListDto>>.SuccessResult(educationDtos);
+            return Result<IEnumerable<EducationListDto>>.Ok(educationDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<EducationListDto>>.ErrorResult($"Eğitim bilgileri alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<EducationListDto>>.Fail($"Eğitim bilgileri alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -37,14 +37,14 @@ public class EducationService : IEducationService
         {
             var education = await _unitOfWork.Educations.GetEducationWithPersonAsync(id);
             if (education == null)
-                return Result<EducationDetailDto?>.ErrorResult("Eğitim bilgisi bulunamadı.");
+                return Result<EducationDetailDto?>.Fail("Eğitim bilgisi bulunamadı.");
 
             var educationDto = _mapper.Map<EducationDetailDto>(education);
-            return Result<EducationDetailDto?>.SuccessResult(educationDto);
+            return Result<EducationDetailDto?>.Ok(educationDto);
         }
         catch (Exception ex)
         {
-            return Result<EducationDetailDto?>.ErrorResult($"Eğitim bilgisi alınırken hata oluştu: {ex.Message}");
+            return Result<EducationDetailDto?>.Fail($"Eğitim bilgisi alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -54,11 +54,11 @@ public class EducationService : IEducationService
         {
             var educations = await _unitOfWork.Educations.GetByPersonIdAsync(personId);
             var educationDtos = _mapper.Map<IEnumerable<EducationListDto>>(educations);
-            return Result<IEnumerable<EducationListDto>>.SuccessResult(educationDtos);
+            return Result<IEnumerable<EducationListDto>>.Ok(educationDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<EducationListDto>>.ErrorResult($"Personel eğitim bilgileri alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<EducationListDto>>.Fail($"Personel eğitim bilgileri alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -68,11 +68,11 @@ public class EducationService : IEducationService
         {
             var educations = await _unitOfWork.Educations.GetOngoingEducationsAsync();
             var educationDtos = _mapper.Map<IEnumerable<EducationListDto>>(educations);
-            return Result<IEnumerable<EducationListDto>>.SuccessResult(educationDtos);
+            return Result<IEnumerable<EducationListDto>>.Ok(educationDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<EducationListDto>>.ErrorResult($"Devam eden eğitimler alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<EducationListDto>>.Fail($"Devam eden eğitimler alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -82,11 +82,11 @@ public class EducationService : IEducationService
         {
             var educations = await _unitOfWork.Educations.GetCompletedEducationsAsync();
             var educationDtos = _mapper.Map<IEnumerable<EducationListDto>>(educations);
-            return Result<IEnumerable<EducationListDto>>.SuccessResult(educationDtos);
+            return Result<IEnumerable<EducationListDto>>.Ok(educationDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<EducationListDto>>.ErrorResult($"Tamamlanan eğitimler alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<EducationListDto>>.Fail($"Tamamlanan eğitimler alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -96,11 +96,11 @@ public class EducationService : IEducationService
         {
             var educations = await _unitOfWork.Educations.GetEducationsByDegreeAsync(degree);
             var educationDtos = _mapper.Map<IEnumerable<EducationListDto>>(educations);
-            return Result<IEnumerable<EducationListDto>>.SuccessResult(educationDtos);
+            return Result<IEnumerable<EducationListDto>>.Ok(educationDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<EducationListDto>>.ErrorResult($"Dereceye göre eğitimler alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<EducationListDto>>.Fail($"Dereceye göre eğitimler alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -111,14 +111,14 @@ public class EducationService : IEducationService
             // Validate person exists
             var person = await _unitOfWork.Persons.GetByIdAsync(educationCreateDto.PersonId);
             if (person == null)
-                return Result<EducationDetailDto>.ErrorResult("Seçilen personel bulunamadı.");
+                return Result<EducationDetailDto>.Fail("Seçilen personel bulunamadı.");
 
             // Validate dates
             if (educationCreateDto.EndDate.HasValue && educationCreateDto.StartDate > educationCreateDto.EndDate)
-                return Result<EducationDetailDto>.ErrorResult("Başlangıç tarihi bitiş tarihinden önce olmalıdır.");
+                return Result<EducationDetailDto>.Fail("Başlangıç tarihi bitiş tarihinden önce olmalıdır.");
 
             if (!educationCreateDto.IsOngoing && !educationCreateDto.EndDate.HasValue)
-                return Result<EducationDetailDto>.ErrorResult("Devam etmeyen eğitimler için bitiş tarihi gereklidir.");
+                return Result<EducationDetailDto>.Fail("Devam etmeyen eğitimler için bitiş tarihi gereklidir.");
 
             var education = _mapper.Map<Education>(educationCreateDto);
             education.CreatedAt = DateTime.Now;
@@ -129,15 +129,15 @@ public class EducationService : IEducationService
 
             var createdEducation = await _unitOfWork.Educations.GetEducationWithPersonAsync(education.Id);
             if (createdEducation == null)
-                return Result<EducationDetailDto>.ErrorResult("Eğitim bilgisi kaydedildi ancak tekrar alınamadı.");
+                return Result<EducationDetailDto>.Fail("Eğitim bilgisi kaydedildi ancak tekrar alınamadı.");
 
             var educationDto = _mapper.Map<EducationDetailDto>(createdEducation);
 
-            return Result<EducationDetailDto>.SuccessResult(educationDto, "Eğitim bilgisi başarıyla eklendi.");
+            return Result<EducationDetailDto>.Ok(educationDto, "Eğitim bilgisi başarıyla eklendi.");
         }
         catch (Exception ex)
         {
-            return Result<EducationDetailDto>.ErrorResult($"Eğitim bilgisi eklenirken hata oluştu: {ex.Message}. Inner: {ex.InnerException?.Message ?? "N/A"}");
+            return Result<EducationDetailDto>.Fail($"Eğitim bilgisi eklenirken hata oluştu: {ex.Message}. Inner: {ex.InnerException?.Message ?? "N/A"}");
         }
     }
 
@@ -147,19 +147,19 @@ public class EducationService : IEducationService
         {
             var existingEducation = await _unitOfWork.Educations.GetByIdAsync(educationUpdateDto.Id);
             if (existingEducation == null)
-                return Result<EducationDetailDto>.ErrorResult("Güncellenecek eğitim bilgisi bulunamadı.");
+                return Result<EducationDetailDto>.Fail("Güncellenecek eğitim bilgisi bulunamadı.");
 
             // Validate person exists
             var person = await _unitOfWork.Persons.GetByIdAsync(educationUpdateDto.PersonId);
             if (person == null)
-                return Result<EducationDetailDto>.ErrorResult("Seçilen personel bulunamadı.");
+                return Result<EducationDetailDto>.Fail("Seçilen personel bulunamadı.");
 
             // Validate dates
             if (educationUpdateDto.EndDate.HasValue && educationUpdateDto.StartDate > educationUpdateDto.EndDate)
-                return Result<EducationDetailDto>.ErrorResult("Başlangıç tarihi bitiş tarihinden önce olmalıdır.");
+                return Result<EducationDetailDto>.Fail("Başlangıç tarihi bitiş tarihinden önce olmalıdır.");
 
             if (!educationUpdateDto.IsOngoing && !educationUpdateDto.EndDate.HasValue)
-                return Result<EducationDetailDto>.ErrorResult("Devam etmeyen eğitimler için bitiş tarihi gereklidir.");
+                return Result<EducationDetailDto>.Fail("Devam etmeyen eğitimler için bitiş tarihi gereklidir.");
 
             _mapper.Map(educationUpdateDto, existingEducation);
             existingEducation.UpdatedAt = DateTime.Now;
@@ -170,11 +170,11 @@ public class EducationService : IEducationService
             var updatedEducation = await _unitOfWork.Educations.GetEducationWithPersonAsync(existingEducation.Id);
             var educationDto = _mapper.Map<EducationDetailDto>(updatedEducation);
 
-            return Result<EducationDetailDto>.SuccessResult(educationDto, "Eğitim bilgisi başarıyla güncellendi.");
+            return Result<EducationDetailDto>.Ok(educationDto, "Eğitim bilgisi başarıyla güncellendi.");
         }
         catch (Exception ex)
         {
-            return Result<EducationDetailDto>.ErrorResult($"Eğitim bilgisi güncellenirken hata oluştu: {ex.Message}");
+            return Result<EducationDetailDto>.Fail($"Eğitim bilgisi güncellenirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -184,7 +184,7 @@ public class EducationService : IEducationService
         {
             var education = await _unitOfWork.Educations.GetByIdAsync(id);
             if (education == null)
-                return Result.ErrorResult("Silinecek eğitim bilgisi bulunamadı.");
+                return Result.Fail("Silinecek eğitim bilgisi bulunamadı.");
 
             education.IsActive = false;
             education.UpdatedAt = DateTime.Now;
@@ -192,11 +192,11 @@ public class EducationService : IEducationService
             _unitOfWork.Educations.Update(education);
             await _unitOfWork.SaveChangesAsync();
 
-            return Result.SuccessResult("Eğitim bilgisi başarıyla silindi.");
+            return Result.Ok("Eğitim bilgisi başarıyla silindi.");
         }
         catch (Exception ex)
         {
-            return Result.ErrorResult($"Eğitim bilgisi silinirken hata oluştu: {ex.Message}");
+            return Result.Fail($"Eğitim bilgisi silinirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -206,7 +206,7 @@ public class EducationService : IEducationService
         {
             var education = await _unitOfWork.Educations.GetByIdAsync(id);
             if (education == null)
-                return Result.ErrorResult("Eğitim bilgisi bulunamadı.");
+                return Result.Fail("Eğitim bilgisi bulunamadı.");
 
             education.IsActive = isActive;
             education.UpdatedAt = DateTime.Now;
@@ -215,11 +215,11 @@ public class EducationService : IEducationService
             await _unitOfWork.SaveChangesAsync();
 
             var statusText = isActive ? "aktif" : "pasif";
-            return Result.SuccessResult($"Eğitim bilgisi durumu {statusText} olarak güncellendi.");
+            return Result.Ok($"Eğitim bilgisi durumu {statusText} olarak güncellendi.");
         }
         catch (Exception ex)
         {
-            return Result.ErrorResult($"Eğitim bilgisi durumu güncellenirken hata oluştu: {ex.Message}");
+            return Result.Fail($"Eğitim bilgisi durumu güncellenirken hata oluştu: {ex.Message}");
         }
     }
 }

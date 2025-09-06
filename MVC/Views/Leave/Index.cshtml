@@ -1,0 +1,258 @@
+@model IEnumerable<MVC.Models.LeaveListViewModel>
+@{
+    ViewData["Title"] = "İzin Yönetimi";
+    var filter = ViewData["Filter"] as MVC.Models.LeaveFilterViewModel ?? new MVC.Models.LeaveFilterViewModel();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-calendar-check text-primary me-2"></i>
+                        İzin Yönetimi
+                    </h3>
+                    <div class="btn-group">
+                        <a asp-action="Create" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i>
+                            Yeni İzin
+                        </a>
+                        <a asp-action="PendingApprovals" class="btn btn-warning">
+                            <i class="fas fa-clock me-1"></i>
+                            Onay Bekleyenler
+                        </a>
+                        <a asp-action="MyLeaves" class="btn btn-info">
+                            <i class="fas fa-user me-1"></i>
+                            İzinlerim
+                        </a>
+                        <a asp-action="Calendar" class="btn btn-primary">
+                            <i class="fas fa-calendar me-1"></i>
+                            Takvim
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Filtering Section -->
+                <div class="card-body">
+                    <form method="get" class="row g-3 mb-4">
+                        <div class="col-md-2">
+                            <label for="PersonId" class="form-label">Personel</label>
+                            <select asp-for="@filter.PersonId" asp-items="@filter.Persons" class="form-select">
+                                <option value="">Tümü</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="LeaveTypeId" class="form-label">İzin Türü</label>
+                            <select asp-for="@filter.LeaveTypeId" asp-items="@filter.LeaveTypes" class="form-select">
+                                <option value="">Tümü</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="DepartmentId" class="form-label">Departman</label>
+                            <select asp-for="@filter.DepartmentId" asp-items="@filter.Departments" class="form-select">
+                                <option value="">Tümü</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="Status" class="form-label">Durum</label>
+                            <select asp-for="@filter.Status" asp-items="@filter.StatusOptions" class="form-select">
+                                <option value="">Tümü</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="StartDate" class="form-label">Başlangıç</label>
+                            <input asp-for="@filter.StartDate" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-2">
+                            <label for="EndDate" class="form-label">Bitiş</label>
+                            <input asp-for="@filter.EndDate" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-8">
+                            <label for="SearchTerm" class="form-label">Arama</label>
+                            <input asp-for="@filter.SearchTerm" type="text" class="form-control" placeholder="Personel adı, gerekçe..." />
+                        </div>
+                        <div class="col-md-2">
+                            <label for="Year" class="form-label">Yıl</label>
+                            <input asp-for="@filter.Year" type="number" class="form-control" min="2020" max="2030" />
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search me-1"></i>
+                                Filtrele
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>
+                                Temizle
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 class="mb-0">@Model.Count()</h4>
+                                            <p class="mb-0">Toplam İzin</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-calendar-check fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-dark">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 class="mb-0">@Model.Count(l => l.Status == DAL.Entities.LeaveStatus.Pending)</h4>
+                                            <p class="mb-0">Onay Bekleyen</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-clock fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 class="mb-0">@Model.Count(l => l.Status == DAL.Entities.LeaveStatus.Approved)</h4>
+                                            <p class="mb-0">Onaylanan</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-check fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 class="mb-0">@Model.Count(l => l.Status == DAL.Entities.LeaveStatus.InProgress)</h4>
+                                            <p class="mb-0">Devam Eden</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-play fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Personel</th>
+                                    <th>Departman</th>
+                                    <th>İzin Türü</th>
+                                    <th>Tarih Aralığı</th>
+                                    <th>Gün</th>
+                                    <th>Durum</th>
+                                    <th>Talep Tarihi</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>@item.PersonName</strong>
+                                                <br />
+                                                <small class="text-muted">@item.EmployeeNumber</small>
+                                            </div>
+                                        </td>
+                                        <td>@item.DepartmentName</td>
+                                        <td>
+                                            <span class="badge" style="background-color: @item.LeaveTypeColor; color: white;">
+                                                @item.LeaveTypeName
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                @item.StartDate.ToString("dd.MM.yyyy") - @item.EndDate.ToString("dd.MM.yyyy")
+                                                @if (item.DaysUntilStart > 0)
+                                                {
+                                                    <br />
+                                                    <small class="text-info">@item.DaysUntilStart gün sonra</small>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">@item.TotalDays gün</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @item.StatusBadgeClass">
+                                                <i class="@item.StatusIcon me-1"></i>
+                                                @item.StatusText
+                                            </span>
+                                            @if (item.IsUrgent)
+                                            {
+                                                <span class="badge bg-danger ms-1">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                    Acil
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>@item.RequestDate.ToString("dd.MM.yyyy")</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info" title="Detaylar">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                @if (item.Status == DAL.Entities.LeaveStatus.Pending)
+                                                {
+                                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning" title="Düzenle">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a asp-action="Approve" asp-route-id="@item.Id" class="btn btn-success" title="Onayla">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                }
+                                                @if (item.Status == DAL.Entities.LeaveStatus.Pending || item.Status == DAL.Entities.LeaveStatus.Approved)
+                                                {
+                                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" title="Sil">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">İzin kaydı bulunamadı</h5>
+                            <p class="text-muted">Filtreleri değiştirerek tekrar deneyin veya yeni bir izin ekleyin.</p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>
+                                İlk İzni Ekle
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

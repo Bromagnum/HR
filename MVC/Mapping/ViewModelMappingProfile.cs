@@ -61,5 +61,52 @@ public class ViewModelMappingProfile : Profile
         // ViewModel to DTO mappings
         CreateMap<PositionCreateViewModel, PositionCreateDto>();
         CreateMap<PositionUpdateViewModel, PositionUpdateDto>();
+
+        // WorkLog DTO to ViewModel mappings
+        CreateMap<WorkLogListDto, WorkLogListViewModel>();
+        CreateMap<WorkLogDetailDto, WorkLogDetailViewModel>();
+        CreateMap<WorkLogDetailDto, WorkLogUpdateViewModel>();
+        CreateMap<WorkLogTimeSheetDto, WorkLogTimeSheetViewModel>()
+            .ForMember(dest => dest.WorkLogs, opt => opt.MapFrom(src => src.WorkLogs));
+
+        // ViewModel to DTO mappings
+        CreateMap<WorkLogCreateViewModel, WorkLogCreateDto>();
+        CreateMap<WorkLogUpdateViewModel, WorkLogUpdateDto>();
+        CreateMap<WorkLogCheckInViewModel, WorkLogCheckInDto>();
+        CreateMap<WorkLogCheckOutViewModel, WorkLogCheckOutDto>();
+        CreateMap<WorkLogApprovalViewModel, WorkLogApprovalDto>();
+
+        // LeaveType DTO to ViewModel mappings
+        CreateMap<LeaveTypeListDto, LeaveTypeListViewModel>();
+        CreateMap<LeaveTypeDetailDto, LeaveTypeDetailViewModel>();
+        CreateMap<LeaveTypeDetailDto, LeaveTypeEditViewModel>();
+
+        // ViewModel to DTO mappings
+        CreateMap<LeaveTypeCreateViewModel, LeaveTypeCreateDto>();
+        CreateMap<LeaveTypeEditViewModel, LeaveTypeUpdateDto>();
+
+        // Leave DTO to ViewModel mappings
+        CreateMap<LeaveListDto, LeaveListViewModel>();
+        CreateMap<LeaveDetailDto, LeaveDetailViewModel>();
+        CreateMap<LeaveDetailDto, LeaveEditViewModel>();
+        CreateMap<LeaveCalendarDto, LeaveCalendarViewModel>();
+
+        // ViewModel to DTO mappings
+        CreateMap<LeaveCreateViewModel, LeaveCreateDto>();
+        CreateMap<LeaveEditViewModel, LeaveUpdateDto>();
+        CreateMap<LeaveApprovalViewModel, LeaveApprovalDto>();
+        CreateMap<LeaveFilterViewModel, LeaveFilterDto>();
+
+        // LeaveBalance DTO to ViewModel mappings
+        CreateMap<LeaveBalanceListDto, LeaveBalanceListViewModel>();
+        CreateMap<LeaveBalanceDetailDto, LeaveBalanceDetailViewModel>();
+        CreateMap<LeaveBalanceDetailDto, LeaveBalanceEditViewModel>();
+        CreateMap<LeaveBalanceSummaryDto, LeaveBalanceSummaryViewModel>()
+            .ForMember(dest => dest.Balances, opt => opt.MapFrom(src => src.Balances));
+
+        // ViewModel to DTO mappings
+        CreateMap<LeaveBalanceCreateViewModel, LeaveBalanceCreateDto>();
+        CreateMap<LeaveBalanceEditViewModel, LeaveBalanceUpdateDto>();
+        CreateMap<LeaveBalanceAdjustmentViewModel, LeaveBalanceAdjustmentDto>();
     }
 }

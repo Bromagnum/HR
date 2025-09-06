@@ -1,0 +1,268 @@
+@model MVC.Models.WorkLogDetailViewModel
+@{
+    ViewData["Title"] = "Çalışma Kaydını Sil";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title">
+                        <i class="fas fa-trash me-2"></i>
+                        Çalışma Kaydını Sil
+                    </h3>
+                </div>
+
+                <div class="card-body">
+                    <div class="alert alert-danger d-flex align-items-center mb-4">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div>
+                            <h5 class="mb-1">Dikkat!</h5>
+                            <p class="mb-0">Bu çalışma kaydını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+                        </div>
+                    </div>
+
+                    <!-- Record Summary -->
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            <h6 class="mb-0">Silinecek Kayıt Bilgileri</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Personel:</strong>
+                                        <br>
+                                        @Model.PersonName
+                                        @if (!string.IsNullOrEmpty(Model.EmployeeNumber))
+                                        {
+                                            <br><small class="text-muted">Sicil No: @Model.EmployeeNumber</small>
+                                        }
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Departman:</strong>
+                                        <br>
+                                        @Model.DepartmentName
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Tarih:</strong>
+                                        <br>
+                                        @Model.Date.ToString("dd.MM.yyyy")
+                                        <small class="text-muted">(@Model.Date.ToString("dddd", new System.Globalization.CultureInfo("tr-TR")))</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Çalışma Saatleri:</strong>
+                                        <br>
+                                        @Model.StartTime.ToString(@"hh\:mm") - 
+                                        @if (Model.EndTime.HasValue)
+                                        {
+                                            @Model.EndTime.Value.ToString(@"hh\:mm")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-warning">Devam ediyor</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="text-center p-3 bg-primary text-white rounded">
+                                        <h5 class="mb-1">@Model.TotalHours.ToString("F1")</h5>
+                                        <small>Toplam Saat</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center p-3 bg-success text-white rounded">
+                                        <h5 class="mb-1">@Model.RegularHours.ToString("F1")</h5>
+                                        <small>Normal Saat</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center p-3 bg-warning text-white rounded">
+                                        <h5 class="mb-1">@Model.OvertimeHours.ToString("F1")</h5>
+                                        <small>Mesai Saati</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <strong>Çalışma Türü:</strong>
+                                    <br>
+                                    @switch (Model.WorkType)
+                                    {
+                                        case "Office":
+                                            <span class="badge bg-primary">Ofis</span>
+                                            break;
+                                        case "Remote":
+                                            <span class="badge bg-success">Uzaktan</span>
+                                            break;
+                                        case "Field":
+                                            <span class="badge bg-info">Saha</span>
+                                            break;
+                                        case "Meeting":
+                                            <span class="badge bg-warning">Toplantı</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@Model.WorkType</span>
+                                            break;
+                                    }
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Durum:</strong>
+                                    <br>
+                                    @switch (Model.Status)
+                                    {
+                                        case "Active":
+                                            <span class="badge bg-warning">Aktif</span>
+                                            break;
+                                        case "Completed":
+                                            <span class="badge bg-primary">Tamamlandı</span>
+                                            break;
+                                        case "Approved":
+                                            <span class="badge bg-success">Onaylandı</span>
+                                            break;
+                                        case "Rejected":
+                                            <span class="badge bg-danger">Reddedildi</span>
+                                            break;
+                                        case "Pending":
+                                            <span class="badge bg-info">Onay Bekliyor</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@Model.Status</span>
+                                            break;
+                                    }
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.Location))
+                            {
+                                <div class="mt-3">
+                                    <strong>Lokasyon:</strong> @Model.Location
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(Model.TasksCompleted))
+                            {
+                                <div class="mt-3">
+                                    <strong>Tamamlanan Görevler:</strong>
+                                    <div class="mt-2 p-3 bg-white rounded border">
+                                        @Html.Raw(Model.TasksCompleted.Replace("\n", "<br>"))
+                                    </div>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(Model.Notes))
+                            {
+                                <div class="mt-3">
+                                    <strong>Notlar:</strong>
+                                    <div class="mt-2 p-3 bg-white rounded border">
+                                        @Html.Raw(Model.Notes.Replace("\n", "<br>"))
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="mt-3 pt-3 border-top">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Oluşturulma Tarihi:</small>
+                                        <br>
+                                        @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Son Güncelleme:</small>
+                                        <br>
+                                        @Model.UpdatedAt.ToString("dd.MM.yyyy HH:mm")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Approval Information -->
+                    @if (!string.IsNullOrEmpty(Model.ApprovedByName))
+                    {
+                        <div class="alert alert-warning mt-3">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Onay Durumu</h6>
+                            <p class="mb-2">
+                                Bu kayıt <strong>@Model.ApprovedByName</strong> tarafından 
+                                <strong>@Model.ApprovedAt?.ToString("dd.MM.yyyy HH:mm")</strong> tarihinde 
+                                <strong>@(Model.Status == "Approved" ? "onaylanmış" : "reddedilmiş")</strong>tir.
+                            </p>
+                            @if (!string.IsNullOrEmpty(Model.ApprovalNotes))
+                            {
+                                <p class="mb-0"><strong>Onay Notları:</strong> @Model.ApprovalNotes</p>
+                            }
+                        </div>
+                    }
+
+                    <!-- Special Warnings -->
+                    @if (Model.Status == "Approved")
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <strong>Onaylanmış Kayıt:</strong> Bu kayıt onaylanmış durumdadır. Silme işlemi geri alınamaz!
+                        </div>
+                    }
+
+                    @if (Model.OvertimeHours > 0)
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-clock me-2"></i>
+                            <strong>Mesai Kaydı:</strong> Bu kayıt @Model.OvertimeHours.ToString("F1") saat mesai içermektedir.
+                        </div>
+                    }
+                </div>
+
+                <div class="card-footer">
+                    <form asp-action="Delete" method="post" class="d-flex justify-content-between">
+                        @Html.HiddenFor(model => model.Id)
+                        @Html.AntiForgeryToken()
+                        
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            İptal Et
+                        </a>
+                        
+                        <div>
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info me-2">
+                                <i class="fas fa-eye me-1"></i>
+                                Detayları Görüntüle
+                            </a>
+                            <button type="submit" class="btn btn-danger" onclick="return confirmDelete()">
+                                <i class="fas fa-trash me-1"></i>
+                                Kaydı Sil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    .card {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .badge {
+        font-size: 0.85em;
+    }
+</style>
+
+<script>
+    function confirmDelete() {
+        return confirm('Bu çalışma kaydını silmek istediğinizden kesinlikle emin misiniz?\n\nBu işlem geri alınamaz ve tüm veriler kalıcı olarak silinecektir.');
+    }
+</script>

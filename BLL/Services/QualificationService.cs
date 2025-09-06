@@ -24,11 +24,11 @@ public class QualificationService : IQualificationService
             var qualifications = await _unitOfWork.Qualifications.GetAllAsync();
             var qualificationDtos = _mapper.Map<IEnumerable<QualificationListDto>>(qualifications);
             
-            return Result<IEnumerable<QualificationListDto>>.SuccessResult(qualificationDtos);
+            return Result<IEnumerable<QualificationListDto>>.Ok(qualificationDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<QualificationListDto>>.ErrorResult($"Yeterlilik bilgileri alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<QualificationListDto>>.Fail($"Yeterlilik bilgileri alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -38,14 +38,14 @@ public class QualificationService : IQualificationService
         {
             var qualification = await _unitOfWork.Qualifications.GetQualificationWithPersonAsync(id);
             if (qualification == null)
-                return Result<QualificationDetailDto>.ErrorResult("Yeterlilik bilgisi bulunamadı.");
+                return Result<QualificationDetailDto>.Fail("Yeterlilik bilgisi bulunamadı.");
 
             var qualificationDto = _mapper.Map<QualificationDetailDto>(qualification);
-            return Result<QualificationDetailDto>.SuccessResult(qualificationDto);
+            return Result<QualificationDetailDto>.Ok(qualificationDto);
         }
         catch (Exception ex)
         {
-            return Result<QualificationDetailDto>.ErrorResult($"Yeterlilik bilgisi alınırken hata oluştu: {ex.Message}");
+            return Result<QualificationDetailDto>.Fail($"Yeterlilik bilgisi alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -56,14 +56,14 @@ public class QualificationService : IQualificationService
             // Validate person exists
             var person = await _unitOfWork.Persons.GetByIdAsync(qualificationCreateDto.PersonId);
             if (person == null)
-                return Result<QualificationDetailDto>.ErrorResult("Seçilen personel bulunamadı.");
+                return Result<QualificationDetailDto>.Fail("Seçilen personel bulunamadı.");
 
             // Check expiration date logic
             if (qualificationCreateDto.HasExpiration && !qualificationCreateDto.ExpirationDate.HasValue)
-                return Result<QualificationDetailDto>.ErrorResult("Süre sınırı varsa son geçerlilik tarihi girilmelidir.");
+                return Result<QualificationDetailDto>.Fail("Süre sınırı varsa son geçerlilik tarihi girilmelidir.");
 
             if (qualificationCreateDto.ExpirationDate.HasValue && qualificationCreateDto.ExpirationDate.Value <= qualificationCreateDto.IssueDate)
-                return Result<QualificationDetailDto>.ErrorResult("Son geçerlilik tarihi, veriliş tarihinden sonra olmalıdır.");
+                return Result<QualificationDetailDto>.Fail("Son geçerlilik tarihi, veriliş tarihinden sonra olmalıdır.");
 
             var qualification = _mapper.Map<Qualification>(qualificationCreateDto);
             qualification.CreatedAt = DateTime.Now;
@@ -74,15 +74,15 @@ public class QualificationService : IQualificationService
 
             var createdQualification = await _unitOfWork.Qualifications.GetQualificationWithPersonAsync(qualification.Id);
             if (createdQualification == null)
-                return Result<QualificationDetailDto>.ErrorResult("Yeterlilik bilgisi kaydedildi ancak tekrar alınamadı.");
+                return Result<QualificationDetailDto>.Fail("Yeterlilik bilgisi kaydedildi ancak tekrar alınamadı.");
 
             var qualificationDto = _mapper.Map<QualificationDetailDto>(createdQualification);
 
-            return Result<QualificationDetailDto>.SuccessResult(qualificationDto, "Yeterlilik bilgisi başarıyla eklendi.");
+            return Result<QualificationDetailDto>.Ok(qualificationDto, "Yeterlilik bilgisi başarıyla eklendi.");
         }
         catch (Exception ex)
         {
-            return Result<QualificationDetailDto>.ErrorResult($"Yeterlilik bilgisi eklenirken hata oluştu: {ex.Message}. Inner: {ex.InnerException?.Message ?? "N/A"}");
+            return Result<QualificationDetailDto>.Fail($"Yeterlilik bilgisi eklenirken hata oluştu: {ex.Message}. Inner: {ex.InnerException?.Message ?? "N/A"}");
         }
     }
 
@@ -92,19 +92,19 @@ public class QualificationService : IQualificationService
         {
             var qualification = await _unitOfWork.Qualifications.GetByIdAsync(qualificationUpdateDto.Id);
             if (qualification == null)
-                return Result<QualificationDetailDto>.ErrorResult("Yeterlilik bilgisi bulunamadı.");
+                return Result<QualificationDetailDto>.Fail("Yeterlilik bilgisi bulunamadı.");
 
             // Validate person exists
             var person = await _unitOfWork.Persons.GetByIdAsync(qualificationUpdateDto.PersonId);
             if (person == null)
-                return Result<QualificationDetailDto>.ErrorResult("Seçilen personel bulunamadı.");
+                return Result<QualificationDetailDto>.Fail("Seçilen personel bulunamadı.");
 
             // Check expiration date logic
             if (qualificationUpdateDto.HasExpiration && !qualificationUpdateDto.ExpirationDate.HasValue)
-                return Result<QualificationDetailDto>.ErrorResult("Süre sınırı varsa son geçerlilik tarihi girilmelidir.");
+                return Result<QualificationDetailDto>.Fail("Süre sınırı varsa son geçerlilik tarihi girilmelidir.");
 
             if (qualificationUpdateDto.ExpirationDate.HasValue && qualificationUpdateDto.ExpirationDate.Value <= qualificationUpdateDto.IssueDate)
-                return Result<QualificationDetailDto>.ErrorResult("Son geçerlilik tarihi, veriliş tarihinden sonra olmalıdır.");
+                return Result<QualificationDetailDto>.Fail("Son geçerlilik tarihi, veriliş tarihinden sonra olmalıdır.");
 
             _mapper.Map(qualificationUpdateDto, qualification);
             qualification.UpdatedAt = DateTime.Now;
@@ -115,11 +115,11 @@ public class QualificationService : IQualificationService
             var updatedQualification = await _unitOfWork.Qualifications.GetQualificationWithPersonAsync(qualification.Id);
             var qualificationDto = _mapper.Map<QualificationDetailDto>(updatedQualification);
 
-            return Result<QualificationDetailDto>.SuccessResult(qualificationDto, "Yeterlilik bilgisi başarıyla güncellendi.");
+            return Result<QualificationDetailDto>.Ok(qualificationDto, "Yeterlilik bilgisi başarıyla güncellendi.");
         }
         catch (Exception ex)
         {
-            return Result<QualificationDetailDto>.ErrorResult($"Yeterlilik bilgisi güncellenirken hata oluştu: {ex.Message}");
+            return Result<QualificationDetailDto>.Fail($"Yeterlilik bilgisi güncellenirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -129,16 +129,16 @@ public class QualificationService : IQualificationService
         {
             var qualification = await _unitOfWork.Qualifications.GetByIdAsync(id);
             if (qualification == null)
-                return Result.ErrorResult("Yeterlilik bilgisi bulunamadı.");
+                return Result.Fail("Yeterlilik bilgisi bulunamadı.");
 
             _unitOfWork.Qualifications.Remove(qualification);
             await _unitOfWork.SaveChangesAsync();
 
-            return Result.SuccessResult("Yeterlilik bilgisi başarıyla silindi.");
+            return Result.Ok("Yeterlilik bilgisi başarıyla silindi.");
         }
         catch (Exception ex)
         {
-            return Result.ErrorResult($"Yeterlilik bilgisi silinirken hata oluştu: {ex.Message}");
+            return Result.Fail($"Yeterlilik bilgisi silinirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -148,7 +148,7 @@ public class QualificationService : IQualificationService
         {
             var qualification = await _unitOfWork.Qualifications.GetByIdAsync(id);
             if (qualification == null)
-                return Result.ErrorResult("Yeterlilik bilgisi bulunamadı.");
+                return Result.Fail("Yeterlilik bilgisi bulunamadı.");
 
             qualification.IsActive = isActive;
             qualification.UpdatedAt = DateTime.Now;
@@ -157,11 +157,11 @@ public class QualificationService : IQualificationService
             await _unitOfWork.SaveChangesAsync();
 
             var statusText = isActive ? "aktif" : "pasif";
-            return Result.SuccessResult($"Yeterlilik bilgisi durumu {statusText} olarak güncellendi.");
+            return Result.Ok($"Yeterlilik bilgisi durumu {statusText} olarak güncellendi.");
         }
         catch (Exception ex)
         {
-            return Result.ErrorResult($"Yeterlilik bilgisi durumu güncellenirken hata oluştu: {ex.Message}");
+            return Result.Fail($"Yeterlilik bilgisi durumu güncellenirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -172,11 +172,11 @@ public class QualificationService : IQualificationService
             var qualifications = await _unitOfWork.Qualifications.GetByPersonIdAsync(personId);
             var qualificationDtos = _mapper.Map<IEnumerable<QualificationListDto>>(qualifications);
             
-            return Result<IEnumerable<QualificationListDto>>.SuccessResult(qualificationDtos);
+            return Result<IEnumerable<QualificationListDto>>.Ok(qualificationDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<QualificationListDto>>.ErrorResult($"Personel yeterlilikleri alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<QualificationListDto>>.Fail($"Personel yeterlilikleri alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -187,11 +187,11 @@ public class QualificationService : IQualificationService
             var qualifications = await _unitOfWork.Qualifications.GetExpiringSoonAsync(days);
             var qualificationDtos = _mapper.Map<IEnumerable<QualificationListDto>>(qualifications);
             
-            return Result<IEnumerable<QualificationListDto>>.SuccessResult(qualificationDtos);
+            return Result<IEnumerable<QualificationListDto>>.Ok(qualificationDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<QualificationListDto>>.ErrorResult($"Süresi yaklaşan yeterlilikler alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<QualificationListDto>>.Fail($"Süresi yaklaşan yeterlilikler alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -202,11 +202,11 @@ public class QualificationService : IQualificationService
             var qualifications = await _unitOfWork.Qualifications.GetExpiredAsync();
             var qualificationDtos = _mapper.Map<IEnumerable<QualificationListDto>>(qualifications);
             
-            return Result<IEnumerable<QualificationListDto>>.SuccessResult(qualificationDtos);
+            return Result<IEnumerable<QualificationListDto>>.Ok(qualificationDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<QualificationListDto>>.ErrorResult($"Süresi dolmuş yeterlilikler alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<QualificationListDto>>.Fail($"Süresi dolmuş yeterlilikler alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -217,11 +217,11 @@ public class QualificationService : IQualificationService
             var qualifications = await _unitOfWork.Qualifications.GetByCategoryAsync(category);
             var qualificationDtos = _mapper.Map<IEnumerable<QualificationListDto>>(qualifications);
             
-            return Result<IEnumerable<QualificationListDto>>.SuccessResult(qualificationDtos);
+            return Result<IEnumerable<QualificationListDto>>.Ok(qualificationDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<QualificationListDto>>.ErrorResult($"Kategori yeterlilikleri alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<QualificationListDto>>.Fail($"Kategori yeterlilikleri alınırken hata oluştu: {ex.Message}");
         }
     }
 }

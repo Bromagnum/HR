@@ -1,0 +1,317 @@
+@model MVC.Models.WorkLogTimeSheetViewModel
+@{
+    ViewData["Title"] = "Zaman Çizelgesi";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title">
+                        <i class="fas fa-table me-2"></i>
+                        Zaman Çizelgesi Raporu
+                    </h3>
+                </div>
+
+                <div class="card-body">
+                    <!-- Filter Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <form method="get" class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Personel Seçin</label>
+                                    <select name="personId" class="form-select">
+                                        <option value="">-- Personel Seçiniz --</option>
+                                        @if (ViewBag.PersonSelectList != null)
+                                        {
+                                            @foreach (var person in (SelectList)ViewBag.PersonSelectList)
+                                            {
+                                                <option value="@person.Value" selected="@(person.Value == ViewBag.PersonId?.ToString())">@person.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Başlangıç Tarihi</label>
+                                    <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Bitiş Tarihi</label>
+                                    <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-info w-100">
+                                        <i class="fas fa-search me-1"></i>
+                                        Raporu Oluştur
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    @if (Model != null && !string.IsNullOrEmpty(Model.PersonName))
+                    {
+                        <!-- Summary Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-user me-2"></i>
+                                            @Model.PersonName - Özet Rapor
+                                        </h5>
+                                        <small class="text-muted">@Model.StartDate.ToString("dd.MM.yyyy") - @Model.EndDate.ToString("dd.MM.yyyy")</small>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center">
+                                            <div class="col-md-2">
+                                                <div class="p-3 bg-primary text-white rounded">
+                                                    <h4>@Model.TotalWorkDays</h4>
+                                                    <small>Toplam Gün</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="p-3 bg-success text-white rounded">
+                                                    <h4>@Model.TotalHours.ToString("F1")</h4>
+                                                    <small>Toplam Saat</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="p-3 bg-info text-white rounded">
+                                                    <h4>@Model.TotalRegularHours.ToString("F1")</h4>
+                                                    <small>Normal Saat</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="p-3 bg-warning text-white rounded">
+                                                    <h4>@Model.TotalOvertimeHours.ToString("F1")</h4>
+                                                    <small>Mesai Saati</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="p-3 bg-danger text-white rounded">
+                                                    <h4>@Model.LateArrivals</h4>
+                                                    <small>Geç Gelme</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="p-3 bg-secondary text-white rounded">
+                                                    <h4>@Model.EarlyDepartures</h4>
+                                                    <small>Erken Gitme</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Records -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5><i class="fas fa-list me-2"></i>Detaylı Kayıtlar</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th><i class="fas fa-calendar me-1"></i>Tarih</th>
+                                                <th><i class="fas fa-clock me-1"></i>Giriş</th>
+                                                <th><i class="fas fa-clock me-1"></i>Çıkış</th>
+                                                <th><i class="fas fa-hourglass-half me-1"></i>Toplam</th>
+                                                <th><i class="fas fa-briefcase me-1"></i>Tür</th>
+                                                <th><i class="fas fa-info-circle me-1"></i>Durum</th>
+                                                <th><i class="fas fa-flag me-1"></i>Özel Durumlar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model.WorkLogs.Any())
+                                            {
+                                                @foreach (var workLog in Model.WorkLogs)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            @workLog.Date.ToString("dd.MM.yyyy")
+                                                            <br>
+                                                            <small class="text-muted">@workLog.Date.ToString("dddd", new System.Globalization.CultureInfo("tr-TR"))</small>
+                                                        </td>
+                                                        <td>
+                                                            @workLog.StartTime.ToString(@"hh\:mm")
+                                                            @if (workLog.IsLateArrival)
+                                                            {
+                                                                <i class="fas fa-exclamation-triangle text-warning ms-1" title="Geç geldi"></i>
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            @if (workLog.EndTime.HasValue)
+                                                            {
+                                                                @workLog.EndTime.Value.ToString(@"hh\:mm")
+                                                                @if (workLog.IsEarlyDeparture)
+                                                                {
+                                                                    <i class="fas fa-exclamation-triangle text-info ms-1" title="Erken gitti"></i>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-warning">Devam</span>
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            <strong>@workLog.TotalHours.ToString("F1")h</strong>
+                                                            @if (workLog.IsOvertime)
+                                                            {
+                                                                <br><small class="text-warning">+@workLog.OvertimeHours.ToString("F1")h mesai</small>
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            @switch (workLog.WorkType)
+                                                            {
+                                                                case "Office":
+                                                                    <span class="badge bg-primary">Ofis</span>
+                                                                    break;
+                                                                case "Remote":
+                                                                    <span class="badge bg-success">Uzaktan</span>
+                                                                    break;
+                                                                case "Field":
+                                                                    <span class="badge bg-info">Saha</span>
+                                                                    break;
+                                                                case "Meeting":
+                                                                    <span class="badge bg-warning">Toplantı</span>
+                                                                    break;
+                                                                default:
+                                                                    <span class="badge bg-secondary">@workLog.WorkType</span>
+                                                                    break;
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            @switch (workLog.Status)
+                                                            {
+                                                                case "Active":
+                                                                    <span class="badge bg-warning">Aktif</span>
+                                                                    break;
+                                                                case "Completed":
+                                                                    <span class="badge bg-primary">Tamamlandı</span>
+                                                                    break;
+                                                                case "Approved":
+                                                                    <span class="badge bg-success">Onaylandı</span>
+                                                                    break;
+                                                                case "Rejected":
+                                                                    <span class="badge bg-danger">Reddedildi</span>
+                                                                    break;
+                                                                default:
+                                                                    <span class="badge bg-secondary">@workLog.Status</span>
+                                                                    break;
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            @if (workLog.IsLateArrival)
+                                                            {
+                                                                <span class="badge bg-warning me-1">Geç</span>
+                                                            }
+                                                            @if (workLog.IsEarlyDeparture)
+                                                            {
+                                                                <span class="badge bg-info me-1">Erken</span>
+                                                            }
+                                                            @if (workLog.IsOvertime)
+                                                            {
+                                                                <span class="badge bg-warning me-1">Mesai</span>
+                                                            }
+                                                            @if (!workLog.IsLateArrival && !workLog.IsEarlyDeparture && !workLog.IsOvertime)
+                                                            {
+                                                                <span class="text-success">Normal</span>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="7" class="text-center py-4">
+                                                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                                        <h5 class="text-muted">Bu tarih aralığında kayıt bulunamadı</h5>
+                                                        <p class="text-muted">Lütfen farklı tarih aralığı seçin.</p>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- No Data Selected -->
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-line fa-4x text-muted mb-4"></i>
+                            <h4 class="text-muted">Zaman Çizelgesi Raporu</h4>
+                            <p class="text-muted">Rapor oluşturmak için yukarıdaki filtreleri kullanarak personel ve tarih aralığı seçin.</p>
+                            <div class="mt-4">
+                                <div class="row justify-content-center">
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h6><i class="fas fa-info-circle me-2"></i>Rapor Özellikleri</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><i class="fas fa-check text-success me-2"></i>Detaylı çalışma saatleri</li>
+                                                    <li><i class="fas fa-check text-success me-2"></i>Mesai hesaplamaları</li>
+                                                    <li><i class="fas fa-check text-success me-2"></i>Performans göstergeleri</li>
+                                                    <li><i class="fas fa-check text-success me-2"></i>Özet istatistikler</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Geri Dön
+                        </a>
+                        @if (Model != null && Model.WorkLogs.Any())
+                        {
+                            <div>
+                                <button type="button" class="btn btn-success me-2" onclick="window.print()">
+                                    <i class="fas fa-print me-1"></i>
+                                    Yazdır
+                                </button>
+                                <button type="button" class="btn btn-info" onclick="exportToExcel()">
+                                    <i class="fas fa-file-excel me-1"></i>
+                                    Excel'e Aktar
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .card-footer, .btn {
+            display: none !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+</style>
+
+<script>
+    function exportToExcel() {
+        const table = document.querySelector('table');
+        if (table) {
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Zaman Çizelgesi"});
+            XLSX.writeFile(wb, 'zaman-cizelgesi-' + new Date().toISOString().split('T')[0] + '.xlsx');
+        }
+    }
+</script>

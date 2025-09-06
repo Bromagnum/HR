@@ -33,6 +33,14 @@ public class PersonRepository : Repository<Person>, IPersonRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Person>> GetActivePersonsAsync()
+    {
+        return await _dbSet
+            .Include(p => p.Department)
+            .Where(p => p.IsActive)
+            .ToListAsync();
+    }
+
     public override async Task<Person?> GetByIdAsync(int id)
     {
         return await _dbSet

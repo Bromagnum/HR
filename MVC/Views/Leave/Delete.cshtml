@@ -1,0 +1,191 @@
+@model MVC.Models.LeaveDetailViewModel
+@{
+    ViewData["Title"] = "İzin Sil";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-trash text-danger me-2"></i>
+                        İzin Silme Onayı
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Dikkat!</strong> Bu işlem geri alınamaz. İzin kaydı kalıcı olarak silinecektir.
+                    </div>
+
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <!-- Personal Information -->
+                            <div class="border rounded p-3 mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user me-2"></i>
+                                    Personel Bilgileri
+                                </h5>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4"><strong>Personel:</strong></div>
+                                    <div class="col-sm-8">@Model.PersonName</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4"><strong>Sicil No:</strong></div>
+                                    <div class="col-sm-8">@Model.EmployeeNumber</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Departman:</strong></div>
+                                    <div class="col-sm-8">@Model.DepartmentName</div>
+                                </div>
+                            </div>
+
+                            <!-- Leave Information -->
+                            <div class="border rounded p-3 mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-calendar-check me-2"></i>
+                                    İzin Bilgileri
+                                </h5>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4"><strong>İzin Türü:</strong></div>
+                                    <div class="col-sm-8">
+                                        <span class="badge" style="background-color: @Model.LeaveTypeColor; color: white;">
+                                            @Model.LeaveTypeName
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4"><strong>Tarih Aralığı:</strong></div>
+                                    <div class="col-sm-8">
+                                        @Model.StartDate.ToString("dd.MM.yyyy") - @Model.EndDate.ToString("dd.MM.yyyy")
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4"><strong>Gün Sayısı:</strong></div>
+                                    <div class="col-sm-8">
+                                        <span class="badge bg-secondary">@Model.TotalDays gün</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Durum:</strong></div>
+                                    <div class="col-sm-8">
+                                        @{
+                                            var statusClass = Model.Status switch
+                                            {
+                                                DAL.Entities.LeaveStatus.Pending => "bg-warning text-dark",
+                                                DAL.Entities.LeaveStatus.Approved => "bg-success",
+                                                DAL.Entities.LeaveStatus.Rejected => "bg-danger",
+                                                DAL.Entities.LeaveStatus.Cancelled => "bg-secondary",
+                                                DAL.Entities.LeaveStatus.InProgress => "bg-info",
+                                                DAL.Entities.LeaveStatus.Completed => "bg-primary",
+                                                _ => "bg-secondary"
+                                            };
+                                            var statusIcon = Model.Status switch
+                                            {
+                                                DAL.Entities.LeaveStatus.Pending => "fas fa-clock",
+                                                DAL.Entities.LeaveStatus.Approved => "fas fa-check",
+                                                DAL.Entities.LeaveStatus.Rejected => "fas fa-times",
+                                                DAL.Entities.LeaveStatus.Cancelled => "fas fa-ban",
+                                                DAL.Entities.LeaveStatus.InProgress => "fas fa-play",
+                                                DAL.Entities.LeaveStatus.Completed => "fas fa-check-double",
+                                                _ => "fas fa-question"
+                                            };
+                                        }
+                                        <span class="badge @statusClass">
+                                            <i class="@statusIcon me-1"></i>
+                                            @Model.StatusText
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <!-- Reason & Notes -->
+                            <div class="border rounded p-3 mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-comment me-2"></i>
+                                    Gerekçe ve Notlar
+                                </h5>
+                                <div class="mb-3">
+                                    <strong>Gerekçe:</strong>
+                                    <p class="mt-2 p-2 bg-light rounded">@Model.Reason</p>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.Notes))
+                                {
+                                    <div class="mb-3">
+                                        <strong>Notlar:</strong>
+                                        <p class="mt-2 p-2 bg-light rounded">@Model.Notes</p>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Deletion Impact Warning -->
+                            <div class="border rounded p-3 mb-4 bg-warning bg-opacity-10">
+                                <h5 class="text-warning mb-3">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Silme İşleminin Etkileri
+                                </h5>
+                                <ul class="mb-0">
+                                    <li>İzin kaydı kalıcı olarak silinecektir</li>
+                                    <li>İzin bakiyesi hesaplamalarına artık dahil edilmeyecektir</li>
+                                    @if (Model.Status == DAL.Entities.LeaveStatus.Approved || Model.Status == DAL.Entities.LeaveStatus.InProgress)
+                                    {
+                                        <li class="text-danger"><strong>Dikkat:</strong> Onaylanmış/Devam eden bir izin siliniyor</li>
+                                    }
+                                    <li>Bu işlem geri alınamaz</li>
+                                </ul>
+                            </div>
+
+                            <!-- Audit Information -->
+                            <div class="border rounded p-3 mb-4 bg-light">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-history me-2"></i>
+                                    Kayıt Bilgileri
+                                </h6>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4"><strong>Talep Tarihi:</strong></div>
+                                    <div class="col-sm-8">@Model.RequestDate.ToString("dd MMMM yyyy HH:mm")</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4"><strong>Oluşturulma:</strong></div>
+                                    <div class="col-sm-8">@Model.CreatedAt.ToString("dd MMMM yyyy HH:mm")</div>
+                                </div>
+                                @if (Model.UpdatedAt.HasValue)
+                                {
+                                    <div class="row">
+                                        <div class="col-sm-4"><strong>Güncellenme:</strong></div>
+                                        <div class="col-sm-8">@Model.UpdatedAt.Value.ToString("dd MMMM yyyy HH:mm")</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <form asp-action="Delete" method="post" class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            İptal Et
+                        </a>
+                        <div>
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info me-2">
+                                <i class="fas fa-eye me-1"></i>
+                                Detayları Görüntüle
+                            </a>
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Bu izin kaydını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')">
+                                <i class="fas fa-trash me-1"></i>
+                                Evet, Sil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

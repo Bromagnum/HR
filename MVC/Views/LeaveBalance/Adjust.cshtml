@@ -1,0 +1,312 @@
+@model MVC.Models.LeaveBalanceAdjustmentViewModel
+@{
+    ViewData["Title"] = "Bakiye Düzeltme";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-edit"></i> İzin Bakiyesi Düzeltme</h2>
+        <div>
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-calculator"></i> Bakiye Düzeltme Formu</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Adjust" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <!-- Person Selection -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="PersonId" class="form-label"></label>
+                                <select asp-for="PersonId" class="form-select" id="personSelect">
+                                    <option value="">-- Personel Seçiniz --</option>
+                                    @if (Model.Persons != null)
+                                    {
+                                        @foreach (var person in Model.Persons)
+                                        {
+                                            <option value="@person.Value" selected="@(person.Selected)">@person.Text</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="PersonId" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label asp-for="LeaveTypeId" class="form-label"></label>
+                                <select asp-for="LeaveTypeId" class="form-select" id="leaveTypeSelect">
+                                    <option value="">-- İzin Türü Seçiniz --</option>
+                                    @if (Model.LeaveTypes != null)
+                                    {
+                                        @foreach (var leaveType in Model.LeaveTypes)
+                                        {
+                                            <option value="@leaveType.Value" selected="@(leaveType.Selected)">@leaveType.Text</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="LeaveTypeId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Year -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Year" class="form-label"></label>
+                                <select asp-for="Year" class="form-select">
+                                    @for (int year = DateTime.Now.Year + 1; year >= DateTime.Now.Year - 3; year--)
+                                    {
+                                        <option value="@year" selected="@(year == Model.Year)">@year</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Year" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Current Balance Display -->
+                        <div class="row mb-3" id="currentBalanceSection" style="display: none;">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <h6><i class="fas fa-info-circle"></i> Mevcut Bakiye Bilgisi</h6>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <strong>Mevcut Bakiye:</strong><br>
+                                            <span id="currentBalanceDisplay" class="h5 text-primary">@Model.CurrentBalance.ToString("N1")</span> gün
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Düzeltme Miktarı:</strong><br>
+                                            <span id="adjustmentDisplay" class="h5">0.0</span> gün
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Yeni Bakiye:</strong><br>
+                                            <span id="newBalanceDisplay" class="h5 text-success">@Model.CurrentBalance.ToString("N1")</span> gün
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Adjustment Amount -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="AdjustmentDays" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="AdjustmentDays" class="form-control" step="0.1" id="adjustmentInput" />
+                                    <span class="input-group-text">gün</span>
+                                </div>
+                                <span asp-validation-for="AdjustmentDays" class="text-danger"></span>
+                                <div class="form-text">
+                                    Pozitif değer bakiye artırır, negatif değer azaltır.
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label asp-for="AdjustmentType" class="form-label"></label>
+                                <select asp-for="AdjustmentType" class="form-select">
+                                    <option value="Manual">Manuel Düzeltme</option>
+                                    <option value="System">Sistem Düzeltmesi</option>
+                                    <option value="Carryover">Devir İşlemi</option>
+                                    <option value="Bonus">Bonus İzin</option>
+                                    <option value="Penalty">Ceza İşlemi</option>
+                                </select>
+                                <span asp-validation-for="AdjustmentType" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Reason -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label asp-for="Reason" class="form-label"></label>
+                                <textarea asp-for="Reason" class="form-control" rows="3" placeholder="Düzeltme gerekçesini açıklayınız..."></textarea>
+                                <span asp-validation-for="Reason" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Hidden Fields -->
+                        <input asp-for="AdjustedById" type="hidden" />
+
+                        <!-- Submit Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                                    <i class="fas fa-save"></i> Düzeltmeyi Kaydet
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> İptal
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Panel -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="fas fa-question-circle"></i> Bakiye Düzeltme Rehberi</h6>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="helpAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help1">
+                                    Düzeltme Türleri
+                                </button>
+                            </h2>
+                            <div id="help1" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <ul class="list-unstyled">
+                                        <li><strong>Manuel Düzeltme:</strong> İnsan kaynakları tarafından yapılan düzeltmeler</li>
+                                        <li><strong>Sistem Düzeltmesi:</strong> Sistem hatası düzeltmeleri</li>
+                                        <li><strong>Devir İşlemi:</strong> Yıl sonu devir işlemleri</li>
+                                        <li><strong>Bonus İzin:</strong> Ek izin hakları</li>
+                                        <li><strong>Ceza İşlemi:</strong> İzin kesintileri</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help2">
+                                    Dikkat Edilecek Hususlar
+                                </button>
+                            </h2>
+                            <div id="help2" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <ul class="list-unstyled">
+                                        <li>• Düzeltme işlemi geri alınamaz</li>
+                                        <li>• Gerekçe yazmak zorunludur</li>
+                                        <li>• Negatif bakiye oluşabilir</li>
+                                        <li>• Tüm işlemler loglanır</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help3">
+                                    Örnekler
+                                </button>
+                            </h2>
+                            <div id="help3" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <ul class="list-unstyled">
+                                        <li><strong>+5.0:</strong> 5 gün ek izin verilmesi</li>
+                                        <li><strong>-2.5:</strong> 2.5 gün izin kesintisi</li>
+                                        <li><strong>+15.0:</strong> Yıl sonu devir işlemi</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            const personSelect = $('#personSelect');
+            const leaveTypeSelect = $('#leaveTypeSelect');
+            const adjustmentInput = $('#adjustmentInput');
+            const submitBtn = $('#submitBtn');
+            const currentBalanceSection = $('#currentBalanceSection');
+            const currentBalanceDisplay = $('#currentBalanceDisplay');
+            const adjustmentDisplay = $('#adjustmentDisplay');
+            const newBalanceDisplay = $('#newBalanceDisplay');
+
+            // Enable submit button when form is valid
+            function validateForm() {
+                const isValid = personSelect.val() && leaveTypeSelect.val() && adjustmentInput.val();
+                submitBtn.prop('disabled', !isValid);
+            }
+
+            // Update balance display
+            function updateBalanceDisplay() {
+                const adjustment = parseFloat(adjustmentInput.val()) || 0;
+                const current = parseFloat(currentBalanceDisplay.text()) || 0;
+                const newBalance = current + adjustment;
+                
+                adjustmentDisplay.text(adjustment.toFixed(1));
+                newBalanceDisplay.text(newBalance.toFixed(1));
+                
+                // Color coding
+                adjustmentDisplay.removeClass('text-success text-danger text-warning');
+                newBalanceDisplay.removeClass('text-success text-danger text-warning');
+                
+                if (adjustment > 0) {
+                    adjustmentDisplay.addClass('text-success');
+                } else if (adjustment < 0) {
+                    adjustmentDisplay.addClass('text-danger');
+                }
+                
+                if (newBalance < 0) {
+                    newBalanceDisplay.addClass('text-danger');
+                } else if (newBalance > current) {
+                    newBalanceDisplay.addClass('text-success');
+                } else {
+                    newBalanceDisplay.addClass('text-warning');
+                }
+            }
+
+            // Load current balance when person and leave type are selected
+            function loadCurrentBalance() {
+                const personId = personSelect.val();
+                const leaveTypeId = leaveTypeSelect.val();
+                const year = $('select[name="Year"]').val();
+                
+                if (personId && leaveTypeId) {
+                    $.post('@Url.Action("GetBalanceInfo")', {
+                        personId: personId,
+                        leaveTypeId: leaveTypeId,
+                        year: year
+                    }, function(response) {
+                        if (response.success) {
+                            currentBalanceDisplay.text(response.remainingDays.toFixed(1));
+                            currentBalanceSection.show();
+                            updateBalanceDisplay();
+                        }
+                    });
+                } else {
+                    currentBalanceSection.hide();
+                }
+            }
+
+            // Event handlers
+            personSelect.change(function() {
+                validateForm();
+                loadCurrentBalance();
+            });
+            
+            leaveTypeSelect.change(function() {
+                validateForm();
+                loadCurrentBalance();
+            });
+            
+            adjustmentInput.on('input', function() {
+                validateForm();
+                updateBalanceDisplay();
+            });
+
+            // Initialize if values are pre-selected
+            if (personSelect.val() && leaveTypeSelect.val()) {
+                loadCurrentBalance();
+            }
+            
+            validateForm();
+        });
+    </script>
+}

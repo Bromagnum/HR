@@ -1,0 +1,298 @@
+@model IEnumerable<MVC.Models.LeaveCalendarViewModel>
+@{
+    ViewData["Title"] = "İzin Takvimi";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt text-primary me-2"></i>
+                        İzin Takvimi
+                    </h3>
+                    <div class="btn-group">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-list me-1"></i>
+                            Liste Görünümü
+                        </a>
+                        <a asp-action="Create" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i>
+                            Yeni İzin
+                        </a>
+                        <a asp-action="Statistics" class="btn btn-info">
+                            <i class="fas fa-chart-bar me-1"></i>
+                            İstatistikler
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Filter Controls -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label">Departman Filtresi</label>
+                            <form method="get">
+                                <select name="departmentId" class="form-select" onchange="this.form.submit()">
+                                    <option value="">Tüm Departmanlar</option>
+                                    <option value="1">İnsan Kaynakları</option>
+                                    <option value="2">Bilgi Teknolojileri</option>
+                                    <option value="3">Muhasebe</option>
+                                    <option value="4">Satış</option>
+                                    <option value="5">Pazarlama</option>
+                                </select>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Görünüm</label>
+                            <div class="btn-group w-100">
+                                <button type="button" class="btn btn-outline-primary active" onclick="changeView('month')">Aylık</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="changeView('week')">Haftalık</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="changeView('day')">Günlük</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Navigasyon</label>
+                            <div class="btn-group w-100">
+                                <button type="button" class="btn btn-outline-secondary" onclick="previousPeriod()">
+                                    <i class="fas fa-chevron-left"></i>
+                                    Önceki
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="goToToday()">
+                                    Bugün
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="nextPeriod()">
+                                    Sonraki
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="alert alert-light">
+                                <strong>Renk Kodları:</strong>
+                                <span class="badge me-2" style="background-color: #0d6efd;">Yıllık İzin</span>
+                                <span class="badge me-2" style="background-color: #198754;">Hastalık İzni</span>
+                                <span class="badge me-2" style="background-color: #ffc107; color: black;">Mazeret İzni</span>
+                                <span class="badge me-2" style="background-color: #dc3545;">Babalık İzni</span>
+                                <span class="badge me-2" style="background-color: #6f42c1;">Diğer</span>
+                                <span class="badge me-2" style="background-color: #fd7e14;">Onay Bekleyen</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Container -->
+                    <div id="calendar" style="min-height: 600px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Detail Modal -->
+<div class="modal fade" id="leaveDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">İzin Detayları</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="leaveDetailContent">
+                    <!-- Content will be loaded dynamically -->
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <a id="editLeaveBtn" href="#" class="btn btn-warning">
+                    <i class="fas fa-edit me-1"></i>
+                    Düzenle
+                </a>
+                <a id="detailLeaveBtn" href="#" class="btn btn-primary">
+                    <i class="fas fa-eye me-1"></i>
+                    Detaylar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- FullCalendar CSS and JS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/tr.global.min.js"></script>
+
+    <script>
+        let calendar;
+        let currentView = 'dayGridMonth';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+
+            // Sample leave data - in real app, this would come from the server
+            const leaveEvents = [
+                @foreach (var leave in Model)
+                {
+                    <text>{
+                        id: '@leave.Id',
+                        title: '@leave.PersonName - @leave.LeaveTypeName',
+                        start: '@leave.StartDate.ToString("yyyy-MM-dd")',
+                        end: '@leave.EndDate.AddDays(1).ToString("yyyy-MM-dd")', // FullCalendar end date is exclusive
+                        backgroundColor: '@leave.Color',
+                        borderColor: '@leave.Color',
+                        extendedProps: {
+                            personName: '@leave.PersonName',
+                            leaveTypeName: '@leave.LeaveTypeName',
+                            totalDays: @leave.TotalDays,
+                            status: '@leave.Status',
+                            tooltip: '@leave.Tooltip'
+                        }
+                    },</text>
+                }
+            ];
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'tr',
+                headerToolbar: {
+                    left: 'title',
+                    center: '',
+                    right: ''
+                },
+                height: 600,
+                events: leaveEvents,
+                eventClick: function(info) {
+                    showLeaveDetail(info.event);
+                },
+                eventDidMount: function(info) {
+                    // Add tooltip
+                    info.el.setAttribute('title', info.event.extendedProps.tooltip);
+                    info.el.setAttribute('data-bs-toggle', 'tooltip');
+                },
+                dateClick: function(info) {
+                    // Redirect to create new leave with selected date
+                    window.location.href = '@Url.Action("Create", "Leave")?startDate=' + info.dateStr;
+                },
+                eventMouseEnter: function(info) {
+                    // Show tooltip on hover
+                    $(info.el).tooltip('show');
+                },
+                eventMouseLeave: function(info) {
+                    // Hide tooltip
+                    $(info.el).tooltip('hide');
+                }
+            });
+
+            calendar.render();
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        function changeView(viewType) {
+            // Update button states
+            document.querySelectorAll('.btn-group .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Change calendar view
+            switch(viewType) {
+                case 'month':
+                    calendar.changeView('dayGridMonth');
+                    break;
+                case 'week':
+                    calendar.changeView('timeGridWeek');
+                    break;
+                case 'day':
+                    calendar.changeView('timeGridDay');
+                    break;
+            }
+        }
+
+        function previousPeriod() {
+            calendar.prev();
+        }
+
+        function nextPeriod() {
+            calendar.next();
+        }
+
+        function goToToday() {
+            calendar.today();
+        }
+
+        function showLeaveDetail(event) {
+            const modal = new bootstrap.Modal(document.getElementById('leaveDetailModal'));
+            
+            // Update modal content
+            document.getElementById('leaveDetailContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Personel Bilgileri</h6>
+                        <p><strong>Personel:</strong> ${event.extendedProps.personName}</p>
+                        <p><strong>İzin Türü:</strong> 
+                            <span class="badge" style="background-color: ${event.backgroundColor}; color: white;">
+                                ${event.extendedProps.leaveTypeName}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">İzin Bilgileri</h6>
+                        <p><strong>Başlangıç:</strong> ${event.start.toLocaleDateString('tr-TR')}</p>
+                        <p><strong>Bitiş:</strong> ${new Date(event.end.getTime() - 86400000).toLocaleDateString('tr-TR')}</p>
+                        <p><strong>Süre:</strong> ${event.extendedProps.totalDays} gün</p>
+                        <p><strong>Durum:</strong> 
+                            <span class="badge ${getStatusBadgeClass(event.extendedProps.status)}">
+                                ${getStatusText(event.extendedProps.status)}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            // Update action buttons
+            document.getElementById('editLeaveBtn').href = '@Url.Action("Edit", "Leave")/' + event.id;
+            document.getElementById('detailLeaveBtn').href = '@Url.Action("Details", "Leave")/' + event.id;
+
+            modal.show();
+        }
+
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'Pending': return 'bg-warning text-dark';
+                case 'Approved': return 'bg-success';
+                case 'Rejected': return 'bg-danger';
+                case 'Cancelled': return 'bg-secondary';
+                case 'InProgress': return 'bg-info';
+                case 'Completed': return 'bg-primary';
+                default: return 'bg-secondary';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'Pending': return 'Onay Bekliyor';
+                case 'Approved': return 'Onaylandı';
+                case 'Rejected': return 'Reddedildi';
+                case 'Cancelled': return 'İptal Edildi';
+                case 'InProgress': return 'Devam Ediyor';
+                case 'Completed': return 'Tamamlandı';
+                default: return 'Bilinmiyor';
+            }
+        }
+    </script>
+}

@@ -1,0 +1,56 @@
+﻿  Geri y├╝klenecek projeler belirleniyor...
+  Geri y├╝kleme i├ğin t├╝m projeler g├╝ncel.
+  DAL -> C:\Users\G├ûKTU─Ş\IKYS\DAL\bin\Debug\net8.0\DAL.dll
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Utilities\Result.cs(47,29): warning CS0108: 'Result<T>.Fail(string)', 'Result.Fail(string)' devral─▒nan ├╝yesini gizler. Gizleme isteniyorsa yeni anahtar s├Âzc├╝k kullan─▒n. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Utilities\Result.cs(52,29): warning CS0108: 'Result<T>.Fail(List<string>)', 'Result.Fail(List<string>)' devral─▒nan ├╝yesini gizler. Gizleme isteniyorsa yeni anahtar s├Âzc├╝k kullan─▒n. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(38,51): error CS1501: 'GetFilteredLeavesAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 7 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(156,60): error CS1501: 'GetBalancesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(170,60): error CS1501: 'GetBalancesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\WorkLogService.cs(138,31): error CS0117: 'Result' bir 'OkResult' tan─▒m─▒ i├ğermiyor [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(218,51): error CS1501: 'GetLeavesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(265,60): error CS1501: 'GetBalancesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\WorkLogService.cs(163,31): error CS0117: 'Result' bir 'OkResult' tan─▒m─▒ i├ğermiyor [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(445,17): warning CS8604: 'bool Enumerable.Any<LeaveListDto>(IEnumerable<LeaveListDto> source)' i├ğindeki 'source' parametresi i├ğin olas─▒ null ba┼şvuru ba─ş─▒ms─▒z de─şi┼şkeni. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(490,17): warning CS8604: 'bool Enumerable.Any<LeaveListDto>(IEnumerable<LeaveListDto> source)' i├ğindeki 'source' parametresi i├ğin olas─▒ null ba┼şvuru ba─ş─▒ms─▒z de─şi┼şkeni. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveTypeService.cs(384,50): warning CS8601: Olas─▒ null ba┼şvuru atamas─▒. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(391,60): error CS1501: 'GetBalancesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(578,61): error CS1501: 'GetLeavesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(617,51): error CS1501: 'GetUpcomingLeavesAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\WorkLogService.cs(523,31): error CS0117: 'Result' bir 'OkResult' tan─▒m─▒ i├ğermiyor [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\WorkLogService.cs(550,31): error CS0117: 'Result' bir 'OkResult' tan─▒m─▒ i├ğermiyor [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(666,37): warning CS1998: Bu zaman uyumsuz y├Ântemde 'await' i┼şle├ğleri yok ve zaman uyumlu ├ğal─▒┼şacak. 'await' i┼şlecini kullanarak engelleyici olmayan API ├ğa─şr─▒lar─▒n─▒ beklemeyi veya 'await Task.Run(...)' kullanarak bir arka plan i┼ş par├ğac─▒─ş─▒nda CPU ba─şlant─▒l─▒ i┼ş yapmay─▒ d├╝┼ş├╝n├╝n. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(490,72): error CS1501: 'GetBalancesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(818,68): error CS1501: 'GetOverusedBalancesAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 1 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(832,66): error CS1501: 'GetUnusedBalancesAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(896,37): warning CS1998: Bu zaman uyumsuz y├Ântemde 'await' i┼şle├ğleri yok ve zaman uyumlu ├ğal─▒┼şacak. 'await' i┼şlecini kullanarak engelleyici olmayan API ├ğa─şr─▒lar─▒n─▒ beklemeyi veya 'await Task.Run(...)' kullanarak bir arka plan i┼ş par├ğac─▒─ş─▒nda CPU ba─şlant─▒l─▒ i┼ş yapmay─▒ d├╝┼ş├╝n├╝n. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+
+Olu┼şturma BA┼ŞARISIZ OLDU.
+
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Utilities\Result.cs(47,29): warning CS0108: 'Result<T>.Fail(string)', 'Result.Fail(string)' devral─▒nan ├╝yesini gizler. Gizleme isteniyorsa yeni anahtar s├Âzc├╝k kullan─▒n. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Utilities\Result.cs(52,29): warning CS0108: 'Result<T>.Fail(List<string>)', 'Result.Fail(List<string>)' devral─▒nan ├╝yesini gizler. Gizleme isteniyorsa yeni anahtar s├Âzc├╝k kullan─▒n. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(445,17): warning CS8604: 'bool Enumerable.Any<LeaveListDto>(IEnumerable<LeaveListDto> source)' i├ğindeki 'source' parametresi i├ğin olas─▒ null ba┼şvuru ba─ş─▒ms─▒z de─şi┼şkeni. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(490,17): warning CS8604: 'bool Enumerable.Any<LeaveListDto>(IEnumerable<LeaveListDto> source)' i├ğindeki 'source' parametresi i├ğin olas─▒ null ba┼şvuru ba─ş─▒ms─▒z de─şi┼şkeni. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveTypeService.cs(384,50): warning CS8601: Olas─▒ null ba┼şvuru atamas─▒. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(666,37): warning CS1998: Bu zaman uyumsuz y├Ântemde 'await' i┼şle├ğleri yok ve zaman uyumlu ├ğal─▒┼şacak. 'await' i┼şlecini kullanarak engelleyici olmayan API ├ğa─şr─▒lar─▒n─▒ beklemeyi veya 'await Task.Run(...)' kullanarak bir arka plan i┼ş par├ğac─▒─ş─▒nda CPU ba─şlant─▒l─▒ i┼ş yapmay─▒ d├╝┼ş├╝n├╝n. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(896,37): warning CS1998: Bu zaman uyumsuz y├Ântemde 'await' i┼şle├ğleri yok ve zaman uyumlu ├ğal─▒┼şacak. 'await' i┼şlecini kullanarak engelleyici olmayan API ├ğa─şr─▒lar─▒n─▒ beklemeyi veya 'await Task.Run(...)' kullanarak bir arka plan i┼ş par├ğac─▒─ş─▒nda CPU ba─şlant─▒l─▒ i┼ş yapmay─▒ d├╝┼ş├╝n├╝n. [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(38,51): error CS1501: 'GetFilteredLeavesAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 7 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(156,60): error CS1501: 'GetBalancesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(170,60): error CS1501: 'GetBalancesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\WorkLogService.cs(138,31): error CS0117: 'Result' bir 'OkResult' tan─▒m─▒ i├ğermiyor [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(218,51): error CS1501: 'GetLeavesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(265,60): error CS1501: 'GetBalancesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\WorkLogService.cs(163,31): error CS0117: 'Result' bir 'OkResult' tan─▒m─▒ i├ğermiyor [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(391,60): error CS1501: 'GetBalancesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(578,61): error CS1501: 'GetLeavesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveService.cs(617,51): error CS1501: 'GetUpcomingLeavesAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\WorkLogService.cs(523,31): error CS0117: 'Result' bir 'OkResult' tan─▒m─▒ i├ğermiyor [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\WorkLogService.cs(550,31): error CS0117: 'Result' bir 'OkResult' tan─▒m─▒ i├ğermiyor [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(490,72): error CS1501: 'GetBalancesByPersonAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(818,68): error CS1501: 'GetOverusedBalancesAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 1 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+C:\Users\G├ûKTU─Ş\IKYS\BLL\Services\LeaveBalanceService.cs(832,66): error CS1501: 'GetUnusedBalancesAsync' y├Ântemi i├ğin hi├ğbir tekrar y├╝kleme 2 ba─ş─▒ms─▒z de─şi┼şken almaz [C:\Users\G├ûKTU─Ş\IKYS\BLL\BLL.csproj]
+    7 Uyar─▒
+    15 Hata
+
+Ge├ğen S├╝re 00:00:02.25
+
+─░┼ş y├╝k├╝ g├╝ncelle┼ştirmeleri var. Daha fazla bilgi i├ğin `dotnet workload list` ├ğal─▒┼şt─▒r─▒n.

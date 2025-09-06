@@ -1,0 +1,204 @@
+@model LeaveTypeDetailViewModel
+@{
+    ViewData["Title"] = $"İzin Türünü Sil: {Model.Name}";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trash me-2"></i>
+                        @ViewData["Title"]
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x float-start me-3"></i>
+                        <h5>Bu işlem geri alınamaz!</h5>
+                        <p class="mb-0">
+                            Bu izin türünü silmek istediğinizden emin misiniz? 
+                            Bu işlem sonucunda izin türü kalıcı olarak silinecektir.
+                        </p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Silinecek İzin Türü Bilgileri</h6>
+                            
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="color-indicator me-3" style="background-color: @Model.Color; width: 25px; height: 25px; border-radius: 50%; border: 2px solid #dee2e6;"></div>
+                                <div>
+                                    <strong>@Model.Name</strong>
+                                    <div>
+                                        @if (Model.IsActive)
+                                        {
+                                            <span class="badge bg-success">Aktif</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Pasif</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="fw-bold">Açıklama:</label>
+                                <p class="mb-0">@(Model.Description ?? "Açıklama belirtilmemiş")</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="fw-bold">Maksimum Gün/Yıl:</label>
+                                <p class="mb-0">
+                                    @if (Model.MaxDaysPerYear == 0)
+                                    {
+                                        <span class="badge bg-info">Sınırsız</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary">@Model.MaxDaysPerYear gün</span>
+                                    }
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="fw-bold">Özellikler:</label>
+                                <div class="mt-2">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @if (Model.RequiresApproval)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-check-circle"></i> Onay Gerekli
+                                            </span>
+                                        }
+                                        @if (Model.RequiresDocument)
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-file-alt"></i> Belge Gerekli
+                                            </span>
+                                        }
+                                        @if (Model.IsPaid)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-money-bill"></i> Ücretli
+                                            </span>
+                                        }
+                                        @if (Model.CanCarryOver)
+                                        {
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-arrow-right"></i> Devir Edilebilir
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Etkilenecek Veriler</h6>
+                            
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <div class="mb-2">
+                                                <span class="badge bg-primary fs-6">@Model.TotalLeaves</span>
+                                            </div>
+                                            <small class="text-muted">Toplam İzin Kaydı</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="mb-2">
+                                                <span class="badge bg-warning fs-6">@Model.PendingLeaves</span>
+                                            </div>
+                                            <small class="text-muted">Bekleyen İzin</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (Model.TotalLeaves > 0)
+                            {
+                                <div class="alert alert-warning mt-3">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Uyarı:</strong> Bu izin türüne ait @Model.TotalLeaves adet izin kaydı var. 
+                                    @if (Model.PendingLeaves > 0)
+                                    {
+                                        <br /><strong>@(Model.PendingLeaves) adet bekleyen izin talebi bulunuyor.</strong>
+                                    }
+                                </div>
+                            }
+
+                            @if (Model.ApprovedLeaves > 0)
+                            {
+                                <div class="alert alert-danger mt-3">
+                                    <i class="fas fa-ban"></i>
+                                    <strong>Silme Engeli:</strong> Bu izin türüne ait onaylanmış izinler olduğu için silme işlemi gerçekleştirilemeyebilir.
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">
+                                        <i class="fas fa-info-circle"></i> Silme Sonrası
+                                    </h6>
+                                    <ul class="mb-0 text-muted">
+                                        <li>İzin türü tamamen silinecek</li>
+                                        <li>Bu türe ait bakiye kayıtları silinecek</li>
+                                        <li>İlişkili izin talepleri varsa silme işlemi başarısız olabilir</li>
+                                        <li>Bu işlem geri alınamaz</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input asp-for="Id" type="hidden" />
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-info">
+                                    <i class="fas fa-eye"></i> Detayları Gör
+                                </a>
+                                <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Geri Dön
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-danger" onclick="return confirmDelete()">
+                                    <i class="fas fa-trash"></i> Evet, Sil
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmDelete() {
+        return confirm('Bu izin türünü kalıcı olarak silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!');
+    }
+</script>
+
+<style>
+    .color-indicator {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .card-header.bg-danger {
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .badge.fs-6 {
+        font-size: 1.1rem !important;
+        padding: 0.5rem 0.75rem;
+    }
+</style>

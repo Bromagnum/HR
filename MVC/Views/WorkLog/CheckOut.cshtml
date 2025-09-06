@@ -1,0 +1,462 @@
+@model MVC.Models.WorkLogCheckOutViewModel
+@{
+    ViewData["Title"] = "Çıkış Yap";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        İş Günü Bitir - Çıkış Yap
+                    </h3>
+                </div>
+
+                <form asp-action="CheckOut" method="post" class="needs-validation" novalidate>
+                    @Html.HiddenFor(model => model.Id)
+                    
+                    <div class="card-body">
+                        <!-- Current Time Display -->
+                        <div class="alert alert-info text-center mb-4">
+                            <h4 class="mb-2">
+                                <i class="fas fa-clock me-2"></i>
+                                <span id="currentTime">--:--:--</span>
+                            </h4>
+                            <p class="mb-0">
+                                <i class="fas fa-calendar me-1"></i>
+                                <span id="currentDate">--</span>
+                            </p>
+                        </div>
+
+                        <!-- Work Session Summary -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Çalışma Oturumu Özeti
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <strong>Personel:</strong>
+                                            <br>
+                                            @Model.PersonName
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Tarih:</strong>
+                                            <br>
+                                            @Model.Date.ToString("dd.MM.yyyy")
+                                            <small class="text-muted">(@Model.Date.ToString("dddd", new System.Globalization.CultureInfo("tr-TR")))</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <strong>Giriş Saati:</strong>
+                                            <br>
+                                            <span class="h5 text-success">@Model.StartTime.ToString(@"hh\:mm")</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Çalışma Süresi:</strong>
+                                            <br>
+                                            <span id="workDuration" class="h6 text-primary">Hesaplanıyor...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- End Time -->
+                        <div class="mb-3">
+                            <label asp-for="EndTime" class="form-label required">
+                                <i class="fas fa-clock me-1"></i>@Html.DisplayNameFor(model => model.EndTime)
+                            </label>
+                            <div class="input-group">
+                                <input asp-for="EndTime" type="time" class="form-control" required />
+                                <button type="button" class="btn btn-outline-secondary" onclick="setCurrentTime()">
+                                    <i class="fas fa-clock"></i> Şimdi
+                                </button>
+                            </div>
+                            <span asp-validation-for="EndTime" class="text-danger"></span>
+                            <div class="form-text">Mevcut saat otomatik olarak dolduruldu. Gerekirse değiştirebilirsiniz.</div>
+                        </div>
+
+                        <!-- Calculated Work Summary -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h5 id="calculatedTotalHours">--</h5>
+                                        <small>Toplam Çalışma</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h5 id="calculatedRegularHours">--</h5>
+                                        <small>Normal Saat</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-white" id="overtimeCard">
+                                    <div class="card-body text-center">
+                                        <h5 id="calculatedOvertimeHours">--</h5>
+                                        <small>Mesai Saati</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tasks Completed -->
+                        <div class="mb-3">
+                            <label asp-for="TasksCompleted" class="form-label">
+                                <i class="fas fa-tasks me-1"></i>@Html.DisplayNameFor(model => model.TasksCompleted)
+                            </label>
+                            <textarea asp-for="TasksCompleted" class="form-control" rows="4" placeholder="Bugün tamamladığınız görevleri detaylı olarak yazabilirsiniz...
+
+Örnek:
+• Proje X için analiz raporu hazırlandı
+• Müşteri Y ile toplantı gerçekleştirildi
+• Sistem güncellemeleri tamamlandı"></textarea>
+                            <span asp-validation-for="TasksCompleted" class="text-danger"></span>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">
+                                <i class="fas fa-sticky-note me-1"></i>@Html.DisplayNameFor(model => model.Notes)
+                            </label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Yarın için notlar, karşılaşılan sorunlar, özel durumlar..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <!-- Quick Task Templates -->
+                        <div class="mb-3">
+                            <label class="form-label">Hızlı Görev Şablonları:</label>
+                            <div class="btn-group-vertical d-grid gap-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addQuickTask('Günlük rutin işlemler tamamlandı')">
+                                    <i class="fas fa-check me-1"></i>Rutin İşlemler
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addQuickTask('E-posta ve telefon görüşmeleri gerçekleştirildi')">
+                                    <i class="fas fa-envelope me-1"></i>İletişim İşleri
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addQuickTask('Raporlama ve dokümantasyon işleri yapıldı')">
+                                    <i class="fas fa-file-alt me-1"></i>Dokümantasyon
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addQuickTask('Toplantılar ve görüşmeler gerçekleştirildi')">
+                                    <i class="fas fa-users me-1"></i>Toplantılar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Work Performance Summary -->
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-chart-line me-1"></i>
+                                    Çalışma Performansı
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div id="arrivalStatus">
+                                            <i class="fas fa-clock fa-2x mb-2"></i>
+                                            <br>
+                                            <small id="arrivalText">Gelişiniz</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div id="departureStatus">
+                                            <i class="fas fa-door-open fa-2x mb-2"></i>
+                                            <br>
+                                            <small id="departureText">Çıkışınız</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div id="workTimeStatus">
+                                            <i class="fas fa-hourglass-half fa-2x mb-2"></i>
+                                            <br>
+                                            <small id="workTimeText">Çalışma</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div id="productivityStatus">
+                                            <i class="fas fa-trophy fa-2x mb-2"></i>
+                                            <br>
+                                            <small id="productivityText">Verimlilik</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                İptal
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-sign-out-alt me-1"></i>
+                                Çıkış Yap
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .required::after {
+        content: " *";
+        color: red;
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    #currentTime {
+        font-family: 'Courier New', monospace;
+        font-size: 1.8em;
+        font-weight: bold;
+    }
+
+    #currentDate {
+        font-size: 1.1em;
+    }
+
+    .text-late {
+        color: #dc3545 !important;
+    }
+
+    .text-early {
+        color: #17a2b8 !important;
+    }
+
+    .text-ontime {
+        color: #28a745 !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startTime = '@Model.StartTime.ToString(@"hh\:mm")';
+        
+        // Update current time and date
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Update time
+            const timeString = now.toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+            
+            // Update date
+            const dateString = now.toLocaleDateString('tr-TR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('currentDate').textContent = dateString;
+        }
+
+        // Update time every second
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        // Set current time function
+        window.setCurrentTime = function() {
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                             now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('EndTime').value = timeString;
+            calculateWorkHours();
+        };
+
+        // Set initial current time
+        setCurrentTime();
+
+        // Calculate work duration
+        function calculateWorkDuration() {
+            const now = new Date();
+            const startDate = new Date('1970-01-01T' + startTime + ':00');
+            const currentDate = new Date('1970-01-01T' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':00');
+            
+            if (currentDate > startDate) {
+                const diffMs = currentDate - startDate;
+                const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                
+                document.getElementById('workDuration').textContent = hours + ' saat ' + minutes + ' dakika';
+            }
+        }
+
+        // Calculate work hours when end time changes
+        function calculateWorkHours() {
+            const endTimeInput = document.getElementById('EndTime');
+            if (endTimeInput.value) {
+                const start = new Date('1970-01-01T' + startTime + ':00');
+                const end = new Date('1970-01-01T' + endTimeInput.value + ':00');
+                
+                if (end > start) {
+                    const diffMs = end - start;
+                    const totalMinutes = Math.round(diffMs / 60000);
+                    const totalHours = totalMinutes / 60;
+                    
+                    const standardHours = 8;
+                    const regularHours = Math.min(totalHours, standardHours);
+                    const overtimeHours = Math.max(0, totalHours - standardHours);
+                    
+                    document.getElementById('calculatedTotalHours').textContent = totalHours.toFixed(1) + 'h';
+                    document.getElementById('calculatedRegularHours').textContent = regularHours.toFixed(1) + 'h';
+                    document.getElementById('calculatedOvertimeHours').textContent = overtimeHours.toFixed(1) + 'h';
+                    
+                    // Update overtime card color
+                    const overtimeCard = document.getElementById('overtimeCard');
+                    if (overtimeHours > 0) {
+                        overtimeCard.className = 'card bg-warning text-white';
+                    } else {
+                        overtimeCard.className = 'card bg-secondary text-white';
+                    }
+                    
+                    // Update performance indicators
+                    updatePerformanceIndicators(totalHours, overtimeHours);
+                }
+            }
+        }
+
+        // Update performance indicators
+        function updatePerformanceIndicators(totalHours, overtimeHours) {
+            // Arrival status
+            const arrivalStatus = document.getElementById('arrivalStatus');
+            const arrivalText = document.getElementById('arrivalText');
+            const startMinutes = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1]);
+            const standardStartMinutes = 9 * 60; // 09:00
+            const lateThresholdMinutes = 9 * 60 + 15; // 09:15
+            
+            if (startMinutes <= standardStartMinutes) {
+                arrivalStatus.className = 'text-ontime';
+                arrivalText.textContent = 'Zamanında';
+            } else if (startMinutes <= lateThresholdMinutes) {
+                arrivalStatus.className = 'text-warning';
+                arrivalText.textContent = 'Kabul Edilebilir';
+            } else {
+                arrivalStatus.className = 'text-late';
+                arrivalText.textContent = 'Geç';
+            }
+            
+            // Departure status
+            const departureStatus = document.getElementById('departureStatus');
+            const departureText = document.getElementById('departureText');
+            const endTimeInput = document.getElementById('EndTime');
+            if (endTimeInput.value) {
+                const endMinutes = parseInt(endTimeInput.value.split(':')[0]) * 60 + parseInt(endTimeInput.value.split(':')[1]);
+                const standardEndMinutes = 18 * 60; // 18:00
+                
+                if (endMinutes >= standardEndMinutes) {
+                    departureStatus.className = 'text-ontime';
+                    departureText.textContent = 'Normal';
+                } else {
+                    departureStatus.className = 'text-early';
+                    departureText.textContent = 'Erken';
+                }
+            }
+            
+            // Work time status
+            const workTimeStatus = document.getElementById('workTimeStatus');
+            const workTimeText = document.getElementById('workTimeText');
+            if (totalHours >= 8) {
+                workTimeStatus.className = 'text-ontime';
+                workTimeText.textContent = 'Tam Gün';
+            } else if (totalHours >= 7) {
+                workTimeStatus.className = 'text-warning';
+                workTimeText.textContent = 'İyi';
+            } else {
+                workTimeStatus.className = 'text-late';
+                workTimeText.textContent = 'Eksik';
+            }
+            
+            // Productivity status
+            const productivityStatus = document.getElementById('productivityStatus');
+            const productivityText = document.getElementById('productivityText');
+            if (overtimeHours > 0) {
+                productivityStatus.className = 'text-warning';
+                productivityText.textContent = 'Yoğun';
+            } else if (totalHours >= 8) {
+                productivityStatus.className = 'text-ontime';
+                productivityText.textContent = 'Mükemmel';
+            } else {
+                productivityStatus.className = 'text-ontime';
+                productivityText.textContent = 'İyi';
+            }
+        }
+
+        // Update work duration every minute
+        calculateWorkDuration();
+        setInterval(calculateWorkDuration, 60000);
+
+        // Add quick task function
+        window.addQuickTask = function(task) {
+            const tasksTextarea = document.getElementById('TasksCompleted');
+            const currentTasks = tasksTextarea.value;
+            
+            if (currentTasks.trim() === '') {
+                tasksTextarea.value = '• ' + task;
+            } else {
+                tasksTextarea.value = currentTasks + '\n• ' + task;
+            }
+            
+            // Scroll to bottom of textarea
+            tasksTextarea.scrollTop = tasksTextarea.scrollHeight;
+        };
+
+        // Event listeners
+        document.getElementById('EndTime').addEventListener('change', calculateWorkHours);
+
+        // Initial calculation
+        calculateWorkHours();
+
+        // Form validation
+        const form = document.querySelector('.needs-validation');
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+
+        // Auto-focus on end time
+        setTimeout(function() {
+            document.getElementById('EndTime').focus();
+        }, 100);
+    });
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

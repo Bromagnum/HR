@@ -1,0 +1,188 @@
+@model MVC.Models.LeaveCreateViewModel
+@{
+    ViewData["Title"] = "Yeni İzin Ekle";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-plus text-success me-2"></i>
+                        Yeni İzin Ekle
+                    </h3>
+                </div>
+                
+                <form asp-action="Create" method="post" class="needs-validation" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="PersonId" class="form-label"></label>
+                                    <select asp-for="PersonId" asp-items="Model.Persons" class="form-select" required>
+                                        <option value="">Personel seçiniz...</option>
+                                    </select>
+                                    <span asp-validation-for="PersonId" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="LeaveTypeId" class="form-label"></label>
+                                    <select asp-for="LeaveTypeId" asp-items="Model.LeaveTypes" class="form-select" required>
+                                        <option value="">İzin türü seçiniz...</option>
+                                    </select>
+                                    <span asp-validation-for="LeaveTypeId" class="text-danger"></span>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="StartDate" class="form-label"></label>
+                                            <input asp-for="StartDate" class="form-control" type="date" 
+                                                   value="@Model.StartDate.ToString("yyyy-MM-dd")" required />
+                                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="EndDate" class="form-label"></label>
+                                            <input asp-for="EndDate" class="form-control" type="date" 
+                                                   value="@Model.EndDate.ToString("yyyy-MM-dd")" required />
+                                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="totalDaysDisplay" class="form-label">Toplam Gün Sayısı</label>
+                                    <input type="text" id="totalDaysDisplay" class="form-control" readonly value="1" />
+                                    <input asp-for="TotalDays" type="hidden" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Reason" class="form-label"></label>
+                                    <textarea asp-for="Reason" class="form-control" rows="3" required placeholder="İzin gerekçenizi yazınız..."></textarea>
+                                    <span asp-validation-for="Reason" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Notes" class="form-label"></label>
+                                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Ek notlar..."></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="HandoverToPersonId" class="form-label"></label>
+                                    <select asp-for="HandoverToPersonId" asp-items="Model.HandoverPersons" class="form-select">
+                                        <option value="">Devir kişisi seçiniz...</option>
+                                    </select>
+                                    <span asp-validation-for="HandoverToPersonId" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="HandoverNotes" class="form-label"></label>
+                                    <textarea asp-for="HandoverNotes" class="form-control" rows="3" placeholder="İş devir notları..."></textarea>
+                                    <span asp-validation-for="HandoverNotes" class="text-danger"></span>
+                                </div>
+
+                                <!-- Emergency Contact Section -->
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-phone me-1"></i>
+                                        Acil Durum İletişim
+                                    </h6>
+
+                                    <div class="mb-3">
+                                        <label asp-for="EmergencyContact" class="form-label"></label>
+                                        <input asp-for="EmergencyContact" class="form-control" placeholder="Acil durum iletişim kişisi..." />
+                                        <span asp-validation-for="EmergencyContact" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="EmergencyPhone" class="form-label"></label>
+                                        <input asp-for="EmergencyPhone" class="form-control" type="tel" placeholder="Telefon numarası..." />
+                                        <span asp-validation-for="EmergencyPhone" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Geri Dön
+                            </a>
+                            <div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-1"></i>
+                                    İzin Talebini Kaydet
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Calculate total days when date changes
+            function calculateTotalDays() {
+                const startDate = new Date($('#StartDate').val());
+                const endDate = new Date($('#EndDate').val());
+                
+                if (startDate && endDate && endDate >= startDate) {
+                    const timeDiff = endDate.getTime() - startDate.getTime();
+                    const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+                    $('#totalDaysDisplay').val(dayDiff + ' gün');
+                    $('#TotalDays').val(dayDiff);
+                } else {
+                    $('#totalDaysDisplay').val('0 gün');
+                    $('#TotalDays').val(0);
+                }
+            }
+
+            // Bind events
+            $('#StartDate, #EndDate').on('change', calculateTotalDays);
+            
+            // Initial calculation
+            calculateTotalDays();
+
+            // Form validation
+            $('form').on('submit', function(e) {
+                const startDate = new Date($('#StartDate').val());
+                const endDate = new Date($('#EndDate').val());
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (startDate < today) {
+                    e.preventDefault();
+                    alert('Başlangıç tarihi bugünden önce olamaz.');
+                    return false;
+                }
+
+                if (endDate < startDate) {
+                    e.preventDefault();
+                    alert('Bitiş tarihi başlangıç tarihinden önce olamaz.');
+                    return false;
+                }
+
+                return true;
+            });
+        });
+    </script>
+}

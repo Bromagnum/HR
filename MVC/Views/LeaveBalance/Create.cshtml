@@ -1,0 +1,88 @@
+@model MVC.Models.LeaveBalanceCreateViewModel
+@{
+    ViewData["Title"] = "Yeni İzin Bakiyesi";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-plus text-success me-2"></i>
+                        Yeni İzin Bakiyesi Oluştur
+                    </h3>
+                </div>
+                
+                <form asp-action="Create" class="needs-validation" novalidate>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="PersonId" class="form-label"></label>
+                                    <select asp-for="PersonId" asp-items="Model.Persons" class="form-select" required>
+                                        <option value="">Personel seçiniz...</option>
+                                    </select>
+                                    <span asp-validation-for="PersonId" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="LeaveTypeId" class="form-label"></label>
+                                    <select asp-for="LeaveTypeId" asp-items="Model.LeaveTypes" class="form-select" required>
+                                        <option value="">İzin türü seçiniz...</option>
+                                    </select>
+                                    <span asp-validation-for="LeaveTypeId" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Year" class="form-label"></label>
+                                    <input asp-for="Year" class="form-control" type="number" min="2020" max="2030" required />
+                                    <span asp-validation-for="Year" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="AllocatedDays" class="form-label"></label>
+                                    <input asp-for="AllocatedDays" class="form-control" type="number" step="0.5" min="0" required />
+                                    <span asp-validation-for="AllocatedDays" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="CarriedOverDays" class="form-label"></label>
+                                    <input asp-for="CarriedOverDays" class="form-control" type="number" step="0.5" min="0" />
+                                    <span asp-validation-for="CarriedOverDays" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="MonthlyAccrual" class="form-label"></label>
+                                    <input asp-for="MonthlyAccrual" class="form-control" type="number" step="0.1" min="0" />
+                                    <span asp-validation-for="MonthlyAccrual" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Geri Dön
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i>
+                                Bakiyeyi Oluştur
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

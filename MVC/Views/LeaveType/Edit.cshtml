@@ -1,0 +1,227 @@
+@model LeaveTypeEditViewModel
+@{
+    ViewData["Title"] = $"İzin Türünü Düzenle: {Model.Name}";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit text-warning me-2"></i>
+                        @ViewData["Title"]
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input asp-for="Id" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label"></label>
+                                    <input asp-for="Name" class="form-control" placeholder="Örn: Yıllık İzin" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Color" class="form-label"></label>
+                                    <input asp-for="Color" type="color" class="form-control form-control-color" style="width: 100px;" />
+                                    <span asp-validation-for="Color" class="text-danger"></span>
+                                    <small class="form-text text-muted">Takvimlerde görünecek renk</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="İzin türü hakkında açıklama..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="MaxDaysPerYear" class="form-label"></label>
+                                    <input asp-for="MaxDaysPerYear" type="number" class="form-control" min="0" max="365" />
+                                    <span asp-validation-for="MaxDaysPerYear" class="text-danger"></span>
+                                    <small class="form-text text-muted">0 = sınırsız</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="NotificationDays" class="form-label"></label>
+                                    <input asp-for="NotificationDays" type="number" class="form-control" min="0" max="30" />
+                                    <span asp-validation-for="NotificationDays" class="text-danger"></span>
+                                    <small class="form-text text-muted">Kaç gün önceden bildirilmeli</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input asp-for="RequiresApproval" class="form-check-input" type="checkbox" />
+                                        <label asp-for="RequiresApproval" class="form-check-label">
+                                            <i class="fas fa-check-circle text-warning"></i> Onay Gerekli
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input asp-for="RequiresDocument" class="form-check-input" type="checkbox" />
+                                        <label asp-for="RequiresDocument" class="form-check-label">
+                                            <i class="fas fa-file-alt text-danger"></i> Belge Gerekli
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input asp-for="IsPaid" class="form-check-input" type="checkbox" />
+                                        <label asp-for="IsPaid" class="form-check-label">
+                                            <i class="fas fa-money-bill text-success"></i> Ücretli
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input asp-for="CanCarryOver" class="form-check-input" type="checkbox" id="canCarryOver" onchange="toggleCarryOverDays()" />
+                                        <label asp-for="CanCarryOver" class="form-check-label">
+                                            <i class="fas fa-arrow-right text-primary"></i> Devir Edilebilir
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="carryOverDaysDiv">
+                            <label asp-for="MaxCarryOverDays" class="form-label"></label>
+                            <input asp-for="MaxCarryOverDays" type="number" class="form-control" min="0" max="365" />
+                            <span asp-validation-for="MaxCarryOverDays" class="text-danger"></span>
+                            <small class="form-text text-muted">Maksimum kaç gün devir edilebilir</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label">
+                                    <i class="fas fa-check text-success"></i> Aktif
+                                </label>
+                                <small class="form-text text-muted d-block">Pasif yapılan izin türleri yeni taleplerde görünmez</small>
+                            </div>
+                        </div>
+
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-info-circle text-info"></i> Önizleme
+                                </h6>
+                                <div class="d-flex align-items-center">
+                                    <div class="color-preview me-3" style="background-color: @Model.Color; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #dee2e6;"></div>
+                                    <div>
+                                        <strong class="name-preview">@Model.Name</strong>
+                                        <div class="badges-preview mt-1">
+                                            @if (Model.RequiresApproval)
+                                            {
+                                                <span class="badge bg-warning text-dark me-1"><i class="fas fa-check-circle"></i></span>
+                                            }
+                                            @if (Model.RequiresDocument)
+                                            {
+                                                <span class="badge bg-danger me-1"><i class="fas fa-file-alt"></i></span>
+                                            }
+                                            @if (Model.IsPaid)
+                                            {
+                                                <span class="badge bg-success me-1"><i class="fas fa-money-bill"></i></span>
+                                            }
+                                            @if (Model.CanCarryOver)
+                                            {
+                                                <span class="badge bg-primary me-1"><i class="fas fa-arrow-right"></i></span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Dikkat:</strong> Bu izin türüne ait mevcut izin talepleri ve bakiyeler etkilenebilir. 
+                            Önemli değişikliklerden önce yedek almanızı öneririz.
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                            </button>
+                            <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-info">
+                                <i class="fas fa-eye"></i> Detayları Gör
+                            </a>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Geri Dön
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleCarryOverDays() {
+        const checkbox = document.getElementById('canCarryOver');
+        const div = document.getElementById('carryOverDaysDiv');
+        div.style.display = checkbox.checked ? 'block' : 'none';
+    }
+
+    function updatePreview() {
+        const name = document.getElementById('Name').value || 'İzin Türü';
+        const color = document.getElementById('Color').value;
+        const requiresApproval = document.getElementById('RequiresApproval').checked;
+        const requiresDocument = document.getElementById('RequiresDocument').checked;
+        const isPaid = document.getElementById('IsPaid').checked;
+        const canCarryOver = document.getElementById('CanCarryOver').checked;
+
+        document.querySelector('.name-preview').textContent = name;
+        document.querySelector('.color-preview').style.backgroundColor = color;
+
+        let badges = '';
+        if (requiresApproval) badges += '<span class="badge bg-warning text-dark me-1"><i class="fas fa-check-circle"></i></span>';
+        if (requiresDocument) badges += '<span class="badge bg-danger me-1"><i class="fas fa-file-alt"></i></span>';
+        if (isPaid) badges += '<span class="badge bg-success me-1"><i class="fas fa-money-bill"></i></span>';
+        if (canCarryOver) badges += '<span class="badge bg-primary me-1"><i class="fas fa-arrow-right"></i></span>';
+
+        document.querySelector('.badges-preview').innerHTML = badges;
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleCarryOverDays();
+
+        // Add event listeners for preview updates
+        ['Name', 'Color', 'RequiresApproval', 'RequiresDocument', 'IsPaid', 'CanCarryOver'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', updatePreview);
+                element.addEventListener('change', updatePreview);
+            }
+        });
+    });
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -13,6 +13,10 @@ public class UnitOfWork : IUnitOfWork
     private IEducationRepository? _educations;
     private IQualificationRepository? _qualifications;
     private IPositionRepository? _positions;
+    private IWorkLogRepository? _workLogs;
+    private ILeaveTypeRepository? _leaveTypes;
+    private ILeaveRepository? _leaves;
+    private ILeaveBalanceRepository? _leaveBalances;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -33,6 +37,18 @@ public class UnitOfWork : IUnitOfWork
 
     public IPositionRepository Positions =>
         _positions ??= new PositionRepository(_context);
+
+    public IWorkLogRepository WorkLogs =>
+        _workLogs ??= new WorkLogRepository(_context);
+
+    public ILeaveTypeRepository LeaveTypes =>
+        _leaveTypes ??= new LeaveTypeRepository(_context);
+
+    public ILeaveRepository Leaves =>
+        _leaves ??= new LeaveRepository(_context);
+
+    public ILeaveBalanceRepository LeaveBalances =>
+        _leaveBalances ??= new LeaveBalanceRepository(_context);
 
     public async Task<int> SaveChangesAsync()
     {

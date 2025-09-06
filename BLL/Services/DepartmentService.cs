@@ -24,11 +24,11 @@ public class DepartmentService : IDepartmentService
             var departments = await _unitOfWork.Departments.GetAllAsync();
             var departmentDtos = _mapper.Map<IEnumerable<DepartmentListDto>>(departments);
             
-            return Result<IEnumerable<DepartmentListDto>>.SuccessResult(departmentDtos);
+            return Result<IEnumerable<DepartmentListDto>>.Ok(departmentDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<DepartmentListDto>>.ErrorResult($"Departman listesi alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<DepartmentListDto>>.Fail($"Departman listesi alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -39,15 +39,15 @@ public class DepartmentService : IDepartmentService
             var department = await _unitOfWork.Departments.GetByIdAsync(id);
             if (department == null)
             {
-                return Result<DepartmentDetailDto>.ErrorResult("Departman bulunamadı.");
+                return Result<DepartmentDetailDto>.Fail("Departman bulunamadı.");
             }
 
             var departmentDto = _mapper.Map<DepartmentDetailDto>(department);
-            return Result<DepartmentDetailDto>.SuccessResult(departmentDto);
+            return Result<DepartmentDetailDto>.Ok(departmentDto);
         }
         catch (Exception ex)
         {
-            return Result<DepartmentDetailDto>.ErrorResult($"Departman getirilirken hata oluştu: {ex.Message}");
+            return Result<DepartmentDetailDto>.Fail($"Departman getirilirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -58,11 +58,11 @@ public class DepartmentService : IDepartmentService
             var departments = await _unitOfWork.Departments.GetRootDepartmentsAsync();
             var departmentDtos = _mapper.Map<IEnumerable<DepartmentListDto>>(departments);
             
-            return Result<IEnumerable<DepartmentListDto>>.SuccessResult(departmentDtos);
+            return Result<IEnumerable<DepartmentListDto>>.Ok(departmentDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<DepartmentListDto>>.ErrorResult($"Ana departmanlar alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<DepartmentListDto>>.Fail($"Ana departmanlar alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -73,11 +73,11 @@ public class DepartmentService : IDepartmentService
             var departments = await _unitOfWork.Departments.GetSubDepartmentsAsync(parentId);
             var departmentDtos = _mapper.Map<IEnumerable<DepartmentListDto>>(departments);
             
-            return Result<IEnumerable<DepartmentListDto>>.SuccessResult(departmentDtos);
+            return Result<IEnumerable<DepartmentListDto>>.Ok(departmentDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<DepartmentListDto>>.ErrorResult($"Alt departmanlar alınırken hata oluştu: {ex.Message}");
+            return Result<IEnumerable<DepartmentListDto>>.Fail($"Alt departmanlar alınırken hata oluştu: {ex.Message}");
         }
     }
 
@@ -91,7 +91,7 @@ public class DepartmentService : IDepartmentService
                 var parentDepartment = await _unitOfWork.Departments.GetByIdAsync(dto.ParentDepartmentId.Value);
                 if (parentDepartment == null)
                 {
-                    return Result<DepartmentDetailDto>.ErrorResult("Geçersiz üst departman seçimi.");
+                    return Result<DepartmentDetailDto>.Fail("Geçersiz üst departman seçimi.");
                 }
             }
 
@@ -102,11 +102,11 @@ public class DepartmentService : IDepartmentService
             var createdDepartment = await _unitOfWork.Departments.GetByIdAsync(department.Id);
             var departmentDto = _mapper.Map<DepartmentDetailDto>(createdDepartment);
 
-            return Result<DepartmentDetailDto>.SuccessResult(departmentDto, "Departman başarıyla oluşturuldu.");
+            return Result<DepartmentDetailDto>.Ok(departmentDto, "Departman başarıyla oluşturuldu.");
         }
         catch (Exception ex)
         {
-            return Result<DepartmentDetailDto>.ErrorResult($"Departman oluşturulurken hata oluştu: {ex.Message}");
+            return Result<DepartmentDetailDto>.Fail($"Departman oluşturulurken hata oluştu: {ex.Message}");
         }
     }
 
@@ -117,7 +117,7 @@ public class DepartmentService : IDepartmentService
             var department = await _unitOfWork.Departments.GetByIdAsync(dto.Id);
             if (department == null)
             {
-                return Result<DepartmentDetailDto>.ErrorResult("Departman bulunamadı.");
+                return Result<DepartmentDetailDto>.Fail("Departman bulunamadı.");
             }
 
             // Üst departman kontrolü
@@ -125,13 +125,13 @@ public class DepartmentService : IDepartmentService
             {
                 if (dto.ParentDepartmentId == dto.Id)
                 {
-                    return Result<DepartmentDetailDto>.ErrorResult("Departman kendisinin alt departmanı olamaz.");
+                    return Result<DepartmentDetailDto>.Fail("Departman kendisinin alt departmanı olamaz.");
                 }
 
                 var parentDepartment = await _unitOfWork.Departments.GetByIdAsync(dto.ParentDepartmentId.Value);
                 if (parentDepartment == null)
                 {
-                    return Result<DepartmentDetailDto>.ErrorResult("Geçersiz üst departman seçimi.");
+                    return Result<DepartmentDetailDto>.Fail("Geçersiz üst departman seçimi.");
                 }
             }
 
@@ -142,11 +142,11 @@ public class DepartmentService : IDepartmentService
             var updatedDepartment = await _unitOfWork.Departments.GetByIdAsync(department.Id);
             var departmentDto = _mapper.Map<DepartmentDetailDto>(updatedDepartment);
 
-            return Result<DepartmentDetailDto>.SuccessResult(departmentDto, "Departman başarıyla güncellendi.");
+            return Result<DepartmentDetailDto>.Ok(departmentDto, "Departman başarıyla güncellendi.");
         }
         catch (Exception ex)
         {
-            return Result<DepartmentDetailDto>.ErrorResult($"Departman güncellenirken hata oluştu: {ex.Message}");
+            return Result<DepartmentDetailDto>.Fail($"Departman güncellenirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -157,29 +157,29 @@ public class DepartmentService : IDepartmentService
             var department = await _unitOfWork.Departments.GetByIdAsync(id);
             if (department == null)
             {
-                return Result.ErrorResult("Departman bulunamadı.");
+                return Result.Fail("Departman bulunamadı.");
             }
 
             // Alt departman kontrolü
             if (department.SubDepartments.Any(d => d.IsActive))
             {
-                return Result.ErrorResult("Alt departmanları olan departman silinemez.");
+                return Result.Fail("Alt departmanları olan departman silinemez.");
             }
 
             // Personel kontrolü
             if (department.Employees.Any(e => e.IsActive))
             {
-                return Result.ErrorResult("Personeli olan departman silinemez.");
+                return Result.Fail("Personeli olan departman silinemez.");
             }
 
             _unitOfWork.Departments.Remove(department);
             await _unitOfWork.SaveChangesAsync();
 
-            return Result.SuccessResult("Departman başarıyla silindi.");
+            return Result.Ok("Departman başarıyla silindi.");
         }
         catch (Exception ex)
         {
-            return Result.ErrorResult($"Departman silinirken hata oluştu: {ex.Message}");
+            return Result.Fail($"Departman silinirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -190,7 +190,7 @@ public class DepartmentService : IDepartmentService
             var department = await _unitOfWork.Departments.GetByIdAsync(id);
             if (department == null)
             {
-                return Result.ErrorResult("Departman bulunamadı.");
+                return Result.Fail("Departman bulunamadı.");
             }
 
             department.IsActive = isActive;
@@ -198,11 +198,11 @@ public class DepartmentService : IDepartmentService
             await _unitOfWork.SaveChangesAsync();
 
             var statusText = isActive ? "aktif" : "pasif";
-            return Result.SuccessResult($"Departman durumu {statusText} olarak güncellendi.");
+            return Result.Ok($"Departman durumu {statusText} olarak güncellendi.");
         }
         catch (Exception ex)
         {
-            return Result.ErrorResult($"Departman durumu güncellenirken hata oluştu: {ex.Message}");
+            return Result.Fail($"Departman durumu güncellenirken hata oluştu: {ex.Message}");
         }
     }
 
@@ -285,11 +285,11 @@ public class DepartmentService : IDepartmentService
                 Filter = filter
             };
             
-            return Result<DepartmentSearchResultDto>.SuccessResult(result);
+            return Result<DepartmentSearchResultDto>.Ok(result);
         }
         catch (Exception ex)
         {
-            return Result<DepartmentSearchResultDto>.ErrorResult($"Departman arama işlemi sırasında hata oluştu: {ex.Message}");
+            return Result<DepartmentSearchResultDto>.Fail($"Departman arama işlemi sırasında hata oluştu: {ex.Message}");
         }
     }
 
@@ -308,14 +308,14 @@ public class DepartmentService : IDepartmentService
             
             if (searchResult.Success && searchResult.Data != null)
             {
-                return Result<IEnumerable<DepartmentListDto>>.SuccessResult(searchResult.Data.Departments);
+                return Result<IEnumerable<DepartmentListDto>>.Ok(searchResult.Data.Departments);
             }
             
-            return Result<IEnumerable<DepartmentListDto>>.ErrorResult(searchResult.Message);
+            return Result<IEnumerable<DepartmentListDto>>.Fail(searchResult.Message);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<DepartmentListDto>>.ErrorResult($"Departman filtreleme işlemi sırasında hata oluştu: {ex.Message}");
+            return Result<IEnumerable<DepartmentListDto>>.Fail($"Departman filtreleme işlemi sırasında hata oluştu: {ex.Message}");
         }
     }
 }

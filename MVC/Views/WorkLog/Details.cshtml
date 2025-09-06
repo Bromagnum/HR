@@ -1,0 +1,530 @@
+@model MVC.Models.WorkLogDetailViewModel
+@{
+    ViewData["Title"] = "Çalışma Kaydı Detayları";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Çalışma Kaydı Detayları
+                    </h3>
+                    <div class="btn-group">
+                        @if (!Model.EndTime.HasValue && Model.Status == "Active")
+                        {
+                            <a asp-action="CheckOut" asp-route-id="@Model.Id" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt me-1"></i>
+                                Çıkış Yap
+                            </a>
+                        }
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                            <i class="fas fa-edit me-1"></i>
+                            Düzenle
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-list me-1"></i>
+                            Listeye Dön
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Status Banner -->
+                    <div class="alert @(GetStatusAlertClass(Model.Status)) d-flex align-items-center mb-4">
+                        <i class="fas @(GetStatusIcon(Model.Status)) fa-2x me-3"></i>
+                        <div>
+                            <h5 class="mb-1">@GetStatusText(Model.Status)</h5>
+                            <p class="mb-0">
+                                @if (Model.Status == "Active")
+                                {
+                                    @:Bu çalışma kaydı şu anda aktif durumda.
+                                }
+                                else if (Model.Status == "Completed")
+                                {
+                                    @:Bu çalışma kaydı tamamlanmış.
+                                }
+                                else if (Model.Status == "Approved")
+                                {
+                                    @:Bu çalışma kaydı @Model.ApprovedByName tarafından @Model.ApprovedAt?.ToString("dd.MM.yyyy HH:mm")'de onaylandı.
+                                }
+                                else if (Model.Status == "Rejected")
+                                {
+                                    @:Bu çalışma kaydı @Model.ApprovedByName tarafından @Model.ApprovedAt?.ToString("dd.MM.yyyy HH:mm")'de reddedildi.
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Employee Information -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-user me-1"></i>
+                                        Personel Bilgileri
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Ad Soyad:</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.PersonName
+                                        </div>
+                                    </div>
+                                    <hr class="my-2">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Departman:</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.DepartmentName
+                                        </div>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(Model.EmployeeNumber))
+                                    {
+                                        <hr class="my-2">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Sicil No:</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                @Model.EmployeeNumber
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date and Time Information -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Tarih ve Saat Bilgileri
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Tarih:</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.Date.ToString("dd.MM.yyyy")
+                                            <br>
+                                            <small class="text-muted">@Model.Date.ToString("dddd", new System.Globalization.CultureInfo("tr-TR"))</small>
+                                        </div>
+                                    </div>
+                                    <hr class="my-2">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Giriş Saati:</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.StartTime.ToString(@"hh\:mm")
+                                            @if (Model.IsLateArrival)
+                                            {
+                                                <span class="badge bg-warning ms-1">Geç</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <hr class="my-2">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Çıkış Saati:</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            @if (Model.EndTime.HasValue)
+                                            {
+                                                @Model.EndTime.Value.ToString(@"hh\:mm")
+                                                @if (Model.IsEarlyDeparture)
+                                                {
+                                                    <span class="badge bg-info ms-1">Erken</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">Devam Ediyor</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Break Information -->
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-coffee me-1"></i>
+                                        Mola Bilgileri
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    @if (Model.BreakStartTime.HasValue || Model.BreakEndTime.HasValue || Model.BreakDurationMinutes > 0)
+                                    {
+                                        @if (Model.BreakStartTime.HasValue)
+                                        {
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <strong>Mola Başlangıç:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    @Model.BreakStartTime.Value.ToString(@"hh\:mm")
+                                                </div>
+                                            </div>
+                                            <hr class="my-2">
+                                        }
+                                        @if (Model.BreakEndTime.HasValue)
+                                        {
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <strong>Mola Bitiş:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    @Model.BreakEndTime.Value.ToString(@"hh\:mm")
+                                                </div>
+                                            </div>
+                                            <hr class="my-2">
+                                        }
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Mola Süresi:</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                @Model.BreakDurationMinutes dakika
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted mb-0">Mola bilgisi bulunmuyor.</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Work Statistics -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-warning text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-chart-bar me-1"></i>
+                                        Çalışma İstatistikleri
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Toplam Saat:</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <span class="h5 text-primary">@Model.TotalHours.ToString("F1")</span> saat
+                                        </div>
+                                    </div>
+                                    <hr class="my-2">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Normal Saat:</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            @Model.RegularHours.ToString("F1") saat
+                                        </div>
+                                    </div>
+                                    <hr class="my-2">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Mesai Saati:</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            @if (Model.OvertimeHours > 0)
+                                            {
+                                                <span class="text-warning fw-bold">@Model.OvertimeHours.ToString("F1") saat</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Work Details -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-secondary text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-briefcase me-1"></i>
+                                        Çalışma Detayları
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <strong>Çalışma Türü:</strong>
+                                            <br>
+                                            @switch (Model.WorkType)
+                                            {
+                                                case "Office":
+                                                    <span class="badge bg-primary">Ofis</span>
+                                                    break;
+                                                case "Remote":
+                                                    <span class="badge bg-success">Uzaktan</span>
+                                                    break;
+                                                case "Field":
+                                                    <span class="badge bg-info">Saha</span>
+                                                    break;
+                                                case "Meeting":
+                                                    <span class="badge bg-warning">Toplantı</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary">@Model.WorkType</span>
+                                                    break;
+                                            }
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(Model.Location))
+                                        {
+                                            <div class="col-md-3">
+                                                <strong>Lokasyon:</strong>
+                                                <br>
+                                                @Model.Location
+                                            </div>
+                                        }
+                                        <div class="col-md-3">
+                                            <strong>Özel Durumlar:</strong>
+                                            <br>
+                                            @if (Model.IsWeekend)
+                                            {
+                                                <span class="badge bg-info me-1">Hafta Sonu</span>
+                                            }
+                                            @if (Model.IsHoliday)
+                                            {
+                                                <span class="badge bg-warning me-1">Tatil</span>
+                                            }
+                                            @if (!Model.IsWeekend && !Model.IsHoliday)
+                                            {
+                                                <span class="text-muted">Yok</span>
+                                            }
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Kayıt Durumu:</strong>
+                                            <br>
+                                            @if (Model.IsActive)
+                                            {
+                                                <span class="badge bg-success">Aktif</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Pasif</span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(Model.TasksCompleted))
+                                    {
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <strong>Tamamlanan Görevler:</strong>
+                                                <div class="mt-2 p-3 bg-light rounded">
+                                                    @Html.Raw(Model.TasksCompleted.Replace("\n", "<br>"))
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(Model.Notes))
+                                    {
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <strong>Notlar:</strong>
+                                                <div class="mt-2 p-3 bg-light rounded">
+                                                    @Html.Raw(Model.Notes.Replace("\n", "<br>"))
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Approval Information -->
+                    @if (!string.IsNullOrEmpty(Model.ApprovedByName) || !string.IsNullOrEmpty(Model.ApprovalNotes))
+                    {
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header @(Model.Status == "Approved" ? "bg-success" : "bg-danger") text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas @(Model.Status == "Approved" ? "fa-check-circle" : "fa-times-circle") me-1"></i>
+                                            Onay Bilgileri
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        @if (!string.IsNullOrEmpty(Model.ApprovedByName))
+                                        {
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <strong>Onaylayan:</strong>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    @Model.ApprovedByName
+                                                </div>
+                                            </div>
+                                            <hr class="my-2">
+                                        }
+                                        @if (Model.ApprovedAt.HasValue)
+                                        {
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <strong>Onay Tarihi:</strong>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    @Model.ApprovedAt.Value.ToString("dd.MM.yyyy HH:mm")
+                                                </div>
+                                            </div>
+                                            <hr class="my-2">
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.ApprovalNotes))
+                                        {
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <strong>Onay Notları:</strong>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="p-3 bg-light rounded">
+                                                        @Html.Raw(Model.ApprovalNotes.Replace("\n", "<br>"))
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- System Information -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0 text-muted">
+                                        <i class="fas fa-info me-1"></i>
+                                        Sistem Bilgileri
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <small class="text-muted">Oluşturulma:</small>
+                                            <br>
+                                            @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted">Son Güncelleme:</small>
+                                            <br>
+                                            @Model.UpdatedAt.ToString("dd.MM.yyyy HH:mm")
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(Model.CheckInIP))
+                                        {
+                                            <div class="col-md-3">
+                                                <small class="text-muted">Giriş IP:</small>
+                                                <br>
+                                                @Model.CheckInIP
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.CheckOutIP))
+                                        {
+                                            <div class="col-md-3">
+                                                <small class="text-muted">Çıkış IP:</small>
+                                                <br>
+                                                @Model.CheckOutIP
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusAlertClass(string status)
+    {
+        return status switch
+        {
+            "Active" => "alert-warning",
+            "Completed" => "alert-primary",
+            "Approved" => "alert-success",
+            "Rejected" => "alert-danger",
+            "Pending" => "alert-info",
+            _ => "alert-secondary"
+        };
+    }
+
+    string GetStatusIcon(string status)
+    {
+        return status switch
+        {
+            "Active" => "fa-play-circle",
+            "Completed" => "fa-check-circle",
+            "Approved" => "fa-thumbs-up",
+            "Rejected" => "fa-thumbs-down",
+            "Pending" => "fa-hourglass-half",
+            _ => "fa-question-circle"
+        };
+    }
+
+    string GetStatusText(string status)
+    {
+        return status switch
+        {
+            "Active" => "Aktif Çalışma",
+            "Completed" => "Tamamlanmış Çalışma",
+            "Approved" => "Onaylı Çalışma",
+            "Rejected" => "Reddedilmiş Çalışma",
+            "Pending" => "Onay Bekleyen Çalışma",
+            _ => status
+        };
+    }
+}
+
+<style>
+    .card {
+        transition: transform 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    .badge {
+        font-size: 0.85em;
+    }
+</style>

@@ -1,0 +1,371 @@
+@model Dictionary<string, object>
+@{
+    ViewData["Title"] = "İzin Bakiye İstatistikleri";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-chart-bar text-info me-2"></i>
+                        İzin Bakiye İstatistikleri
+                    </h3>
+                    <div class="btn-group">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Geri Dön
+                        </a>
+                        <a asp-action="LowBalanceAlerts" class="btn btn-warning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Düşük Bakiyeler
+                        </a>
+                        <a asp-action="UnusedBalances" class="btn btn-primary">
+                            <i class="fas fa-clock me-1"></i>
+                            Kullanılmamış Bakiyeler
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Filter Section -->
+                    <form method="get" class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label">Departman</label>
+                            <select name="departmentId" class="form-select">
+                                <option value="">Tüm Departmanlar</option>
+                                <!-- Options will be populated by controller -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Yıl</label>
+                            <input name="year" type="number" class="form-control" value="@DateTime.Now.Year" min="2020" max="2030" />
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i>
+                                Filtrele
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Overview Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h3 class="mb-0">125</h3>
+                                            <p class="mb-0">Toplam Çalışan</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-users fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h3 class="mb-0">2,850</h3>
+                                            <p class="mb-0">Toplam Tahsis (gün)</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-calendar-plus fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h3 class="mb-0">1,245</h3>
+                                            <p class="mb-0">Kullanılan (gün)</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-calendar-check fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-warning text-dark">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h3 class="mb-0">1,605</h3>
+                                            <p class="mb-0">Kalan (gün)</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-calendar-minus fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-chart-pie me-2"></i>
+                                        İzin Türlerine Göre Dağılım
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="leaveTypeChart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-chart-bar me-2"></i>
+                                        Departmanlara Göre Kullanım
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="departmentChart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Düşük Bakiye Uyarıları
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Ahmet Yılmaz</strong>
+                                                <br />
+                                                <small class="text-muted">Yıllık İzin - 1.5 gün kalmış</small>
+                                            </div>
+                                            <span class="badge bg-danger">Kritik</span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Fatma Demir</strong>
+                                                <br />
+                                                <small class="text-muted">Mazeret İzni - 0.5 gün kalmış</small>
+                                            </div>
+                                            <span class="badge bg-danger">Kritik</span>
+                                        </div>
+                                        <div class="list-group-item text-center">
+                                            <a asp-action="LowBalanceAlerts" class="btn btn-warning btn-sm">
+                                                Tümünü Görüntüle
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-clock me-2"></i>
+                                        Kullanılmamış Yüksek Bakiyeler
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Mehmet Kaya</strong>
+                                                <br />
+                                                <small class="text-muted">Yıllık İzin - 22 gün kalmış</small>
+                                            </div>
+                                            <span class="badge bg-success">Yüksek</span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Ayşe Öz</strong>
+                                                <br />
+                                                <small class="text-muted">Yıllık İzin - 19 gün kalmış</small>
+                                            </div>
+                                            <span class="badge bg-success">Yüksek</span>
+                                        </div>
+                                        <div class="list-group-item text-center">
+                                            <a asp-action="UnusedBalances" class="btn btn-info btn-sm">
+                                                Tümünü Görüntüle
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Utilization Table -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-percentage me-2"></i>
+                                İzin Kullanım Oranları
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>İzin Türü</th>
+                                            <th>Toplam Tahsis</th>
+                                            <th>Kullanılan</th>
+                                            <th>Kalan</th>
+                                            <th>Kullanım Oranı</th>
+                                            <th>Durum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary">Yıllık İzin</span>
+                                            </td>
+                                            <td>2,250 gün</td>
+                                            <td>945 gün</td>
+                                            <td>1,305 gün</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                        <div class="progress-bar bg-info" role="progressbar" style="width: 42%" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100">42%</div>
+                                                    </div>
+                                                    <span class="badge bg-info">42%</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-warning text-dark">Düşük Kullanım</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-success">Hastalık İzni</span>
+                                            </td>
+                                            <td>300 gün</td>
+                                            <td>180 gün</td>
+                                            <td>120 gün</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                        <div class="progress-bar bg-success" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">60%</div>
+                                                    </div>
+                                                    <span class="badge bg-success">60%</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">Normal</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-warning text-dark">Mazeret İzni</span>
+                                            </td>
+                                            <td>300 gün</td>
+                                            <td>120 gün</td>
+                                            <td>180 gün</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">40%</div>
+                                                    </div>
+                                                    <span class="badge bg-warning text-dark">40%</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-warning text-dark">Düşük Kullanım</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Leave Type Distribution Chart
+        const leaveTypeCtx = document.getElementById('leaveTypeChart').getContext('2d');
+        new Chart(leaveTypeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Yıllık İzin', 'Hastalık İzni', 'Mazeret İzni', 'Babalık İzni'],
+                datasets: [{
+                    data: [2250, 300, 300, 150],
+                    backgroundColor: [
+                        '#0d6efd',
+                        '#198754',
+                        '#ffc107',
+                        '#dc3545'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Department Usage Chart
+        const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+        new Chart(departmentCtx, {
+            type: 'bar',
+            data: {
+                labels: ['İT', 'İnsan Kaynakları', 'Muhasebe', 'Satış', 'Pazarlama'],
+                datasets: [{
+                    label: 'Kullanılan',
+                    data: [280, 150, 200, 350, 265],
+                    backgroundColor: '#198754'
+                }, {
+                    label: 'Kalan',
+                    data: [320, 200, 250, 400, 335],
+                    backgroundColor: '#ffc107'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true
+                    },
+                    y: {
+                        stacked: true
+                    }
+                }
+            }
+        });
+    </script>
+}

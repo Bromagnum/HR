@@ -39,4 +39,8 @@ public class Person : BaseEntity
     public Position? Position { get; set; }
     public virtual ICollection<Education> Educations { get; set; } = new List<Education>();
     public virtual ICollection<Qualification> Qualifications { get; set; } = new List<Qualification>();
+    public virtual ICollection<Leave> Leaves { get; set; } = new List<Leave>();
+    public virtual ICollection<Leave> ApprovedLeaves { get; set; } = new List<Leave>();
+    public virtual ICollection<Leave> HandoverLeaves { get; set; } = new List<Leave>();
+    public virtual ICollection<LeaveBalance> LeaveBalances { get; set; } = new List<LeaveBalance>();
 }

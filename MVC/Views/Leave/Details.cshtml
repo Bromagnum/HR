@@ -1,0 +1,289 @@
+@model MVC.Models.LeaveDetailViewModel
+@{
+    ViewData["Title"] = "İzin Detayları";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        İzin Detayları
+                    </h3>
+                    <div class="btn-group">
+                        @if (Model.Status == DAL.Entities.LeaveStatus.Pending)
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                <i class="fas fa-edit me-1"></i>
+                                Düzenle
+                            </a>
+                            <a asp-action="Approve" asp-route-id="@Model.Id" class="btn btn-success">
+                                <i class="fas fa-check me-1"></i>
+                                Onayla/Reddet
+                            </a>
+                        }
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Geri Dön
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <!-- Personal Information -->
+                            <div class="border rounded p-3 mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user me-2"></i>
+                                    Personel Bilgileri
+                                </h5>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Personel:</strong></div>
+                                    <div class="col-sm-8">@Model.PersonName</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Sicil No:</strong></div>
+                                    <div class="col-sm-8">@Model.EmployeeNumber</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Departman:</strong></div>
+                                    <div class="col-sm-8">@Model.DepartmentName</div>
+                                </div>
+                            </div>
+
+                            <!-- Leave Information -->
+                            <div class="border rounded p-3 mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-calendar-check me-2"></i>
+                                    İzin Bilgileri
+                                </h5>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>İzin Türü:</strong></div>
+                                    <div class="col-sm-8">
+                                        <span class="badge" style="background-color: @Model.LeaveTypeColor; color: white;">
+                                            @Model.LeaveTypeName
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Başlangıç:</strong></div>
+                                    <div class="col-sm-8">@Model.StartDate.ToString("dd MMMM yyyy, dddd")</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Bitiş:</strong></div>
+                                    <div class="col-sm-8">@Model.EndDate.ToString("dd MMMM yyyy, dddd")</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Gün Sayısı:</strong></div>
+                                    <div class="col-sm-8">
+                                        <span class="badge bg-secondary fs-6">@Model.TotalDays gün</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Kalan Bakiye:</strong></div>
+                                    <div class="col-sm-8">
+                                        <span class="badge bg-info fs-6">@Model.RemainingBalance gün</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Status Information -->
+                            <div class="border rounded p-3 mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Durum Bilgileri
+                                </h5>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Durum:</strong></div>
+                                    <div class="col-sm-8">
+                                        @{
+                                            var statusClass = Model.Status switch
+                                            {
+                                                DAL.Entities.LeaveStatus.Pending => "bg-warning text-dark",
+                                                DAL.Entities.LeaveStatus.Approved => "bg-success",
+                                                DAL.Entities.LeaveStatus.Rejected => "bg-danger",
+                                                DAL.Entities.LeaveStatus.Cancelled => "bg-secondary",
+                                                DAL.Entities.LeaveStatus.InProgress => "bg-info",
+                                                DAL.Entities.LeaveStatus.Completed => "bg-primary",
+                                                _ => "bg-secondary"
+                                            };
+                                            var statusIcon = Model.Status switch
+                                            {
+                                                DAL.Entities.LeaveStatus.Pending => "fas fa-clock",
+                                                DAL.Entities.LeaveStatus.Approved => "fas fa-check",
+                                                DAL.Entities.LeaveStatus.Rejected => "fas fa-times",
+                                                DAL.Entities.LeaveStatus.Cancelled => "fas fa-ban",
+                                                DAL.Entities.LeaveStatus.InProgress => "fas fa-play",
+                                                DAL.Entities.LeaveStatus.Completed => "fas fa-check-double",
+                                                _ => "fas fa-question"
+                                            };
+                                        }
+                                        <span class="badge @statusClass fs-6">
+                                            <i class="@statusIcon me-1"></i>
+                                            @Model.StatusText
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Talep Tarihi:</strong></div>
+                                    <div class="col-sm-8">@Model.RequestDate.ToString("dd MMMM yyyy HH:mm")</div>
+                                </div>
+                                @if (Model.ApprovedByName != null)
+                                {
+                                    <div class="row">
+                                        <div class="col-sm-4"><strong>Onaylayan:</strong></div>
+                                        <div class="col-sm-8">@Model.ApprovedByName</div>
+                                    </div>
+                                }
+                                @if (Model.ApprovedAt.HasValue)
+                                {
+                                    <div class="row">
+                                        <div class="col-sm-4"><strong>Onay Tarihi:</strong></div>
+                                        <div class="col-sm-8">@Model.ApprovedAt.Value.ToString("dd MMMM yyyy HH:mm")</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <!-- Reason & Notes -->
+                            <div class="border rounded p-3 mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-comment me-2"></i>
+                                    Açıklama ve Notlar
+                                </h5>
+                                <div class="mb-3">
+                                    <strong>Gerekçe:</strong>
+                                    <p class="mt-2 p-2 bg-light rounded">@Model.Reason</p>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.Notes))
+                                {
+                                    <div class="mb-3">
+                                        <strong>Notlar:</strong>
+                                        <p class="mt-2 p-2 bg-light rounded">@Model.Notes</p>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Approval Information -->
+                            @if (!string.IsNullOrEmpty(Model.ApprovalNotes) || !string.IsNullOrEmpty(Model.RejectionReason))
+                            {
+                                <div class="border rounded p-3 mb-4">
+                                    <h5 class="text-primary mb-3">
+                                        <i class="fas fa-stamp me-2"></i>
+                                        Onay Bilgileri
+                                    </h5>
+                                    @if (!string.IsNullOrEmpty(Model.ApprovalNotes))
+                                    {
+                                        <div class="mb-3">
+                                            <strong>Onay Notları:</strong>
+                                            <p class="mt-2 p-2 bg-success bg-opacity-10 rounded">@Model.ApprovalNotes</p>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                                    {
+                                        <div class="mb-3">
+                                            <strong>Red Gerekçesi:</strong>
+                                            <p class="mt-2 p-2 bg-danger bg-opacity-10 rounded">@Model.RejectionReason</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Handover Information -->
+                            @if (!string.IsNullOrEmpty(Model.HandoverToPersonName) || !string.IsNullOrEmpty(Model.HandoverNotes))
+                            {
+                                <div class="border rounded p-3 mb-4">
+                                    <h5 class="text-primary mb-3">
+                                        <i class="fas fa-exchange-alt me-2"></i>
+                                        İş Devir Bilgileri
+                                    </h5>
+                                    @if (!string.IsNullOrEmpty(Model.HandoverToPersonName))
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-4"><strong>Devir Kişisi:</strong></div>
+                                            <div class="col-sm-8">@Model.HandoverToPersonName</div>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.HandoverNotes))
+                                    {
+                                        <div class="mb-3">
+                                            <strong>Devir Notları:</strong>
+                                            <p class="mt-2 p-2 bg-light rounded">@Model.HandoverNotes</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Emergency Contact -->
+                            @if (!string.IsNullOrEmpty(Model.EmergencyContact) || !string.IsNullOrEmpty(Model.EmergencyPhone))
+                            {
+                                <div class="border rounded p-3 mb-4">
+                                    <h5 class="text-primary mb-3">
+                                        <i class="fas fa-phone me-2"></i>
+                                        Acil Durum İletişim
+                                    </h5>
+                                    @if (!string.IsNullOrEmpty(Model.EmergencyContact))
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-4"><strong>İletişim Kişisi:</strong></div>
+                                            <div class="col-sm-8">@Model.EmergencyContact</div>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.EmergencyPhone))
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-4"><strong>Telefon:</strong></div>
+                                            <div class="col-sm-8">
+                                                <a href="tel:@Model.EmergencyPhone">@Model.EmergencyPhone</a>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Document -->
+                            @if (!string.IsNullOrEmpty(Model.DocumentPath))
+                            {
+                                <div class="border rounded p-3 mb-4">
+                                    <h5 class="text-primary mb-3">
+                                        <i class="fas fa-file-alt me-2"></i>
+                                        Belge
+                                    </h5>
+                                    <a href="@Model.DocumentPath" class="btn btn-outline-primary" target="_blank">
+                                        <i class="fas fa-download me-1"></i>
+                                        Belgeyi İndir
+                                    </a>
+                                </div>
+                            }
+
+                            <!-- Audit Information -->
+                            <div class="border rounded p-3 mb-4 bg-light">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-history me-2"></i>
+                                    Denetim Bilgileri
+                                </h6>
+                                <div class="row">
+                                    <div class="col-sm-4"><strong>Oluşturulma:</strong></div>
+                                    <div class="col-sm-8">@Model.CreatedAt.ToString("dd MMMM yyyy HH:mm")</div>
+                                </div>
+                                @if (Model.UpdatedAt.HasValue)
+                                {
+                                    <div class="row">
+                                        <div class="col-sm-4"><strong>Güncellenme:</strong></div>
+                                        <div class="col-sm-8">@Model.UpdatedAt.Value.ToString("dd MMMM yyyy HH:mm")</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

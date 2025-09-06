@@ -1,0 +1,355 @@
+@model Dictionary<string, object>
+@{
+    ViewData["Title"] = "Tüm İzin Türleri İstatistikleri";
+    var year = ViewData["Year"];
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-bar"></i> Tüm İzin Türleri İstatistikleri</h2>
+        <div>
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> İzin Türleri Listesi
+            </a>
+        </div>
+    </div>
+
+    <!-- Year Selection -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Yıl Seçimi</h6>
+                    <form method="get" action="@Url.Action("AllStatistics")">
+                        <div class="input-group">
+                            <select name="year" class="form-select">
+                                @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 5; i--)
+                                {
+                                    <option value="@i" selected="@(i.ToString() == year?.ToString())">@i</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            @if (Model.ContainsKey("TotalRequests"))
+            {
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">@Model["TotalRequests"]</h4>
+                                    <p class="card-text">Toplam İzin Talebi</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-file-alt fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.ContainsKey("TotalDays"))
+            {
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">@Model["TotalDays"]</h4>
+                                    <p class="card-text">Toplam İzin Günü</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-calendar-day fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.ContainsKey("MostUsedType"))
+            {
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">@Model["MostUsedType"]</h6>
+                                    <p class="card-text">En Çok Kullanılan</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-trophy fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.ContainsKey("AvgProcessingTime"))
+            {
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">@Model["AvgProcessingTime"]</h4>
+                                    <p class="card-text">Ort. İşlem Süresi (gün)</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mb-4">
+            <!-- Leave Types Usage Chart -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> İzin Türlerine Göre Kullanım</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="leaveTypesChart" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Distribution -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-pie"></i> Genel Durum Dağılımı</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Trend Chart -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line"></i> Aylık Trend Analizi</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="monthlyTrendChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Leave Types Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-table"></i> Detaylı İzin Türleri Raporu</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>İzin Türü</th>
+                                        <th>Toplam Talep</th>
+                                        <th>Onaylanan</th>
+                                        <th>Reddedilen</th>
+                                        <th>Bekleyen</th>
+                                        <th>Toplam Gün</th>
+                                        <th>Onay Oranı</th>
+                                        <th>Ort. Süre</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Sample data rows - in real implementation this would be populated from Model -->
+                                    <tr>
+                                        <td><span class="badge bg-primary">Yıllık İzin</span></td>
+                                        <td>145</td>
+                                        <td><span class="text-success">125</span></td>
+                                        <td><span class="text-danger">8</span></td>
+                                        <td><span class="text-warning">12</span></td>
+                                        <td>1,245</td>
+                                        <td><span class="badge bg-success">86.2%</span></td>
+                                        <td>2.3 gün</td>
+                                        <td>
+                                            <a href="@Url.Action("Statistics", new { id = 1 })" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-chart-bar"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-info">Hastalık İzni</span></td>
+                                        <td>89</td>
+                                        <td><span class="text-success">84</span></td>
+                                        <td><span class="text-danger">2</span></td>
+                                        <td><span class="text-warning">3</span></td>
+                                        <td>567</td>
+                                        <td><span class="badge bg-success">94.4%</span></td>
+                                        <td>1.2 gün</td>
+                                        <td>
+                                            <a href="@Url.Action("Statistics", new { id = 2 })" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-chart-bar"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-warning">Mazeret İzni</span></td>
+                                        <td>34</td>
+                                        <td><span class="text-success">28</span></td>
+                                        <td><span class="text-danger">4</span></td>
+                                        <td><span class="text-warning">2</span></td>
+                                        <td>98</td>
+                                        <td><span class="badge bg-warning">82.4%</span></td>
+                                        <td>3.1 gün</td>
+                                        <td>
+                                            <a href="@Url.Action("Statistics", new { id = 3 })" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-chart-bar"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Bilgi:</strong> @year yılı için herhangi bir izin türü verisi bulunamadı.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Leave Types Usage Chart
+            const leaveTypesCtx = document.getElementById('leaveTypesChart').getContext('2d');
+            new Chart(leaveTypesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Yıllık İzin', 'Hastalık İzni', 'Mazeret İzni', 'Ölüm İzni', 'Evlilik İzni'],
+                    datasets: [{
+                        label: 'Talep Sayısı',
+                        data: [145, 89, 34, 12, 8],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Status Distribution Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Onaylanan', 'Reddedilen', 'Bekleyen'],
+                    datasets: [{
+                        data: [237, 14, 17],
+                        backgroundColor: [
+                            '#28a745',
+                            '#dc3545',
+                            '#ffc107'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Monthly Trend Chart
+            const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+            new Chart(monthlyTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
+                             'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+                    datasets: [
+                        {
+                            label: 'Yıllık İzin',
+                            data: [15, 12, 18, 25, 22, 28, 35, 30, 20, 18, 15, 12],
+                            borderColor: 'rgb(54, 162, 235)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Hastalık İzni',
+                            data: [8, 10, 7, 9, 6, 5, 4, 6, 8, 12, 15, 9],
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Diğer',
+                            data: [3, 2, 4, 3, 5, 4, 6, 5, 3, 2, 3, 4],
+                            borderColor: 'rgb(255, 206, 86)',
+                            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

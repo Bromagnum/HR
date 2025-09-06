@@ -1,0 +1,307 @@
+@model LeaveTypeDetailViewModel
+@{
+    ViewData["Title"] = $"İzin Türü: {Model.Name}";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <div class="d-flex align-items-center">
+                            <div class="color-indicator me-3" style="background-color: @Model.Color; width: 25px; height: 25px; border-radius: 50%; border: 2px solid #dee2e6;"></div>
+                            @Model.Name
+                        </div>
+                    </h5>
+                    <div>
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> Aktif
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-times"></i> Pasif
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Genel Bilgiler</h6>
+                            
+                            <div class="mb-3">
+                                <label class="fw-bold">Açıklama:</label>
+                                <p class="mb-0">@(Model.Description ?? "Açıklama belirtilmemiş")</p>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label class="fw-bold">Maksimum Gün/Yıl:</label>
+                                        <p class="mb-0">
+                                            @if (Model.MaxDaysPerYear == 0)
+                                            {
+                                                <span class="badge bg-info">Sınırsız</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary">@Model.MaxDaysPerYear gün</span>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label class="fw-bold">Bildirim Gün:</label>
+                                        <p class="mb-0">
+                                            <span class="badge bg-warning text-dark">@Model.NotificationDays gün önceden</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="fw-bold">Özellikler:</label>
+                                <div class="mt-2">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @if (Model.RequiresApproval)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-check-circle"></i> Onay Gerekli
+                                            </span>
+                                        }
+                                        @if (Model.RequiresDocument)
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-file-alt"></i> Belge Gerekli
+                                            </span>
+                                        }
+                                        @if (Model.IsPaid)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-money-bill"></i> Ücretli
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-ban"></i> Ücretsiz
+                                            </span>
+                                        }
+                                        @if (Model.CanCarryOver)
+                                        {
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-arrow-right"></i> Devir Edilebilir (@Model.MaxCarryOverDays gün)
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label class="fw-bold">Oluşturulma:</label>
+                                        <p class="mb-0">
+                                            <small class="text-muted">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    @if (Model.UpdatedAt.HasValue)
+                                    {
+                                        <div class="mb-3">
+                                            <label class="fw-bold">Son Güncelleme:</label>
+                                            <p class="mb-0">
+                                                <small class="text-muted">@Model.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")</small>
+                                            </p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">İstatistikler</h6>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="card bg-primary text-white mb-3">
+                                        <div class="card-body text-center">
+                                            <h4 class="mb-0">@Model.TotalLeaves</h4>
+                                            <small>Toplam İzin</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="card bg-warning text-dark mb-3">
+                                        <div class="card-body text-center">
+                                            <h4 class="mb-0">@Model.PendingLeaves</h4>
+                                            <small>Bekleyen</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="card bg-success text-white mb-3">
+                                        <div class="card-body text-center">
+                                            <h4 class="mb-0">@Model.ApprovedLeaves</h4>
+                                            <small>Onaylanan</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="card bg-info text-white mb-3">
+                                        <div class="card-body text-center">
+                                            <h4 class="mb-0">@Model.TotalDaysUsed</h4>
+                                            <small>Toplam Gün</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a href="@Url.Action("Statistics", new { id = Model.Id })" class="btn btn-outline-primary">
+                                    <i class="fas fa-chart-bar"></i> Detaylı İstatistikler
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group">
+                        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Düzenle
+                        </a>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-list"></i> Listeye Dön
+                        </a>
+                        <button type="button" class="btn btn-@(Model.IsActive ? "outline-secondary" : "outline-success")" 
+                                onclick="toggleStatus(@Model.Id, '@Model.Name')">
+                            <i class="fas fa-@(Model.IsActive ? "ban" : "check")"></i> 
+                            @(Model.IsActive ? "Pasif Yap" : "Aktif Yap")
+                        </button>
+                        <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-outline-danger">
+                            <i class="fas fa-trash"></i> Sil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Recent Leaves -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-clock text-info"></i> Son İzinler
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentLeaves?.Any() == true)
+                    {
+                        @foreach (var leave in Model.RecentLeaves.Take(5))
+                        {
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                <div>
+                                    <small class="fw-bold">@leave.PersonName</small><br>
+                                    <small class="text-muted">@leave.StartDate.ToString("dd.MM.yyyy") - @leave.EndDate.ToString("dd.MM.yyyy")</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-@(leave.Status == DAL.Entities.LeaveStatus.Approved ? "success" : 
+                                                           leave.Status == DAL.Entities.LeaveStatus.Pending ? "warning" : 
+                                                           leave.Status == DAL.Entities.LeaveStatus.Rejected ? "danger" : "secondary")">
+                                        @leave.StatusText
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                        <div class="text-center mt-3">
+                            <a href="@Url.Action("Index", "Leave", new { leaveTypeId = Model.Id })" class="btn btn-sm btn-outline-primary">
+                                Tümünü Gör
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                            <p>Henüz izin kaydı yok</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt text-warning"></i> Hızlı İşlemler
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Create", "Leave", new { leaveTypeId = Model.Id })" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Yeni İzin Talebi
+                        </a>
+                        <a href="@Url.Action("Index", "LeaveBalance", new { leaveTypeId = Model.Id })" class="btn btn-info btn-sm">
+                            <i class="fas fa-balance-scale"></i> Bakiyeleri Görüntüle
+                        </a>
+                        <a href="@Url.Action("Index", "Leave", new { leaveTypeId = Model.Id, status = 1 })" class="btn btn-warning btn-sm">
+                            <i class="fas fa-clock"></i> Bekleyen İzinler
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleStatus(id, name) {
+        if (confirm(`"${name}" izin türünün durumunu değiştirmek istediğinizden emin misiniz?`)) {
+            fetch('@Url.Action("ToggleStatus")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: `id=${id}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Hata: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Bir hata oluştu.');
+            });
+        }
+    }
+</script>
+
+<style>
+    .color-indicator {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .badge {
+        font-size: 0.8rem;
+    }
+</style>

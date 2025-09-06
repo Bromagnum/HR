@@ -1,0 +1,223 @@
+
+@model IEnumerable<MVC.Models.LeaveTypeListViewModel>
+@{
+    ViewData["Title"] = ViewData["Title"]?.ToString() ?? "İzin Türleri";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check text-primary me-2"></i>
+                        @ViewData["Title"]
+                    </h5>
+                    <div class="btn-group">
+                        <a href="@Url.Action("Create")" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Yeni İzin Türü
+                        </a>
+                        @if (ViewData["ShowInactiveButton"] == null)
+                        {
+                            <a href="@Url.Action("Active")" class="btn btn-info btn-sm">
+                                <i class="fas fa-filter"></i> Sadece Aktif
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Index")" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-list"></i> Tümünü Göster
+                            </a>
+                        }
+                        <a href="@Url.Action("AllStatistics")" class="btn btn-primary btn-sm">
+                            <i class="fas fa-chart-bar"></i> İstatistikler
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><i class="fas fa-palette"></i></th>
+                                        <th>İzin Türü</th>
+                                        <th>Açıklama</th>
+                                        <th class="text-center">Max Gün/Yıl</th>
+                                        <th class="text-center">Özellikler</th>
+                                        <th class="text-center">Toplam İzin</th>
+                                        <th class="text-center">Aktif İzin</th>
+                                        <th class="text-center">Durum</th>
+                                        <th class="text-center">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr class="@(item.IsActive ? "" : "table-secondary")">
+                                            <td>
+                                                <div class="color-indicator" style="background-color: @item.Color; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #dee2e6;"></div>
+                                            </td>
+                                            <td>
+                                                <strong>@item.Name</strong>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">@item.Description</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">@item.MaxDaysPerYear</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                                    @if (item.RequiresApproval)
+                                                    {
+                                                        <span class="badge bg-warning text-dark" title="Onay Gerekli">
+                                                            <i class="fas fa-check-circle"></i>
+                                                        </span>
+                                                    }
+                                                    @if (item.RequiresDocument)
+                                                    {
+                                                        <span class="badge bg-danger" title="Belge Gerekli">
+                                                            <i class="fas fa-file-alt"></i>
+                                                        </span>
+                                                    }
+                                                    @if (item.IsPaid)
+                                                    {
+                                                        <span class="badge bg-success" title="Ücretli">
+                                                            <i class="fas fa-money-bill"></i>
+                                                        </span>
+                                                    }
+                                                    @if (item.CanCarryOver)
+                                                    {
+                                                        <span class="badge bg-primary" title="Devir Edilebilir">
+                                                            <i class="fas fa-arrow-right"></i>
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-secondary">@item.TotalLeaves</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary">@item.ActiveLeaves</span>
+                                            </td>
+                                            <td class="text-center">
+                                                @if (item.IsActive)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check"></i> Aktif
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-times"></i> Pasif
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", new { id = item.Id })" 
+                                                       class="btn btn-outline-info btn-sm" 
+                                                       title="Detaylar">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", new { id = item.Id })" 
+                                                       class="btn btn-outline-warning btn-sm" 
+                                                       title="Düzenle">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Statistics", new { id = item.Id })" 
+                                                       class="btn btn-outline-primary btn-sm" 
+                                                       title="İstatistikler">
+                                                        <i class="fas fa-chart-bar"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-@(item.IsActive ? "secondary" : "success") btn-sm" 
+                                                            onclick="toggleStatus(@item.Id, '@item.Name')"
+                                                            title="@(item.IsActive ? "Pasif Yap" : "Aktif Yap")">
+                                                        <i class="fas fa-@(item.IsActive ? "ban" : "check")"></i>
+                                                    </button>
+                                                    <a href="@Url.Action("Delete", new { id = item.Id })" 
+                                                       class="btn btn-outline-danger btn-sm" 
+                                                       title="Sil">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Henüz İzin Türü Bulunmuyor</h5>
+                            <p class="text-muted">İlk izin türünüzü oluşturmak için yukarıdaki "Yeni İzin Türü" butonunu kullanın.</p>
+                            <a href="@Url.Action("Create")" class="btn btn-success">
+                                <i class="fas fa-plus"></i> İlk İzin Türünü Oluştur
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleStatus(id, name) {
+        if (confirm(`"${name}" izin türünün durumunu değiştirmek istediğinizden emin misiniz?`)) {
+            fetch('@Url.Action("ToggleStatus")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: `id=${id}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Hata: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Bir hata oluştu.');
+            });
+        }
+    }
+</script>
+
+<style>
+    .color-indicator {
+        display: inline-block;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.25rem;
+        margin-right: 2px;
+    }
+    
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+    
+    .badge {
+        font-size: 0.8rem;
+    }
+</style>

@@ -1,0 +1,252 @@
+@model Dictionary<string, object>
+@{
+    ViewData["Title"] = "İzin Türü İstatistikleri";
+    var leaveTypeId = ViewData["LeaveTypeId"];
+    var year = ViewData["Year"];
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-bar"></i> İzin Türü İstatistikleri</h2>
+        <div>
+            <a href="@Url.Action("Details", new { id = leaveTypeId })" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <!-- Year Selection -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Yıl Seçimi</h6>
+                    <form method="get" action="@Url.Action("Statistics")">
+                        <input type="hidden" name="id" value="@leaveTypeId" />
+                        <div class="input-group">
+                            <select name="year" class="form-select">
+                                @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 5; i--)
+                                {
+                                    <option value="@i" selected="@(i.ToString() == year?.ToString())">@i</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            @if (Model.ContainsKey("TotalRequests"))
+            {
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">@Model["TotalRequests"]</h4>
+                                    <p class="card-text">Toplam Talep</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-file-alt fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.ContainsKey("ApprovedRequests"))
+            {
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">@Model["ApprovedRequests"]</h4>
+                                    <p class="card-text">Onaylanan</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-check fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.ContainsKey("RejectedRequests"))
+            {
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">@Model["RejectedRequests"]</h4>
+                                    <p class="card-text">Reddedilen</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-times fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.ContainsKey("PendingRequests"))
+            {
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">@Model["PendingRequests"]</h4>
+                                    <p class="card-text">Bekleyen</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row">
+            <!-- Monthly Distribution Chart -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line"></i> Aylık Dağılım</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="monthlyChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Distribution Chart -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-pie"></i> Durum Dağılımı</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Usage Table -->
+        @if (Model.ContainsKey("DepartmentUsage"))
+        {
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-building"></i> Departmanlara Göre Kullanım</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Departman</th>
+                                            <th>Toplam Talep</th>
+                                            <th>Onaylanan</th>
+                                            <th>Reddedilen</th>
+                                            <th>Bekleyen</th>
+                                            <th>Onay Oranı</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Department data would be rendered here -->
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">
+                                                Departman verileri yükleniyor...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Bilgi:</strong> @year yılı için bu izin türünde herhangi bir veri bulunamadı.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Monthly Distribution Chart
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
+                             'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+                    datasets: [{
+                        label: 'İzin Talepleri',
+                        data: [12, 19, 15, 25, 22, 20, 18, 24, 16, 14, 18, 20], // Sample data
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Status Distribution Chart  
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Onaylanan', 'Reddedilen', 'Bekleyen'],
+                    datasets: [{
+                        data: [@(Model.ContainsKey("ApprovedRequests") ? Model["ApprovedRequests"] : 0),
+                               @(Model.ContainsKey("RejectedRequests") ? Model["RejectedRequests"] : 0),
+                               @(Model.ContainsKey("PendingRequests") ? Model["PendingRequests"] : 0)],
+                        backgroundColor: [
+                            '#28a745',
+                            '#dc3545', 
+                            '#ffc107'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        });
+    </script>
+}

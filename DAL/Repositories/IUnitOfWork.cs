@@ -7,6 +7,10 @@ public interface IUnitOfWork : IDisposable
     IEducationRepository Educations { get; }
     IQualificationRepository Qualifications { get; }
     IPositionRepository Positions { get; }
+    IWorkLogRepository WorkLogs { get; }
+    ILeaveTypeRepository LeaveTypes { get; }
+    ILeaveRepository Leaves { get; }
+    ILeaveBalanceRepository LeaveBalances { get; }
     
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();

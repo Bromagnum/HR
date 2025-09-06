@@ -1,0 +1,555 @@
+using AutoMapper;
+using BLL.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using MVC.Models;
+using DAL.Entities;
+
+namespace MVC.Controllers;
+
+public class LeaveController : Controller
+{
+    private readonly ILeaveService _leaveService;
+    private readonly ILeaveTypeService _leaveTypeService;
+    private readonly IPersonService _personService;
+    private readonly IDepartmentService _departmentService;
+    private readonly IMapper _mapper;
+
+    public LeaveController(
+        ILeaveService leaveService,
+        ILeaveTypeService leaveTypeService,
+        IPersonService personService,
+        IDepartmentService departmentService,
+        IMapper mapper)
+    {
+        _leaveService = leaveService;
+        _leaveTypeService = leaveTypeService;
+        _personService = personService;
+        _departmentService = departmentService;
+        _mapper = mapper;
+    }
+
+    // GET: Leave
+    public async Task<IActionResult> Index(LeaveFilterViewModel filter)
+    {
+        // Prepare filter dropdowns
+        await PrepareFilterViewData(filter);
+
+        var filterDto = _mapper.Map<BLL.DTOs.LeaveFilterDto>(filter);
+        var result = string.IsNullOrEmpty(filter.SearchTerm) && !filter.PersonId.HasValue && !filter.LeaveTypeId.HasValue && !filter.Status.HasValue
+            ? await _leaveService.GetAllAsync()
+            : await _leaveService.GetFilteredAsync(filterDto);
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return View(new List<LeaveListViewModel>());
+        }
+
+        var viewModels = _mapper.Map<List<LeaveListViewModel>>(result.Data);
+        ViewData["Filter"] = filter;
+        return View(viewModels);
+    }
+
+    // GET: Leave/PendingApprovals
+    public async Task<IActionResult> PendingApprovals()
+    {
+        var result = await _leaveService.GetPendingApprovalsAsync();
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return View("Index", new List<LeaveListViewModel>());
+        }
+
+        var viewModels = _mapper.Map<List<LeaveListViewModel>>(result.Data);
+        ViewData["Title"] = "Onay Bekleyen İzinler";
+        return View("Index", viewModels);
+    }
+
+    // GET: Leave/MyLeaves
+    public async Task<IActionResult> MyLeaves(int? year)
+    {
+        // In a real application, you would get the current user's ID from authentication
+        int currentUserId = 1; // TODO: Get from current user
+        
+        if (year == null) year = DateTime.Now.Year;
+
+        var result = await _leaveService.GetLeavesByPersonAsync(currentUserId, year);
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return View("Index", new List<LeaveListViewModel>());
+        }
+
+        var viewModels = _mapper.Map<List<LeaveListViewModel>>(result.Data);
+        ViewData["Title"] = $"Benim İzinlerim ({year})";
+        ViewData["Year"] = year;
+        return View("Index", viewModels);
+    }
+
+    // GET: Leave/Calendar
+    public async Task<IActionResult> Calendar(DateTime? startDate, DateTime? endDate, int? departmentId)
+    {
+        if (startDate == null) startDate = DateTime.Today.AddMonths(-1);
+        if (endDate == null) endDate = DateTime.Today.AddMonths(2);
+
+        var result = await _leaveService.GetCalendarDataAsync(startDate.Value, endDate.Value, departmentId);
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return View(new List<LeaveCalendarViewModel>());
+        }
+
+        var viewModels = _mapper.Map<List<LeaveCalendarViewModel>>(result.Data);
+        
+        // Prepare department dropdown
+        var departmentsResult = await _departmentService.GetAllAsync();
+        if (departmentsResult.IsSuccess)
+        {
+            ViewBag.Departments = new SelectList(departmentsResult.Data, "Id", "Name", departmentId);
+        }
+
+        ViewData["StartDate"] = startDate.Value.ToString("yyyy-MM-dd");
+        ViewData["EndDate"] = endDate.Value.ToString("yyyy-MM-dd");
+        ViewData["DepartmentId"] = departmentId;
+
+        return View(viewModels);
+    }
+
+    // GET: Leave/Details/5
+    public async Task<IActionResult> Details(int id)
+    {
+        var result = await _leaveService.GetByIdAsync(id);
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return RedirectToAction(nameof(Index));
+        }
+
+        var viewModel = _mapper.Map<LeaveDetailViewModel>(result.Data);
+        return View(viewModel);
+    }
+
+    // GET: Leave/Create
+    public async Task<IActionResult> Create()
+    {
+        var viewModel = new LeaveCreateViewModel();
+        await PrepareCreateEditViewData(viewModel);
+        return View(viewModel);
+    }
+
+    // POST: Leave/Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(LeaveCreateViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            await PrepareCreateEditViewData(viewModel);
+            return View(viewModel);
+        }
+
+        var dto = _mapper.Map<BLL.DTOs.LeaveCreateDto>(viewModel);
+        var result = await _leaveService.CreateAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            await PrepareCreateEditViewData(viewModel);
+            return View(viewModel);
+        }
+
+        TempData["Success"] = "İzin talebi başarıyla oluşturuldu.";
+        return RedirectToAction(nameof(Details), new { id = result.Data?.Id });
+    }
+
+    // GET: Leave/Edit/5
+    public async Task<IActionResult> Edit(int id)
+    {
+        var result = await _leaveService.GetByIdAsync(id);
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Only allow editing pending leaves
+        if (result.Data?.Status != LeaveStatus.Pending)
+        {
+            TempData["Error"] = "Sadece bekleyen izinler düzenlenebilir.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var viewModel = _mapper.Map<LeaveEditViewModel>(result.Data);
+        await PrepareCreateEditViewData(viewModel);
+        return View(viewModel);
+    }
+
+    // POST: Leave/Edit/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, LeaveEditViewModel viewModel)
+    {
+        if (id != viewModel.Id)
+        {
+            TempData["Error"] = "Geçersiz istek.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await PrepareCreateEditViewData(viewModel);
+            return View(viewModel);
+        }
+
+        var dto = _mapper.Map<BLL.DTOs.LeaveUpdateDto>(viewModel);
+        var result = await _leaveService.UpdateAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            await PrepareCreateEditViewData(viewModel);
+            return View(viewModel);
+        }
+
+        TempData["Success"] = "İzin talebi başarıyla güncellendi.";
+        return RedirectToAction(nameof(Details), new { id = viewModel.Id });
+    }
+
+    // GET: Leave/Delete/5
+    public async Task<IActionResult> Delete(int id)
+    {
+        var result = await _leaveService.GetByIdAsync(id);
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return RedirectToAction(nameof(Index));
+        }
+
+        var viewModel = _mapper.Map<LeaveDetailViewModel>(result.Data);
+        return View(viewModel);
+    }
+
+    // POST: Leave/Delete/5
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var result = await _leaveService.DeleteAsync(id);
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return RedirectToAction(nameof(Delete), new { id });
+        }
+
+        TempData["Success"] = "İzin talebi başarıyla silindi.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    // GET: Leave/Approve/5
+    public async Task<IActionResult> Approve(int id)
+    {
+        var result = await _leaveService.GetByIdAsync(id);
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (result.Data?.Status != LeaveStatus.Pending)
+        {
+            TempData["Error"] = "Sadece bekleyen izinler onaylanabilir.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var viewModel = new LeaveApprovalViewModel
+        {
+            Id = result.Data.Id,
+            PersonName = result.Data.PersonName,
+            LeaveTypeName = result.Data.LeaveTypeName,
+            DateRange = $"{result.Data.StartDate:dd.MM.yyyy} - {result.Data.EndDate:dd.MM.yyyy}",
+            TotalDays = result.Data.TotalDays,
+            Reason = result.Data.Reason,
+            RemainingBalance = result.Data.RemainingBalance,
+            ApprovedById = 1 // TODO: Get current user ID
+        };
+
+        return View(viewModel);
+    }
+
+    // POST: Leave/Approve/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Approve(int id, LeaveApprovalViewModel viewModel)
+    {
+        if (id != viewModel.Id)
+        {
+            TempData["Error"] = "Geçersiz istek.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(viewModel);
+        }
+
+        var dto = _mapper.Map<BLL.DTOs.LeaveApprovalDto>(viewModel);
+        dto.IsApproved = viewModel.IsApproved;
+
+        var result = viewModel.IsApproved 
+            ? await _leaveService.ApproveLeaveAsync(dto)
+            : await _leaveService.RejectLeaveAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return View(viewModel);
+        }
+
+        var action = viewModel.IsApproved ? "onaylandı" : "reddedildi";
+        TempData["Success"] = $"İzin talebi başarıyla {action}.";
+        return RedirectToAction(nameof(Details), new { id = viewModel.Id });
+    }
+
+    // POST: Leave/Cancel/5
+    [HttpPost]
+    public async Task<IActionResult> Cancel(int id)
+    {
+        int currentUserId = 1; // TODO: Get from current user
+
+        var result = await _leaveService.CancelAsync(id, currentUserId);
+        if (!result.IsSuccess)
+        {
+            return Json(new { success = false, message = result.Message });
+        }
+
+        return Json(new { success = true, message = "İzin talebi başarıyla iptal edildi." });
+    }
+
+    // GET: Leave/Statistics
+    public async Task<IActionResult> Statistics(int? personId, int? departmentId, int? year)
+    {
+        if (year == null) year = DateTime.Now.Year;
+
+        var result = await _leaveService.GetLeaveStatisticsAsync(personId, departmentId, year);
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return View(new Dictionary<string, object>());
+        }
+
+        // Prepare dropdowns
+        var personsResult = await _personService.GetAllAsync();
+        if (personsResult.IsSuccess)
+        {
+            ViewBag.Persons = new SelectList(personsResult.Data, "Id", "FullName", personId);
+        }
+
+        var departmentsResult = await _departmentService.GetAllAsync();
+        if (departmentsResult.IsSuccess)
+        {
+            ViewBag.Departments = new SelectList(departmentsResult.Data, "Id", "Name", departmentId);
+        }
+
+        ViewData["PersonId"] = personId;
+        ViewData["DepartmentId"] = departmentId;
+        ViewData["Year"] = year;
+
+        return View(result.Data);
+    }
+
+    // GET: Leave/Upcoming
+    public async Task<IActionResult> Upcoming(int days = 30)
+    {
+        var result = await _leaveService.GetUpcomingLeavesAsync(days);
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return View("Index", new List<LeaveListViewModel>());
+        }
+
+        var viewModels = _mapper.Map<List<LeaveListViewModel>>(result.Data);
+        ViewData["Title"] = $"Yaklaşan İzinler ({days} gün)";
+        ViewData["Days"] = days;
+        return View("Index", viewModels);
+    }
+
+    // AJAX: Calculate working days
+    [HttpPost]
+    public async Task<IActionResult> CalculateWorkingDays(DateTime startDate, DateTime endDate)
+    {
+        var result = await _leaveService.CalculateWorkingDaysAsync(startDate, endDate);
+        if (!result.IsSuccess)
+        {
+            return Json(new { success = false, message = result.Message });
+        }
+
+        return Json(new { success = true, workingDays = result.Data });
+    }
+
+    // AJAX: Check conflicts
+    [HttpPost]
+    public async Task<IActionResult> CheckConflicts(int personId, DateTime startDate, DateTime endDate, int? excludeLeaveId)
+    {
+        var result = await _leaveService.CheckConflictsAsync(personId, startDate, endDate, excludeLeaveId);
+        if (!result.IsSuccess)
+        {
+            return Json(new { success = false, message = result.Message });
+        }
+
+        var hasConflicts = result.Data.Any();
+        var conflicts = _mapper.Map<List<LeaveListViewModel>>(result.Data);
+
+        return Json(new { 
+            success = true, 
+            hasConflicts = hasConflicts, 
+            conflicts = conflicts 
+        });
+    }
+
+    // AJAX: Get remaining balance
+    [HttpPost]
+    public async Task<IActionResult> GetRemainingBalance(int personId, int leaveTypeId, int year)
+    {
+        var result = await _leaveService.GetRemainingBalanceAsync(personId, leaveTypeId, year);
+        if (!result.IsSuccess)
+        {
+            return Json(new { success = false, message = result.Message });
+        }
+
+        return Json(new { success = true, remainingBalance = result.Data });
+    }
+
+    // Debug endpoint
+    public async Task<IActionResult> Debug()
+    {
+        try
+        {
+            var allResult = await _leaveService.GetAllAsync();
+            var pendingResult = await _leaveService.GetPendingApprovalsAsync();
+
+            var debugInfo = new
+            {
+                AllLeavesCount = allResult.IsSuccess ? allResult.Data.Count() : 0,
+                AllLeavesSuccess = allResult.IsSuccess,
+                AllLeavesMessage = allResult.Message,
+                PendingLeavesCount = pendingResult.IsSuccess ? pendingResult.Data.Count() : 0,
+                PendingLeavesSuccess = pendingResult.IsSuccess,
+                PendingLeavesMessage = pendingResult.Message,
+                AllLeaves = allResult.IsSuccess ? allResult.Data.Take(5) : null,
+                PendingLeaves = pendingResult.IsSuccess ? pendingResult.Data.Take(5) : null
+            };
+
+            return Json(debugInfo);
+        }
+        catch (Exception ex)
+        {
+            return Json(new { Error = ex.Message, StackTrace = ex.StackTrace });
+        }
+    }
+
+    #region Private Helper Methods
+
+    private async Task PrepareFilterViewData(LeaveFilterViewModel filter)
+    {
+        // Persons dropdown
+        var personsResult = await _personService.GetAllAsync();
+        if (personsResult.IsSuccess)
+        {
+            filter.Persons = personsResult.Data.Select(p => new SelectListItem
+            {
+                Value = p.Id.ToString(),
+                Text = $"{p.FirstName} {p.LastName}",
+                Selected = p.Id == filter.PersonId
+            }).Prepend(new SelectListItem { Value = "", Text = "Tüm Personel" });
+        }
+
+        // LeaveTypes dropdown
+        var leaveTypesResult = await _leaveTypeService.GetActiveAsync();
+        if (leaveTypesResult.IsSuccess)
+        {
+            filter.LeaveTypes = leaveTypesResult.Data.Select(lt => new SelectListItem
+            {
+                Value = lt.Id.ToString(),
+                Text = lt.Name,
+                Selected = lt.Id == filter.LeaveTypeId
+            }).Prepend(new SelectListItem { Value = "", Text = "Tüm İzin Türleri" });
+        }
+
+        // Departments dropdown
+        var departmentsResult = await _departmentService.GetAllAsync();
+        if (departmentsResult.IsSuccess)
+        {
+            filter.Departments = departmentsResult.Data.Select(d => new SelectListItem
+            {
+                Value = d.Id.ToString(),
+                Text = d.Name,
+                Selected = d.Id == filter.DepartmentId
+            }).Prepend(new SelectListItem { Value = "", Text = "Tüm Departmanlar" });
+        }
+
+        // Status dropdown
+        filter.StatusOptions = Enum.GetValues<LeaveStatus>().Select(s => new SelectListItem
+        {
+            Value = ((int)s).ToString(),
+            Text = GetStatusText(s),
+            Selected = s == filter.Status
+        }).Prepend(new SelectListItem { Value = "", Text = "Tüm Durumlar" });
+    }
+
+    private async Task PrepareCreateEditViewData(dynamic viewModel)
+    {
+        // Initialize empty lists to prevent null reference errors
+        viewModel.Persons = new List<SelectListItem>();
+        viewModel.LeaveTypes = new List<SelectListItem>();
+        viewModel.HandoverPersons = new List<SelectListItem> 
+        { 
+            new SelectListItem { Value = "", Text = "Devir Kişisi Seçin" } 
+        };
+
+        // Persons dropdown
+        var personsResult = await _personService.GetAllAsync();
+        if (personsResult.IsSuccess && personsResult.Data != null)
+        {
+            viewModel.Persons = personsResult.Data.Select(p => new SelectListItem
+            {
+                Value = p.Id.ToString(),
+                Text = $"{p.FirstName} {p.LastName}"
+            }).ToList();
+
+            // Handover persons dropdown (same as persons but with empty option)
+            viewModel.HandoverPersons = personsResult.Data.Select(p => new SelectListItem
+            {
+                Value = p.Id.ToString(),
+                Text = $"{p.FirstName} {p.LastName}"
+            }).Prepend(new SelectListItem { Value = "", Text = "Devir Kişisi Seçin" }).ToList();
+        }
+
+        // LeaveTypes dropdown
+        var leaveTypesResult = await _leaveTypeService.GetActiveAsync();
+        if (leaveTypesResult.IsSuccess && leaveTypesResult.Data != null)
+        {
+            viewModel.LeaveTypes = leaveTypesResult.Data.Select(lt => new SelectListItem
+            {
+                Value = lt.Id.ToString(),
+                Text = lt.Name
+            }).ToList();
+        }
+    }
+
+    private static string GetStatusText(LeaveStatus status)
+    {
+        return status switch
+        {
+            LeaveStatus.Pending => "Onay Bekliyor",
+            LeaveStatus.Approved => "Onaylandı",
+            LeaveStatus.Rejected => "Reddedildi",
+            LeaveStatus.Cancelled => "İptal Edildi",
+            LeaveStatus.InProgress => "Devam Ediyor",
+            LeaveStatus.Completed => "Tamamlandı",
+            _ => status.ToString()
+        };
+    }
+
+    #endregion
+}

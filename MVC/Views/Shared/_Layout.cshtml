@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MVC.styles.css" asp-append-version="true" />
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
     <header>
@@ -121,6 +123,96 @@
                                 </a></li>
                             </ul>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-clock"></i> Çalışma Saati
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="Index">
+                                    <i class="fas fa-list"></i> Çalışma Kayıtları
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="CheckIn">
+                                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="Active">
+                                    <i class="fas fa-play-circle"></i> Aktif Kayıtlar
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Raporlar</h6></li>
+                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="TimeSheet">
+                                    <i class="fas fa-table"></i> Zaman Çizelgesi
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="OvertimeReport">
+                                    <i class="fas fa-clock"></i> Mesai Raporu
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="LateArrivalReport">
+                                    <i class="fas fa-exclamation-triangle"></i> Geç Gelme Raporu
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="PendingApprovals">
+                                    <i class="fas fa-hourglass-half"></i> Onay Bekleyenler
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="Create">
+                                    <i class="fas fa-plus"></i> Yeni Kayıt Ekle
+                                </a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-calendar-check"></i> İzin Yönetimi
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><h6 class="dropdown-header">İzin Türleri</h6></li>
+                                <li><a class="dropdown-item" asp-controller="LeaveType" asp-action="Index">
+                                    <i class="fas fa-list"></i> İzin Türleri
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="LeaveType" asp-action="Active">
+                                    <i class="fas fa-check-circle"></i> Aktif İzin Türleri
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="LeaveType" asp-action="Create">
+                                    <i class="fas fa-plus"></i> Yeni İzin Türü
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">İzin Talepleri</h6></li>
+                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="Index">
+                                    <i class="fas fa-calendar-alt"></i> Tüm İzinler
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="MyLeaves">
+                                    <i class="fas fa-user-clock"></i> Benim İzinlerim
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="PendingApprovals">
+                                    <i class="fas fa-hourglass-half"></i> Onay Bekleyenler
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="Calendar">
+                                    <i class="fas fa-calendar"></i> İzin Takvimi
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="Create">
+                                    <i class="fas fa-plus"></i> Yeni İzin Talebi
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Bakiye Yönetimi</h6></li>
+                                <li><a class="dropdown-item" asp-controller="LeaveBalance" asp-action="Index">
+                                    <i class="fas fa-balance-scale"></i> İzin Bakiyeleri
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="LeaveBalance" asp-action="LowBalanceAlerts">
+                                    <i class="fas fa-exclamation-triangle"></i> Düşük Bakiye Uyarıları
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="LeaveBalance" asp-action="Adjust">
+                                    <i class="fas fa-edit"></i> Bakiye Düzeltme
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Raporlar</h6></li>
+                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="Statistics">
+                                    <i class="fas fa-chart-bar"></i> İzin İstatistikleri
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="LeaveBalance" asp-action="Statistics">
+                                    <i class="fas fa-chart-pie"></i> Bakiye İstatistikleri
+                                </a></li>
+                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="Upcoming">
+                                    <i class="fas fa-calendar-week"></i> Yaklaşan İzinler
+                                </a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -139,6 +231,8 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SheetJS for Excel export functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

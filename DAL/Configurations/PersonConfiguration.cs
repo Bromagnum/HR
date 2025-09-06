@@ -79,5 +79,26 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
             .WithMany(pos => pos.Persons)
             .HasForeignKey(p => p.PositionId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Leave Relationships
+        builder.HasMany(p => p.Leaves)
+            .WithOne(l => l.Person)
+            .HasForeignKey(l => l.PersonId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(p => p.ApprovedLeaves)
+            .WithOne(l => l.ApprovedBy)
+            .HasForeignKey(l => l.ApprovedById)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasMany(p => p.HandoverLeaves)
+            .WithOne(l => l.HandoverToPerson)
+            .HasForeignKey(l => l.HandoverToPersonId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasMany(p => p.LeaveBalances)
+            .WithOne(lb => lb.Person)
+            .HasForeignKey(lb => lb.PersonId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

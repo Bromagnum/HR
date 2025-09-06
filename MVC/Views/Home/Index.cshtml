@@ -52,6 +52,48 @@
         </div>
     </div>
     
+    <!-- WorkLog Quick Access Row -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-sign-in-alt fa-3x text-success mb-3"></i>
+                    <h5 class="card-title text-success">Giriş Yap</h5>
+                    <p class="card-text">İş günü başlat - giriş kaydı oluştur</p>
+                    <a asp-controller="WorkLog" asp-action="CheckIn" class="btn btn-success">
+                        <i class="fas fa-play me-1"></i>Başlat
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title text-primary">Çalışma Takibi</h5>
+                    <p class="card-text">Çalışma saatleri kayıtları ve raporlar</p>
+                    <a asp-controller="WorkLog" asp-action="Index" class="btn btn-primary">
+                        <i class="fas fa-list me-1"></i>Kayıtlar
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-info">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
+                    <h5 class="card-title text-info">Zaman Raporları</h5>
+                    <p class="card-text">Mesai, geç gelme ve performans raporları</p>
+                    <a asp-controller="WorkLog" asp-action="TimeSheet" class="btn btn-info">
+                        <i class="fas fa-table me-1"></i>Raporlar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="row mt-4">
         <div class="col-md-6 offset-md-3">
             <div class="card">
@@ -67,8 +109,11 @@
                         <a asp-controller="Education" asp-action="Create" class="btn btn-outline-warning mb-2">
                             <i class="fas fa-graduation-cap"></i> Yeni Eğitim Ekle
                         </a>
-                        <a asp-controller="Position" asp-action="Create" class="btn btn-outline-info">
+                        <a asp-controller="Position" asp-action="Create" class="btn btn-outline-info mb-2">
                             <i class="fas fa-briefcase"></i> Yeni Pozisyon Ekle
+                        </a>
+                        <a asp-controller="WorkLog" asp-action="CheckIn" class="btn btn-outline-success">
+                            <i class="fas fa-clock"></i> Giriş Yap / Çalışma Başlat
                         </a>
                     </div>
                 </div>

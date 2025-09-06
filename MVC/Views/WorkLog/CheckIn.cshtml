@@ -1,0 +1,317 @@
+@model MVC.Models.WorkLogCheckInViewModel
+@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        İş Günü Başlat - Giriş Yap
+                    </h3>
+                </div>
+
+                <form asp-action="CheckIn" method="post" class="needs-validation" novalidate>
+                    <div class="card-body">
+                        <!-- Current Time Display -->
+                        <div class="alert alert-info text-center mb-4">
+                            <h4 class="mb-2">
+                                <i class="fas fa-clock me-2"></i>
+                                <span id="currentTime">--:--:--</span>
+                            </h4>
+                            <p class="mb-0">
+                                <i class="fas fa-calendar me-1"></i>
+                                <span id="currentDate">--</span>
+                            </p>
+                        </div>
+
+                        <!-- Personel Selection -->
+                        <div class="mb-3">
+                            <label asp-for="PersonId" class="form-label required">
+                                <i class="fas fa-user me-1"></i>@Html.DisplayNameFor(model => model.PersonId)
+                            </label>
+                            <select asp-for="PersonId" class="form-select" asp-items="Model.PersonSelectList" required>
+                                <option value="">-- Personel Seçiniz --</option>
+                            </select>
+                            <span asp-validation-for="PersonId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Start Time -->
+                        <div class="mb-3">
+                            <label asp-for="StartTime" class="form-label required">
+                                <i class="fas fa-clock me-1"></i>@Html.DisplayNameFor(model => model.StartTime)
+                            </label>
+                            <div class="input-group">
+                                <input asp-for="StartTime" type="time" class="form-control" required />
+                                <button type="button" class="btn btn-outline-secondary" onclick="setCurrentTime()">
+                                    <i class="fas fa-clock"></i> Şimdi
+                                </button>
+                            </div>
+                            <span asp-validation-for="StartTime" class="text-danger"></span>
+                            <div class="form-text">Mevcut saat otomatik olarak dolduruldu. Gerekirse değiştirebilirsiniz.</div>
+                        </div>
+
+                        <!-- Work Type -->
+                        <div class="mb-3">
+                            <label asp-for="WorkType" class="form-label required">
+                                <i class="fas fa-briefcase me-1"></i>@Html.DisplayNameFor(model => model.WorkType)
+                            </label>
+                            <select asp-for="WorkType" class="form-select" asp-items="Model.WorkTypeSelectList" required>
+                                <option value="">-- Çalışma Türü Seçiniz --</option>
+                            </select>
+                            <span asp-validation-for="WorkType" class="text-danger"></span>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="mb-3">
+                            <label asp-for="Location" class="form-label">
+                                <i class="fas fa-map-marker-alt me-1"></i>@Html.DisplayNameFor(model => model.Location)
+                            </label>
+                            <input asp-for="Location" class="form-control" placeholder="Çalışma lokasyonu (opsiyonel)" />
+                            <span asp-validation-for="Location" class="text-danger"></span>
+                            <div class="form-text">Örn: Ana Ofis, Ev, İstanbul Şubesi, Müşteri Ofisi</div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">
+                                <i class="fas fa-sticky-note me-1"></i>@Html.DisplayNameFor(model => model.Notes)
+                            </label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Günlük plan, notlar veya özel durumlar..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <!-- Quick Work Type Buttons -->
+                        <div class="mb-3">
+                            <label class="form-label">Hızlı Seçim:</label>
+                            <div class="btn-group d-flex" role="group">
+                                <input type="radio" class="btn-check" name="quickWorkType" id="quickOffice" value="Office">
+                                <label class="btn btn-outline-primary" for="quickOffice">
+                                    <i class="fas fa-building me-1"></i>Ofis
+                                </label>
+
+                                <input type="radio" class="btn-check" name="quickWorkType" id="quickRemote" value="Remote">
+                                <label class="btn btn-outline-success" for="quickRemote">
+                                    <i class="fas fa-home me-1"></i>Uzaktan
+                                </label>
+
+                                <input type="radio" class="btn-check" name="quickWorkType" id="quickField" value="Field">
+                                <label class="btn btn-outline-info" for="quickField">
+                                    <i class="fas fa-map me-1"></i>Saha
+                                </label>
+
+                                <input type="radio" class="btn-check" name="quickWorkType" id="quickMeeting" value="Meeting">
+                                <label class="btn btn-outline-warning" for="quickMeeting">
+                                    <i class="fas fa-users me-1"></i>Toplantı
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Working Hours Info -->
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Çalışma Saatleri Bilgisi
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <small class="text-muted">Standart Başlangıç:</small>
+                                        <br>
+                                        <strong>09:00</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Standart Bitiş:</small>
+                                        <br>
+                                        <strong>18:00</strong>
+                                    </div>
+                                </div>
+                                <hr class="my-2">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <small class="text-muted">Normal Çalışma:</small>
+                                        <br>
+                                        <strong>8 saat</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Geç Gelme Sınırı:</small>
+                                        <br>
+                                        <strong>09:15</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Geri Dön
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-sign-in-alt me-1"></i>
+                                Giriş Yap
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .required::after {
+        content: " *";
+        color: red;
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    #currentTime {
+        font-family: 'Courier New', monospace;
+        font-size: 1.8em;
+        font-weight: bold;
+    }
+
+    #currentDate {
+        font-size: 1.1em;
+    }
+
+    .btn-check:checked + .btn {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+        color: white;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update current time and date
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Update time
+            const timeString = now.toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+            
+            // Update date
+            const dateString = now.toLocaleDateString('tr-TR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('currentDate').textContent = dateString;
+        }
+
+        // Update time every second
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        // Set current time function
+        window.setCurrentTime = function() {
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                             now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('StartTime').value = timeString;
+        };
+
+        // Set initial current time
+        setCurrentTime();
+
+        // Quick work type selection
+        document.querySelectorAll('input[name="quickWorkType"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                if (this.checked) {
+                    document.getElementById('WorkType').value = this.value;
+                }
+            });
+        });
+
+        // Auto-set location based on work type
+        document.getElementById('WorkType').addEventListener('change', function() {
+            const locationInput = document.getElementById('Location');
+            const currentLocation = locationInput.value;
+            
+            if (!currentLocation) {
+                switch(this.value) {
+                    case 'Office':
+                        locationInput.value = 'Ana Ofis';
+                        break;
+                    case 'Remote':
+                        locationInput.value = 'Ev';
+                        break;
+                    case 'Field':
+                        locationInput.value = 'Saha Çalışması';
+                        break;
+                    case 'Meeting':
+                        locationInput.value = 'Toplantı Salonu';
+                        break;
+                }
+            }
+        });
+
+        // Check for late arrival
+        document.getElementById('StartTime').addEventListener('change', function() {
+            const selectedTime = this.value;
+            const lateThreshold = '09:15';
+            
+            if (selectedTime > lateThreshold) {
+                if (!document.getElementById('lateWarning')) {
+                    const warning = document.createElement('div');
+                    warning.id = 'lateWarning';
+                    warning.className = 'alert alert-warning mt-2';
+                    warning.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Geç gelme kaydı oluşturulacak (09:15\'ten sonra).';
+                    this.parentNode.parentNode.appendChild(warning);
+                }
+            } else {
+                const existingWarning = document.getElementById('lateWarning');
+                if (existingWarning) {
+                    existingWarning.remove();
+                }
+            }
+        });
+
+        // Form validation
+        const form = document.querySelector('.needs-validation');
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+
+        // Auto-focus on person selection
+        setTimeout(function() {
+            document.getElementById('PersonId').focus();
+        }, 100);
+    });
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

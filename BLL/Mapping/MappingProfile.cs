@@ -21,12 +21,14 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.Department, opt => opt.Ignore());
+            .ForMember(dest => dest.Department, opt => opt.Ignore())
+            .ForMember(dest => dest.Position, opt => opt.Ignore());
 
         CreateMap<PersonUpdateDto, Person>()
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.Department, opt => opt.Ignore());
+            .ForMember(dest => dest.Department, opt => opt.Ignore())
+            .ForMember(dest => dest.Position, opt => opt.Ignore());
 
         CreateMap<Person, PersonUpdateDto>();
 
@@ -97,11 +99,11 @@ public class MappingProfile : Profile
         // Qualification Mappings
         CreateMap<Qualification, QualificationListDto>()
             .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
-            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : null));
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : ""));
 
         CreateMap<Qualification, QualificationDetailDto>()
             .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
-            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : null));
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : ""));
 
         CreateMap<QualificationCreateDto, Qualification>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -146,5 +148,193 @@ public class MappingProfile : Profile
 
         CreateMap<Person, PositionPersonDto>()
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
+
+        // WorkLog Mappings
+        CreateMap<WorkLog, WorkLogListDto>()
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : string.Empty))
+            .ForMember(dest => dest.EmployeeNumber, opt => opt.MapFrom(src => src.Person.EmployeeNumber));
+
+        CreateMap<WorkLog, WorkLogDetailDto>()
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : string.Empty))
+            .ForMember(dest => dest.EmployeeNumber, opt => opt.MapFrom(src => src.Person.EmployeeNumber))
+            .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => src.ApprovedBy != null ? $"{src.ApprovedBy.FirstName} {src.ApprovedBy.LastName}" : string.Empty));
+
+        CreateMap<WorkLogCreateDto, WorkLog>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.TotalHours, opt => opt.Ignore())
+            .ForMember(dest => dest.RegularHours, opt => opt.Ignore())
+            .ForMember(dest => dest.OvertimeHours, opt => opt.Ignore())
+            .ForMember(dest => dest.IsLateArrival, opt => opt.Ignore())
+            .ForMember(dest => dest.IsEarlyDeparture, opt => opt.Ignore())
+            .ForMember(dest => dest.IsOvertime, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "Active"));
+
+        CreateMap<WorkLogUpdateDto, WorkLog>()
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.TotalHours, opt => opt.Ignore())
+            .ForMember(dest => dest.RegularHours, opt => opt.Ignore())
+            .ForMember(dest => dest.OvertimeHours, opt => opt.Ignore())
+            .ForMember(dest => dest.IsLateArrival, opt => opt.Ignore())
+            .ForMember(dest => dest.IsEarlyDeparture, opt => opt.Ignore())
+            .ForMember(dest => dest.IsOvertime, opt => opt.Ignore());
+
+        CreateMap<WorkLog, WorkLogUpdateDto>();
+
+        CreateMap<WorkLogCheckInDto, WorkLog>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Date, opt => opt.MapFrom(src => DateTime.Today))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "Active"))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedBy, opt => opt.Ignore());
+
+        // LeaveType Mappings
+        CreateMap<LeaveType, LeaveTypeListDto>()
+            .ForMember(dest => dest.TotalLeaves, opt => opt.MapFrom(src => src.Leaves.Count))
+            .ForMember(dest => dest.ActiveLeaves, opt => opt.MapFrom(src => src.Leaves.Count(l => l.Status == LeaveStatus.InProgress)));
+
+        CreateMap<LeaveType, LeaveTypeDetailDto>()
+            .ForMember(dest => dest.TotalLeaves, opt => opt.MapFrom(src => src.Leaves.Count))
+            .ForMember(dest => dest.PendingLeaves, opt => opt.MapFrom(src => src.Leaves.Count(l => l.Status == LeaveStatus.Pending)))
+            .ForMember(dest => dest.ApprovedLeaves, opt => opt.MapFrom(src => src.Leaves.Count(l => l.Status == LeaveStatus.Approved)))
+            .ForMember(dest => dest.TotalDaysUsed, opt => opt.MapFrom(src => src.Leaves.Where(l => l.Status == LeaveStatus.Approved).Sum(l => l.TotalDays)))
+            .ForMember(dest => dest.RecentLeaves, opt => opt.MapFrom(src => src.Leaves.OrderByDescending(l => l.RequestDate).Take(5)))
+            .ForMember(dest => dest.Balances, opt => opt.MapFrom(src => src.LeaveBalances));
+
+        CreateMap<LeaveTypeCreateDto, LeaveType>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.Leaves, opt => opt.Ignore())
+            .ForMember(dest => dest.LeaveBalances, opt => opt.Ignore());
+
+        CreateMap<LeaveTypeUpdateDto, LeaveType>()
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Leaves, opt => opt.Ignore())
+            .ForMember(dest => dest.LeaveBalances, opt => opt.Ignore());
+
+        CreateMap<LeaveType, LeaveTypeUpdateDto>();
+
+        // Leave Mappings
+        CreateMap<Leave, LeaveListDto>()
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
+            .ForMember(dest => dest.EmployeeNumber, opt => opt.MapFrom(src => src.Person.EmployeeNumber ?? ""))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : ""))
+            .ForMember(dest => dest.LeaveTypeName, opt => opt.MapFrom(src => src.LeaveType.Name))
+            .ForMember(dest => dest.LeaveTypeColor, opt => opt.MapFrom(src => src.LeaveType.Color))
+            .ForMember(dest => dest.StatusText, opt => opt.MapFrom(src => GetLeaveStatusText(src.Status)))
+            .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => src.ApprovedBy != null ? $"{src.ApprovedBy.FirstName} {src.ApprovedBy.LastName}" : null))
+            .ForMember(dest => dest.RequiresDocument, opt => opt.MapFrom(src => src.LeaveType.RequiresDocument))
+            .ForMember(dest => dest.HasDocument, opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.DocumentPath)))
+            .ForMember(dest => dest.DaysUntilStart, opt => opt.MapFrom(src => (src.StartDate - DateTime.Today).Days))
+            .ForMember(dest => dest.IsUrgent, opt => opt.MapFrom(src => src.Status == LeaveStatus.Pending && (src.StartDate - DateTime.Today).Days <= src.LeaveType.NotificationDays));
+
+        CreateMap<Leave, LeaveDetailDto>()
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
+            .ForMember(dest => dest.EmployeeNumber, opt => opt.MapFrom(src => src.Person.EmployeeNumber ?? ""))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : ""))
+            .ForMember(dest => dest.LeaveTypeName, opt => opt.MapFrom(src => src.LeaveType.Name))
+            .ForMember(dest => dest.LeaveTypeColor, opt => opt.MapFrom(src => src.LeaveType.Color))
+            .ForMember(dest => dest.LeaveTypeRequiresDocument, opt => opt.MapFrom(src => src.LeaveType.RequiresDocument))
+            .ForMember(dest => dest.StatusText, opt => opt.MapFrom(src => GetLeaveStatusText(src.Status)))
+            .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => src.ApprovedBy != null ? $"{src.ApprovedBy.FirstName} {src.ApprovedBy.LastName}" : null))
+            .ForMember(dest => dest.HandoverToPersonName, opt => opt.MapFrom(src => src.HandoverToPerson != null ? $"{src.HandoverToPerson.FirstName} {src.HandoverToPerson.LastName}" : null));
+
+        CreateMap<LeaveCreateDto, Leave>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => LeaveStatus.Pending))
+            .ForMember(dest => dest.RequestDate, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.LeaveType, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.HandoverToPerson, opt => opt.Ignore());
+
+        CreateMap<LeaveUpdateDto, Leave>()
+            .ForMember(dest => dest.Status, opt => opt.Ignore())
+            .ForMember(dest => dest.RequestDate, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.LeaveType, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.HandoverToPerson, opt => opt.Ignore());
+
+        CreateMap<Leave, LeaveUpdateDto>();
+
+        CreateMap<Leave, LeaveCalendarDto>()
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
+            .ForMember(dest => dest.LeaveTypeName, opt => opt.MapFrom(src => src.LeaveType.Name))
+            .ForMember(dest => dest.Color, opt => opt.MapFrom(src => src.LeaveType.Color));
+
+        // LeaveBalance Mappings
+        CreateMap<LeaveBalance, LeaveBalanceListDto>()
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
+            .ForMember(dest => dest.EmployeeNumber, opt => opt.MapFrom(src => src.Person.EmployeeNumber ?? ""))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : ""))
+            .ForMember(dest => dest.LeaveTypeName, opt => opt.MapFrom(src => src.LeaveType.Name))
+            .ForMember(dest => dest.LeaveTypeColor, opt => opt.MapFrom(src => src.LeaveType.Color));
+
+        CreateMap<LeaveBalance, LeaveBalanceDetailDto>()
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
+            .ForMember(dest => dest.EmployeeNumber, opt => opt.MapFrom(src => src.Person.EmployeeNumber ?? ""))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : ""))
+            .ForMember(dest => dest.LeaveTypeName, opt => opt.MapFrom(src => src.LeaveType.Name))
+            .ForMember(dest => dest.LeaveTypeColor, opt => opt.MapFrom(src => src.LeaveType.Color))
+            .ForMember(dest => dest.AdjustedByName, opt => opt.MapFrom(src => "TBD")); // Temporarily set to placeholder
+
+        CreateMap<LeaveBalanceCreateDto, LeaveBalance>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UsedDays, opt => opt.MapFrom(src => 0))
+            .ForMember(dest => dest.PendingDays, opt => opt.MapFrom(src => 0))
+            .ForMember(dest => dest.AccruedToDate, opt => opt.MapFrom(src => src.AllocatedDays))
+            .ForMember(dest => dest.LastAccrualDate, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.LeaveType, opt => opt.Ignore());
+            // .ForMember(dest => dest.AdjustedBy, opt => opt.Ignore()); // Temporarily commented
+
+        CreateMap<LeaveBalanceUpdateDto, LeaveBalance>()
+            .ForMember(dest => dest.PersonId, opt => opt.Ignore())
+            .ForMember(dest => dest.LeaveTypeId, opt => opt.Ignore())
+            .ForMember(dest => dest.Year, opt => opt.Ignore())
+            .ForMember(dest => dest.UsedDays, opt => opt.Ignore())
+            .ForMember(dest => dest.PendingDays, opt => opt.Ignore())
+            .ForMember(dest => dest.AdjustmentDate, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.LeaveType, opt => opt.Ignore());
+            // .ForMember(dest => dest.AdjustedBy, opt => opt.Ignore()); // Temporarily commented
+
+        CreateMap<LeaveBalance, LeaveBalanceUpdateDto>();
+    }
+
+    private static string GetLeaveStatusText(LeaveStatus status)
+    {
+        return status switch
+        {
+            LeaveStatus.Pending => "Onay Bekliyor",
+            LeaveStatus.Approved => "Onaylandı",
+            LeaveStatus.Rejected => "Reddedildi",
+            LeaveStatus.Cancelled => "İptal Edildi",
+            LeaveStatus.InProgress => "Devam Ediyor",
+            LeaveStatus.Completed => "Tamamlandı",
+            _ => status.ToString()
+        };
     }
 }
