@@ -162,8 +162,6 @@ public class LeaveDetailViewModel
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; }
     
-    [Display(Name = "Kalan Bakiye")]
-    public decimal RemainingBalance { get; set; }
 }
 
 public class LeaveCreateViewModel
@@ -297,9 +295,6 @@ public class LeaveApprovalViewModel
     
     [Display(Name = "Gerekçe")]
     public string Reason { get; set; } = string.Empty;
-    
-    [Display(Name = "Kalan Bakiye")]
-    public decimal RemainingBalance { get; set; }
     
     [Required(ErrorMessage = "Onay kararı seçilmelidir.")]
     [Display(Name = "Karar*")]

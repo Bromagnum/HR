@@ -15,12 +15,9 @@ public interface ILeaveBalanceRepository : IRepository<LeaveBalance>
     
     // Additional methods used in services
     Task<IEnumerable<LeaveBalance>> GetBalancesByPersonAsync(int personId);
-    Task<IEnumerable<LeaveBalance>> GetBalancesByPersonAsync(int personId, int year);
     Task<IEnumerable<LeaveBalance>> GetActiveBalancesAsync();
     Task<IEnumerable<LeaveBalance>> GetBalancesByYearAsync(int year);
     Task<IEnumerable<LeaveBalance>> GetLowBalanceAlertsAsync(decimal threshold = 5);
-    Task<IEnumerable<LeaveBalance>> GetOverusedBalancesAsync();
     Task<IEnumerable<LeaveBalance>> GetOverusedBalancesAsync(int year);
-    Task<IEnumerable<LeaveBalance>> GetUnusedBalancesAsync(decimal threshold = 0);
     Task<IEnumerable<LeaveBalance>> GetUnusedBalancesAsync(decimal threshold, int year);
 }

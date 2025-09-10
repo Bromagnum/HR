@@ -90,6 +90,10 @@ public class ViewModelMappingProfile : Profile
         CreateMap<LeaveDetailDto, LeaveDetailViewModel>();
         CreateMap<LeaveDetailDto, LeaveEditViewModel>();
         CreateMap<LeaveCalendarDto, LeaveCalendarViewModel>();
+        
+        // Missing mapping for RecentLeaveViewModel
+        CreateMap<LeaveListDto, RecentLeaveViewModel>()
+            .ForMember(dest => dest.StatusText, opt => opt.MapFrom(src => src.StatusText));
 
         // ViewModel to DTO mappings
         CreateMap<LeaveCreateViewModel, LeaveCreateDto>();

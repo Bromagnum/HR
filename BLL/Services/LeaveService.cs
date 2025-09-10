@@ -60,13 +60,8 @@ public class LeaveService : ILeaveService
 
             var dto = _mapper.Map<LeaveDetailDto>(leave);
             
-            // Calculate remaining balance
-            var balanceResult = await GetRemainingBalanceAsync(leave.PersonId, leave.LeaveTypeId, leave.StartDate.Year);
-            if (balanceResult.IsSuccess)
-            {
-                dto.RemainingBalance = balanceResult.Data;
-            }
-
+            // Balance calculation removed
+            
             return Result<LeaveDetailDto>.Ok(dto);
         }
         catch (Exception ex)
@@ -425,17 +420,7 @@ public class LeaveService : ILeaveService
                 return Result<bool>.Fail("İzin süresi en az 1 iş günü olmalıdır.");
             }
 
-            // Check sufficient balance
-            var balanceResult = await HasSufficientBalanceAsync(dto.PersonId, dto.LeaveTypeId, workingDaysResult.Data, dto.StartDate.Year);
-            if (!balanceResult.IsSuccess)
-            {
-                return Result<bool>.Fail(balanceResult.Message);
-            }
-
-            if (!balanceResult.Data)
-            {
-                return Result<bool>.Fail("Yetersiz izin bakiyesi.");
-            }
+            // Balance check removed - no longer validating balance
 
             // Check conflicts
             var conflictsResult = await CheckConflictsAsync(dto.PersonId, dto.StartDate, dto.EndDate);
@@ -513,43 +498,6 @@ public class LeaveService : ILeaveService
         catch (Exception ex)
         {
             return Result<IEnumerable<LeaveListDto>>.Fail($"Çakışma kontrolü sırasında hata oluştu: {ex.Message}");
-        }
-    }
-
-    public async Task<Result<bool>> HasSufficientBalanceAsync(int personId, int leaveTypeId, int requestedDays, int year)
-    {
-        try
-        {
-            var remainingBalance = await GetRemainingBalanceAsync(personId, leaveTypeId, year);
-            if (!remainingBalance.IsSuccess)
-            {
-                return Result<bool>.Fail(remainingBalance.Message);
-            }
-
-            return Result<bool>.Ok(remainingBalance.Data >= requestedDays);
-        }
-        catch (Exception ex)
-        {
-            return Result<bool>.Fail($"Bakiye kontrolü sırasında hata oluştu: {ex.Message}");
-        }
-    }
-
-    public async Task<Result<decimal>> GetRemainingBalanceAsync(int personId, int leaveTypeId, int year)
-    {
-        try
-        {
-            var balance = await _unitOfWork.LeaveBalances.GetBalanceAsync(personId, leaveTypeId, year);
-            if (balance == null)
-            {
-                return Result<decimal>.Ok(0);
-            }
-
-            var remaining = balance.AllocatedDays + balance.CarriedOverDays + balance.ManualAdjustment - balance.UsedDays - balance.PendingDays;
-            return Result<decimal>.Ok(remaining);
-        }
-        catch (Exception ex)
-        {
-            return Result<decimal>.Fail($"Kalan bakiye hesaplanırken hata oluştu: {ex.Message}");
         }
     }
 

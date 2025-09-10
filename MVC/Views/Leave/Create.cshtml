@@ -14,7 +14,7 @@
                     </h3>
                 </div>
                 
-                <form asp-action="Create" method="post" class="needs-validation" novalidate>
+                <form asp-action="Create" asp-controller="Leave" method="post" class="needs-validation" novalidate>
                     @Html.AntiForgeryToken()
                     <div class="card-body">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
@@ -164,10 +164,36 @@
 
             // Form validation
             $('form').on('submit', function(e) {
+                console.log('Form submit triggered');
+                
+                const personId = $('#PersonId').val();
+                const leaveTypeId = $('#LeaveTypeId').val();
                 const startDate = new Date($('#StartDate').val());
                 const endDate = new Date($('#EndDate').val());
+                const reason = $('#Reason').val().trim();
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
+
+                console.log('Form data:', { personId, leaveTypeId, startDate, endDate, reason });
+
+                // Check required fields
+                if (!personId || personId === '') {
+                    e.preventDefault();
+                    alert('Lütfen personel seçiniz.');
+                    return false;
+                }
+
+                if (!leaveTypeId || leaveTypeId === '') {
+                    e.preventDefault();
+                    alert('Lütfen izin türü seçiniz.');
+                    return false;
+                }
+
+                if (!reason || reason === '') {
+                    e.preventDefault();
+                    alert('Lütfen gerekçe yazınız.');
+                    return false;
+                }
 
                 if (startDate < today) {
                     e.preventDefault();
@@ -181,6 +207,7 @@
                     return false;
                 }
 
+                console.log('Form validation passed, submitting...');
                 return true;
             });
         });

@@ -22,8 +22,7 @@ public interface ILeaveRepository : IRepository<Leave>
     Task<IEnumerable<Leave>> GetLeavesByPersonAsync(int personId, int year);
     Task<IEnumerable<Leave>> GetConflictingLeavesAsync(int personId, DateTime startDate, DateTime endDate, int? excludeLeaveId = null);
     Task<IEnumerable<Leave>> GetCalendarDataAsync(DateTime startDate, DateTime endDate, int? departmentId = null);
-    Task<IEnumerable<Leave>> GetUpcomingLeavesAsync(int days = 30);
-    Task<IEnumerable<Leave>> GetUpcomingLeavesAsync(int days, int? departmentId);
+    Task<IEnumerable<Leave>> GetUpcomingLeavesAsync(int days, int? departmentId = null);
     Task<IEnumerable<Leave>> GetUrgentLeavesAsync();
     Task<IEnumerable<Leave>> GetApprovedLeavesByPersonAndTypeAsync(int personId, int leaveTypeId, int year);
     Task<IEnumerable<Leave>> GetPendingLeavesByPersonAndTypeAsync(int personId, int leaveTypeId, int year);

@@ -71,7 +71,6 @@ public class LeaveDetailDto
     public bool IsActive { get; set; }
     
     // Related Information
-    public decimal RemainingBalance { get; set; }
     public List<LeaveListDto> OverlappingLeaves { get; set; } = new();
 }
 

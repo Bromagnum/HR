@@ -37,43 +37,43 @@
                 <div class="card-body">
                     <form method="get" class="row g-3 mb-4">
                         <div class="col-md-2">
-                            <label for="PersonId" class="form-label">Personel</label>
+                            <label class="form-label">Personel</label>
                             <select asp-for="@filter.PersonId" asp-items="@filter.Persons" class="form-select">
                                 <option value="">Tümü</option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="LeaveTypeId" class="form-label">İzin Türü</label>
+                            <label class="form-label">İzin Türü</label>
                             <select asp-for="@filter.LeaveTypeId" asp-items="@filter.LeaveTypes" class="form-select">
                                 <option value="">Tümü</option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="DepartmentId" class="form-label">Departman</label>
+                            <label class="form-label">Departman</label>
                             <select asp-for="@filter.DepartmentId" asp-items="@filter.Departments" class="form-select">
                                 <option value="">Tümü</option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="Status" class="form-label">Durum</label>
+                            <label class="form-label">Durum</label>
                             <select asp-for="@filter.Status" asp-items="@filter.StatusOptions" class="form-select">
                                 <option value="">Tümü</option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="StartDate" class="form-label">Başlangıç</label>
+                            <label class="form-label">Başlangıç</label>
                             <input asp-for="@filter.StartDate" type="date" class="form-control" />
                         </div>
                         <div class="col-md-2">
-                            <label for="EndDate" class="form-label">Bitiş</label>
+                            <label class="form-label">Bitiş</label>
                             <input asp-for="@filter.EndDate" type="date" class="form-control" />
                         </div>
                         <div class="col-md-8">
-                            <label for="SearchTerm" class="form-label">Arama</label>
+                            <label class="form-label">Arama</label>
                             <input asp-for="@filter.SearchTerm" type="text" class="form-control" placeholder="Personel adı, gerekçe..." />
                         </div>
                         <div class="col-md-2">
-                            <label for="Year" class="form-label">Yıl</label>
+                            <label class="form-label">Yıl</label>
                             <input asp-for="@filter.Year" type="number" class="form-control" min="2020" max="2030" />
                         </div>
                         <div class="col-md-2 d-flex align-items-end">

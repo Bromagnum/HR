@@ -33,8 +33,6 @@ public interface ILeaveService
     Task<Result<bool>> ValidateLeaveRequestAsync(LeaveCreateDto dto);
     Task<Result<bool>> ValidateLeaveUpdateAsync(LeaveUpdateDto dto);
     Task<Result<IEnumerable<LeaveListDto>>> CheckConflictsAsync(int personId, DateTime startDate, DateTime endDate, int? excludeLeaveId = null);
-    Task<Result<bool>> HasSufficientBalanceAsync(int personId, int leaveTypeId, int requestedDays, int year);
-    Task<Result<decimal>> GetRemainingBalanceAsync(int personId, int leaveTypeId, int year);
     
     // Calendar & Reports
     Task<Result<IEnumerable<LeaveCalendarDto>>> GetCalendarDataAsync(DateTime startDate, DateTime endDate, int? departmentId = null);

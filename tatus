@@ -1,0 +1,26 @@
+warning: in the working copy of 'BLL/Services/LeaveBalanceService.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MVC/Controllers/LeaveController.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MVC/Mapping/ViewModelMappingProfile.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MVC/Program.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MVC/Properties/launchSettings.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MVC/Views/Leave/Create.cshtml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MVC/Views/Shared/_Layout.cshtml', LF will be replaced by CRLF the next time Git touches it
+BLL/DTOs/LeaveDto.cs
+BLL/Services/ILeaveService.cs
+BLL/Services/LeaveBalanceService.cs
+BLL/Services/LeaveService.cs
+DAL/Repositories/ILeaveBalanceRepository.cs
+DAL/Repositories/ILeaveRepository.cs
+MVC/Controllers/LeaveBalanceController.cs
+MVC/Controllers/LeaveController.cs
+MVC/Mapping/ViewModelMappingProfile.cs
+MVC/Models/LeaveBalanceStatisticsViewModel.cs
+MVC/Models/LeaveViewModel.cs
+MVC/Program.cs
+MVC/Properties/launchSettings.json
+MVC/Views/Leave/Calendar.cshtml
+MVC/Views/Leave/Create.cshtml
+MVC/Views/Leave/Details.cshtml
+MVC/Views/Leave/Index.cshtml
+MVC/Views/Shared/_Layout.cshtml
+MVC/wwwroot/css/site.css

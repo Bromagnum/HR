@@ -3,19 +3,66 @@ using DAL.Repositories;
 using BLL.Services;
 using BLL.Mapping;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Simple session configuration
-builder.Services.AddSession();
-
-// Cookie policy disabled for development to eliminate warnings
-
-// Simple AntiForgery configuration for development
-builder.Services.AddAntiforgery();
+// Configure cookies for HTTPS-only operation
+if (builder.Environment.IsDevelopment())
+{
+    // HTTPS-only settings for development
+    builder.Services.AddAntiforgery(options =>
+    {
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Force HTTPS
+        options.Cookie.HttpOnly = true;
+        options.Cookie.Name = "__RequestVerificationToken";
+        options.SuppressXFrameOptionsHeader = false;
+    });
+    
+    // Configure session cookies for HTTPS
+    builder.Services.AddSession(options =>
+    {
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Force HTTPS
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+    });
+    
+    builder.Services.Configure<CookiePolicyOptions>(options =>
+    {
+        options.MinimumSameSitePolicy = SameSiteMode.Lax;
+        options.Secure = CookieSecurePolicy.Always; // Force HTTPS
+        options.CheckConsentNeeded = context => false;
+        options.OnAppendCookie = cookieContext => 
+        {
+            cookieContext.CookieOptions.SameSite = SameSiteMode.Lax;
+            cookieContext.CookieOptions.Secure = true; // Always secure
+            cookieContext.CookieOptions.HttpOnly = true;
+        };
+        options.OnDeleteCookie = cookieContext => 
+        {
+            cookieContext.CookieOptions.SameSite = SameSiteMode.Lax;
+            cookieContext.CookieOptions.Secure = true; // Always secure
+            cookieContext.CookieOptions.HttpOnly = true;
+        };
+    });
+}
+else
+{
+    // Production configuration
+    builder.Services.AddAntiforgery();
+    builder.Services.Configure<CookiePolicyOptions>(options =>
+    {
+        options.MinimumSameSitePolicy = SameSiteMode.Strict;
+        options.Secure = CookieSecurePolicy.Always;
+        options.CheckConsentNeeded = context => true;
+    });
+}
 
 // Database Context
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -89,13 +136,13 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Only use HTTPS redirection in production
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+// Force HTTPS redirection in all environments
+app.UseHttpsRedirection();
+
 app.UseRequestLocalization();
-// app.UseCookiePolicy(); // Disabled for development to avoid cookie warnings
+
+// Enable cookie policy and session
+app.UseCookiePolicy();
 app.UseSession();
 app.UseRouting();
 
@@ -109,3 +156,4 @@ app.MapControllerRoute(
 
 
 app.Run();
+

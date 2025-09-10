@@ -51,20 +51,6 @@ public class LeaveController : Controller
         return View(viewModels);
     }
 
-    // GET: Leave/PendingApprovals
-    public async Task<IActionResult> PendingApprovals()
-    {
-        var result = await _leaveService.GetPendingApprovalsAsync();
-        if (!result.IsSuccess)
-        {
-            TempData["Error"] = result.Message;
-            return View("Index", new List<LeaveListViewModel>());
-        }
-
-        var viewModels = _mapper.Map<List<LeaveListViewModel>>(result.Data);
-        ViewData["Title"] = "Onay Bekleyen İzinler";
-        return View("Index", viewModels);
-    }
 
     // GET: Leave/MyLeaves
     public async Task<IActionResult> MyLeaves(int? year)
@@ -143,24 +129,46 @@ public class LeaveController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(LeaveCreateViewModel viewModel)
     {
-        if (!ModelState.IsValid)
+        try
         {
+            // Debug: Log incoming request
+            System.Diagnostics.Debug.WriteLine($"Leave Create POST called with PersonId: {viewModel.PersonId}, LeaveTypeId: {viewModel.LeaveTypeId}");
+            
+            if (!ModelState.IsValid)
+            {
+                System.Diagnostics.Debug.WriteLine("ModelState is invalid");
+                foreach (var error in ModelState)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Field: {error.Key}, Errors: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
+                }
+                await PrepareCreateEditViewData(viewModel);
+                return View(viewModel);
+            }
+
+            var dto = _mapper.Map<BLL.DTOs.LeaveCreateDto>(viewModel);
+            System.Diagnostics.Debug.WriteLine($"Mapped DTO: PersonId={dto.PersonId}, LeaveTypeId={dto.LeaveTypeId}, TotalDays={dto.TotalDays}");
+            
+            var result = await _leaveService.CreateAsync(dto);
+            System.Diagnostics.Debug.WriteLine($"Service result: Success={result.IsSuccess}, Message={result.Message}");
+
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                await PrepareCreateEditViewData(viewModel);
+                return View(viewModel);
+            }
+
+            TempData["Success"] = "İzin talebi başarıyla oluşturuldu.";
+            System.Diagnostics.Debug.WriteLine($"Redirecting to Details with ID: {result.Data?.Id}");
+            return RedirectToAction(nameof(Details), new { id = result.Data?.Id });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Exception in Create: {ex.Message}");
+            TempData["Error"] = $"Bir hata oluştu: {ex.Message}";
             await PrepareCreateEditViewData(viewModel);
             return View(viewModel);
         }
-
-        var dto = _mapper.Map<BLL.DTOs.LeaveCreateDto>(viewModel);
-        var result = await _leaveService.CreateAsync(dto);
-
-        if (!result.IsSuccess)
-        {
-            TempData["Error"] = result.Message;
-            await PrepareCreateEditViewData(viewModel);
-            return View(viewModel);
-        }
-
-        TempData["Success"] = "İzin talebi başarıyla oluşturuldu.";
-        return RedirectToAction(nameof(Details), new { id = result.Data?.Id });
     }
 
     // GET: Leave/Edit/5
@@ -270,7 +278,6 @@ public class LeaveController : Controller
             DateRange = $"{result.Data.StartDate:dd.MM.yyyy} - {result.Data.EndDate:dd.MM.yyyy}",
             TotalDays = result.Data.TotalDays,
             Reason = result.Data.Reason,
-            RemainingBalance = result.Data.RemainingBalance,
             ApprovedById = 1 // TODO: Get current user ID
         };
 
@@ -295,6 +302,8 @@ public class LeaveController : Controller
 
         var dto = _mapper.Map<BLL.DTOs.LeaveApprovalDto>(viewModel);
         dto.IsApproved = viewModel.IsApproved;
+        dto.ApprovedById = 1; // TODO: Get current user ID from session/claims
+        dto.RejectionReason = viewModel.IsApproved ? null : viewModel.ApprovalNotes;
 
         var result = viewModel.IsApproved 
             ? await _leaveService.ApproveLeaveAsync(dto)
@@ -327,6 +336,7 @@ public class LeaveController : Controller
     }
 
     // GET: Leave/Statistics
+    [Route("Leave/Statistics")]
     public async Task<IActionResult> Statistics(int? personId, int? departmentId, int? year)
     {
         if (year == null) year = DateTime.Now.Year;
@@ -358,21 +368,6 @@ public class LeaveController : Controller
         return View(result.Data);
     }
 
-    // GET: Leave/Upcoming
-    public async Task<IActionResult> Upcoming(int days = 30)
-    {
-        var result = await _leaveService.GetUpcomingLeavesAsync(days);
-        if (!result.IsSuccess)
-        {
-            TempData["Error"] = result.Message;
-            return View("Index", new List<LeaveListViewModel>());
-        }
-
-        var viewModels = _mapper.Map<List<LeaveListViewModel>>(result.Data);
-        ViewData["Title"] = $"Yaklaşan İzinler ({days} gün)";
-        ViewData["Days"] = days;
-        return View("Index", viewModels);
-    }
 
     // AJAX: Calculate working days
     [HttpPost]
@@ -407,26 +402,16 @@ public class LeaveController : Controller
         });
     }
 
-    // AJAX: Get remaining balance
-    [HttpPost]
-    public async Task<IActionResult> GetRemainingBalance(int personId, int leaveTypeId, int year)
-    {
-        var result = await _leaveService.GetRemainingBalanceAsync(personId, leaveTypeId, year);
-        if (!result.IsSuccess)
-        {
-            return Json(new { success = false, message = result.Message });
-        }
 
-        return Json(new { success = true, remainingBalance = result.Data });
-    }
-
-    // Debug endpoint
+    // Debug endpoint for forms and services
     public async Task<IActionResult> Debug()
     {
         try
         {
             var allResult = await _leaveService.GetAllAsync();
             var pendingResult = await _leaveService.GetPendingApprovalsAsync();
+            var personsResult = await _personService.GetAllAsync();
+            var leaveTypesResult = await _leaveTypeService.GetActiveAsync();
 
             var debugInfo = new
             {
@@ -436,8 +421,18 @@ public class LeaveController : Controller
                 PendingLeavesCount = pendingResult.IsSuccess ? pendingResult.Data.Count() : 0,
                 PendingLeavesSuccess = pendingResult.IsSuccess,
                 PendingLeavesMessage = pendingResult.Message,
+                PersonsCount = personsResult.IsSuccess ? personsResult.Data.Count() : 0,
+                PersonsSuccess = personsResult.IsSuccess,
+                PersonsMessage = personsResult.Message,
+                LeaveTypesCount = leaveTypesResult.IsSuccess ? leaveTypesResult.Data.Count() : 0,
+                LeaveTypesSuccess = leaveTypesResult.IsSuccess,
+                LeaveTypesMessage = leaveTypesResult.Message,
                 AllLeaves = allResult.IsSuccess ? allResult.Data.Take(5) : null,
-                PendingLeaves = pendingResult.IsSuccess ? pendingResult.Data.Take(5) : null
+                PendingLeaves = pendingResult.IsSuccess ? pendingResult.Data.Take(5) : null,
+                Persons = personsResult.IsSuccess ? personsResult.Data.Take(5) : null,
+                LeaveTypes = leaveTypesResult.IsSuccess ? leaveTypesResult.Data.Take(5) : null,
+                CurrentTime = DateTime.Now,
+                Environment = "Development"
             };
 
             return Json(debugInfo);
@@ -445,6 +440,46 @@ public class LeaveController : Controller
         catch (Exception ex)
         {
             return Json(new { Error = ex.Message, StackTrace = ex.StackTrace });
+        }
+    }
+
+    // Test endpoint for leave request process
+    [HttpPost]
+    public async Task<IActionResult> TestLeaveRequest()
+    {
+        try
+        {
+            // Create a test leave request
+            var testDto = new BLL.DTOs.LeaveCreateDto
+            {
+                PersonId = 1,
+                LeaveTypeId = 1,
+                StartDate = DateTime.Today.AddDays(1),
+                EndDate = DateTime.Today.AddDays(3),
+                Reason = "Test izin talebi",
+                Notes = "Debug test için oluşturuldu"
+            };
+
+            System.Diagnostics.Debug.WriteLine($"Testing leave request: PersonId={testDto.PersonId}, LeaveTypeId={testDto.LeaveTypeId}");
+
+            var result = await _leaveService.CreateAsync(testDto);
+            
+            return Json(new
+            {
+                Success = result.IsSuccess,
+                Message = result.Message,
+                Data = result.Data,
+                TestTime = DateTime.Now
+            });
+        }
+        catch (Exception ex)
+        {
+            return Json(new
+            {
+                Success = false,
+                Error = ex.Message,
+                StackTrace = ex.StackTrace
+            });
         }
     }
 
@@ -549,6 +584,99 @@ public class LeaveController : Controller
             LeaveStatus.Completed => "Tamamlandı",
             _ => status.ToString()
         };
+    }
+
+    // GET: Leave/Upcoming
+    public async Task<IActionResult> Upcoming(int days = 30, int? departmentId = null)
+    {
+        var result = await _leaveService.GetUpcomingLeavesAsync(days);
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return View(new List<LeaveListViewModel>());
+        }
+
+        var viewModels = _mapper.Map<List<LeaveListViewModel>>(result.Data);
+        
+        // Apply department filter if specified (by department name for now)
+        if (departmentId.HasValue)
+        {
+            // Get department name to filter by
+            var deptResult = await _departmentService.GetAllAsync();
+            if (deptResult.IsSuccess && deptResult.Data != null)
+            {
+                var selectedDepartment = deptResult.Data.FirstOrDefault(d => d.Id == departmentId.Value);
+                if (selectedDepartment != null)
+                {
+                    viewModels = viewModels.Where(l => l.DepartmentName == selectedDepartment.Name).ToList();
+                }
+            }
+        }
+        
+        // Prepare statistics for the cards shown in the screenshot
+        var upcomingStats = new Dictionary<string, object>();
+        upcomingStats["TotalRequests"] = viewModels.Count;
+        upcomingStats["PendingApproval"] = viewModels.Count(l => l.Status == DAL.Entities.LeaveStatus.Pending);
+        upcomingStats["Approved"] = viewModels.Count(l => l.Status == DAL.Entities.LeaveStatus.Approved);
+        upcomingStats["InProgress"] = viewModels.Count(l => l.Status == DAL.Entities.LeaveStatus.InProgress);
+        
+        ViewBag.Statistics = upcomingStats;
+        ViewData["Days"] = days;
+        ViewData["DepartmentId"] = departmentId;
+        
+        // Prepare department dropdown
+        var departmentsResult = await _departmentService.GetAllAsync();
+        if (departmentsResult.IsSuccess)
+        {
+            ViewBag.Departments = new SelectList(departmentsResult.Data, "Id", "Name", departmentId);
+        }
+        
+        return View(viewModels);
+    }
+
+    // GET: Leave/PendingApprovals
+    public async Task<IActionResult> PendingApprovals(int? departmentId = null, int? leaveTypeId = null)
+    {
+        var result = await _leaveService.GetFilteredAsync(new BLL.DTOs.LeaveFilterDto
+        {
+            Status = DAL.Entities.LeaveStatus.Pending,
+            DepartmentId = departmentId,
+            LeaveTypeId = leaveTypeId
+        });
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Message;
+            return View(new List<LeaveListViewModel>());
+        }
+
+        var viewModels = _mapper.Map<List<LeaveListViewModel>>(result.Data ?? new List<BLL.DTOs.LeaveListDto>());
+        
+        // Prepare statistics for pending approvals
+        var pendingStats = new Dictionary<string, object>();
+        pendingStats["TotalPending"] = viewModels.Count;
+        pendingStats["UrgentRequests"] = viewModels.Count(l => l.IsUrgent);
+        pendingStats["RequiringDocuments"] = viewModels.Count(l => l.RequiresDocument && !l.HasDocument);
+        pendingStats["LongPending"] = viewModels.Count(l => (DateTime.Now - l.RequestDate).Days > 7);
+        
+        ViewBag.Statistics = pendingStats;
+        ViewData["DepartmentId"] = departmentId;
+        ViewData["LeaveTypeId"] = leaveTypeId;
+        
+        // Prepare dropdowns like in Index action
+        var departmentsResult = await _departmentService.GetAllAsync();
+        if (departmentsResult.IsSuccess)
+        {
+            ViewBag.Departments = new SelectList(departmentsResult.Data ?? new List<BLL.DTOs.DepartmentListDto>(), "Id", "Name", departmentId);
+        }
+
+        var leaveTypesResult = await _leaveTypeService.GetActiveAsync();
+        if (leaveTypesResult.IsSuccess)
+        {
+            ViewBag.LeaveTypes = new SelectList(leaveTypesResult.Data ?? new List<BLL.DTOs.LeaveTypeListDto>(), "Id", "Name", leaveTypeId);
+        }
+        
+        return View(viewModels);
     }
 
     #endregion

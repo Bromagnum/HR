@@ -153,7 +153,7 @@ public class LeaveBalanceService : ILeaveBalanceService
     {
         try
         {
-            var balances = await _unitOfWork.LeaveBalances.GetBalancesByPersonAsync(personId, year);
+            var balances = await _unitOfWork.LeaveBalances.GetBalancesByPersonIdAsync(personId, year);
             var dtos = _mapper.Map<IEnumerable<LeaveBalanceListDto>>(balances);
             return Result<IEnumerable<LeaveBalanceListDto>>.Ok(dtos);
         }
@@ -167,7 +167,7 @@ public class LeaveBalanceService : ILeaveBalanceService
     {
         try
         {
-            var balances = await _unitOfWork.LeaveBalances.GetBalancesByPersonAsync(personId, year);
+            var balances = await _unitOfWork.LeaveBalances.GetBalancesByPersonIdAsync(personId, year);
             var person = await _unitOfWork.Persons.GetByIdAsync(personId);
             
             if (person == null)
@@ -262,7 +262,7 @@ public class LeaveBalanceService : ILeaveBalanceService
     {
         try
         {
-            var balances = await _unitOfWork.LeaveBalances.GetBalancesByPersonAsync(personId, year);
+            var balances = await _unitOfWork.LeaveBalances.GetBalancesByPersonIdAsync(personId, year);
             
             foreach (var balance in balances)
             {
@@ -388,7 +388,7 @@ public class LeaveBalanceService : ILeaveBalanceService
         try
         {
             var year = cutoffDate.Year;
-            var balances = await _unitOfWork.LeaveBalances.GetBalancesByPersonAsync(personId, year);
+            var balances = await _unitOfWork.LeaveBalances.GetBalancesByPersonIdAsync(personId, year);
             
             foreach (var balance in balances.Where(b => b.MonthlyAccrual > 0))
             {
@@ -487,7 +487,7 @@ public class LeaveBalanceService : ILeaveBalanceService
     {
         try
         {
-            var previousYearBalances = await _unitOfWork.LeaveBalances.GetBalancesByPersonAsync(personId, fromYear);
+            var previousYearBalances = await _unitOfWork.LeaveBalances.GetBalancesByPersonIdAsync(personId, fromYear);
             
             foreach (var prevBalance in previousYearBalances)
             {

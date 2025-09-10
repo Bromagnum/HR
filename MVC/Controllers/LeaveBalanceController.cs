@@ -500,5 +500,96 @@ public class LeaveBalanceController : Controller
         await PrepareCreateEditViewData(viewModel);
     }
 
+    // GET: LeaveBalance/Statistics
+    [Route("LeaveBalance/Statistics")]
+    public async Task<IActionResult> Statistics(int? personId, int? leaveTypeId, int? departmentId, int year = 0)
+    {
+        if (year == 0) year = DateTime.Now.Year;
+
+        var statistics = new Dictionary<string, object>();
+        
+        try
+        {
+            // Get overall balance statistics
+            var allBalancesResult = await _leaveBalanceService.GetAllAsync();
+            if (allBalancesResult.IsSuccess && allBalancesResult.Data != null)
+            {
+                var balances = allBalancesResult.Data.ToList();
+                
+                statistics["TotalBalances"] = balances.Count;
+                statistics["TotalAllocatedDays"] = balances.Sum(b => b.AllocatedDays);
+                statistics["TotalUsedDays"] = balances.Sum(b => b.UsedDays);
+                statistics["TotalPendingDays"] = balances.Sum(b => b.PendingDays);
+                statistics["TotalRemainingDays"] = balances.Sum(b => b.RemainingDays);
+                
+                // Department-wise statistics
+                var departmentStats = balances
+                    .Where(b => !string.IsNullOrEmpty(b.DepartmentName))
+                    .GroupBy(b => b.DepartmentName)
+                    .Select(g => new
+                    {
+                        Department = g.Key,
+                        AllocatedDays = g.Sum(b => b.AllocatedDays),
+                        UsedDays = g.Sum(b => b.UsedDays),
+                        RemainingDays = g.Sum(b => b.RemainingDays)
+                    })
+                    .OrderByDescending(s => s.AllocatedDays)
+                    .ToList();
+                
+                statistics["DepartmentStatistics"] = departmentStats;
+                
+                // Leave type statistics
+                var leaveTypeStats = balances
+                    .GroupBy(b => b.LeaveTypeName)
+                    .Select(g => new
+                    {
+                        LeaveType = g.Key,
+                        AllocatedDays = g.Sum(b => b.AllocatedDays),
+                        UsedDays = g.Sum(b => b.UsedDays),
+                        RemainingDays = g.Sum(b => b.RemainingDays),
+                        UtilizationRate = g.Sum(b => b.AllocatedDays) > 0 ? 
+                            Math.Round((g.Sum(b => b.UsedDays) / g.Sum(b => b.AllocatedDays)) * 100, 2) : 0
+                    })
+                    .OrderByDescending(s => s.AllocatedDays)
+                    .ToList();
+                
+                statistics["LeaveTypeStatistics"] = leaveTypeStats;
+                
+                // Low balance alerts
+                var lowBalanceThreshold = 5; // 5 days or less
+                var lowBalances = balances
+                    .Where(b => b.RemainingDays <= lowBalanceThreshold)
+                    .OrderBy(b => b.RemainingDays)
+                    .ToList();
+                
+                statistics["LowBalanceAlerts"] = lowBalances;
+                statistics["LowBalanceCount"] = lowBalances.Count;
+                
+                // Overused balances (negative remaining days)
+                var overusedBalances = balances
+                    .Where(b => b.RemainingDays < 0)
+                    .OrderBy(b => b.RemainingDays)
+                    .ToList();
+                
+                statistics["OverusedBalances"] = overusedBalances;
+                statistics["OverusedCount"] = overusedBalances.Count;
+            }
+            
+            statistics["Year"] = year;
+            statistics["PersonId"] = personId ?? 0;
+            statistics["LeaveTypeId"] = leaveTypeId ?? 0;
+            statistics["DepartmentId"] = departmentId ?? 0;
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"İstatistikler yüklenirken hata oluştu: {ex.Message}";
+        }
+        
+        // Prepare filter dropdowns
+        await PrepareFilterViewData(personId, leaveTypeId, departmentId, year);
+        
+        return View(statistics);
+    }
+
     #endregion
 }

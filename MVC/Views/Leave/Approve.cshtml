@@ -1,0 +1,214 @@
+@model LeaveApprovalViewModel
+@{
+    ViewData["Title"] = "İzin Onayı";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-check-circle"></i> İzin Onayı
+                    </h3>
+                    <div class="card-tools">
+                        <a asp-action="PendingApprovals" class="btn btn-tool">
+                            <i class="fas fa-arrow-left"></i> Geri Dön
+                        </a>
+                    </div>
+                </div>
+
+                <form asp-action="Approve" asp-controller="Leave" method="post" class="needs-validation" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Id" type="hidden" />
+
+                    <div class="card-body">
+                        <!-- İzin Detayları -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle"></i> İzin Detayları
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="PersonName" class="form-label">@Html.DisplayNameFor(m => m.PersonName)</label>
+                                    <input asp-for="PersonName" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="LeaveTypeName" class="form-label">@Html.DisplayNameFor(m => m.LeaveTypeName)</label>
+                                    <input asp-for="LeaveTypeName" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="DateRange" class="form-label">@Html.DisplayNameFor(m => m.DateRange)</label>
+                                    <input asp-for="DateRange" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="TotalDays" class="form-label">@Html.DisplayNameFor(m => m.TotalDays)</label>
+                                    <input asp-for="TotalDays" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Reason" class="form-label">@Html.DisplayNameFor(m => m.Reason)</label>
+                                    <textarea asp-for="Reason" class="form-control" rows="3" readonly></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <!-- Onay Kısmı -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5 class="text-success mb-3">
+                                    <i class="fas fa-clipboard-check"></i> Onay İşlemi
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label required">@Html.DisplayNameFor(m => m.IsApproved)</label>
+                                    <div class="form-check-group">
+                                        <div class="form-check">
+                                            <input asp-for="IsApproved" type="radio" value="true" class="form-check-input" id="approve_yes" />
+                                            <label class="form-check-label text-success" for="approve_yes">
+                                                <i class="fas fa-check"></i> Onayla
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input asp-for="IsApproved" type="radio" value="false" class="form-check-input" id="approve_no" />
+                                            <label class="form-check-label text-danger" for="approve_no">
+                                                <i class="fas fa-times"></i> Reddet
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="IsApproved" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="ApprovalNotes" class="form-label">@Html.DisplayNameFor(m => m.ApprovalNotes)</label>
+                                    <textarea asp-for="ApprovalNotes" class="form-control" rows="4" 
+                                              placeholder="Onay/Red gerekçenizi buraya yazabilirsiniz..."></textarea>
+                                    <span asp-validation-for="ApprovalNotes" class="text-danger"></span>
+                                    <small class="form-text text-muted">İsteğe bağlı - Maksimum 500 karakter</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-12 text-end">
+                                <a asp-action="PendingApprovals" class="btn btn-secondary me-2">
+                                    <i class="fas fa-arrow-left"></i> İptal
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Onayı Kaydet
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        $(document).ready(function() {
+            // Form validation
+            $('form').on('submit', function(e) {
+                const approvalDecision = $('input[name="IsApproved"]:checked').val();
+                
+                if (!approvalDecision) {
+                    e.preventDefault();
+                    alert('Lütfen bir onay kararı seçiniz (Onayla/Reddet).');
+                    return false;
+                }
+                
+                // Confirmation dialog
+                const action = approvalDecision === 'true' ? 'onaylamak' : 'reddetmek';
+                const confirmMessage = `Bu izin talebini ${action} istediğinizden emin misiniz?`;
+                
+                if (!confirm(confirmMessage)) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                return true;
+            });
+
+            // Radio button styling
+            $('input[type="radio"]').on('change', function() {
+                $('input[type="radio"]').parent().removeClass('selected');
+                $(this).parent().addClass('selected');
+            });
+        });
+    </script>
+
+    <style>
+        .form-check-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+        
+        .form-check {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .form-check:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .form-check.selected {
+            border-color: #007bff;
+            background-color: #e3f2fd;
+        }
+        
+        .form-check-input {
+            margin-right: 8px;
+        }
+        
+        .form-check-label {
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+        
+        .required::after {
+            content: " *";
+            color: #dc3545;
+        }
+    </style>
+}
