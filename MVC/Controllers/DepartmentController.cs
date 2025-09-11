@@ -3,11 +3,13 @@ using BLL.Services.Export;
 using BLL.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using MVC.Models;
 using AutoMapper;
 
 namespace MVC.Controllers;
 
+[Authorize(Roles = "Admin,Manager")]
 public class DepartmentController : Controller
 {
     private readonly IDepartmentService _departmentService;

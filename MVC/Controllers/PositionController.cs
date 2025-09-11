@@ -3,10 +3,12 @@ using BLL.DTOs;
 using BLL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using MVC.Models;
 
 namespace MVC.Controllers
 {
+    [Authorize(Roles = "Admin,Manager")] // Sadece Admin ve Manager pozisyon yönetebilir
     public class PositionController : Controller
     {
         private readonly IPositionService _positionService;

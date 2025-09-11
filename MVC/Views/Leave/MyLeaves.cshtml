@@ -1,0 +1,365 @@
+@model IEnumerable<LeaveListViewModel>
+@{
+    ViewData["Title"] = ViewData["Title"]?.ToString() ?? "İzinlerim";
+    var currentYear = ViewData["CurrentYear"] as int? ?? DateTime.Now.Year;
+    var isEmployeeView = ViewData["IsEmployeeView"] as bool? ?? false;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-calendar-check me-2"></i>@ViewData["Title"]
+                        </h3>
+                        <div class="btn-group">
+                            <a asp-action="Create" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus me-1"></i>Yeni İzin Talebi
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (isEmployeeView)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Bilgi:</strong> Bu sayfada sadece sizin izin taleplerinizi görebilirsiniz. 
+                                    Yeni izin talebi oluşturmak için "Yeni İzin Talebi" butonunu kullanın.
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Yıl Filtreleme -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                <i class="fas fa-filter me-1"></i>Yıl Filtresi
+                            </label>
+                            <select class="form-select" id="yearFilter">
+                                @for (int year = DateTime.Now.Year; year >= DateTime.Now.Year - 5; year--)
+                                {
+                                    <option value="@year" selected="@(year == currentYear)">@year</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-8 d-flex align-items-end">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="filterByStatus('all')">
+                                    <i class="fas fa-list me-1"></i>Tümü
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="filterByStatus('Pending')">
+                                    <i class="fas fa-clock me-1"></i>Bekleyen
+                                </button>
+                                <button type="button" class="btn btn-outline-success btn-sm" onclick="filterByStatus('Approved')">
+                                    <i class="fas fa-check me-1"></i>Onaylı
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="filterByStatus('Rejected')">
+                                    <i class="fas fa-times me-1"></i>Reddedilen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İzin Listesi -->
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="leavesTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><i class="fas fa-calendar-day me-1"></i>Tarih Aralığı</th>
+                                        <th><i class="fas fa-tags me-1"></i>İzin Türü</th>
+                                        <th><i class="fas fa-clock me-1"></i>Gün Sayısı</th>
+                                        <th><i class="fas fa-comment me-1"></i>Neden</th>
+                                        <th><i class="fas fa-info-circle me-1"></i>Durum</th>
+                                        <th><i class="fas fa-calendar me-1"></i>Talep Tarihi</th>
+                                        <th><i class="fas fa-user-check me-1"></i>Onaylayan</th>
+                                        <th><i class="fas fa-cogs me-1"></i>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var leave in Model)
+                                    {
+                                        <tr data-status="@leave.Status">
+                                            <td>
+                                                <strong>@leave.StartDate.ToString("dd.MM.yyyy")</strong>
+                                                <br>
+                                                <small class="text-muted">@leave.EndDate.ToString("dd.MM.yyyy")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge" style="background-color: @leave.LeaveTypeColor; color: white;">
+                                                    @leave.LeaveTypeName
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@leave.TotalDays gün</span>
+                                            </td>
+                                            <td>
+                                                @if (leave.Reason.Length > 50)
+                                                {
+                                                    <span title="@leave.Reason">
+                                                        @leave.Reason.Substring(0, 50)...
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    @leave.Reason
+                                                }
+                                            </td>
+                                            <td>
+                                                @switch (leave.Status.ToString())
+                                                {
+                                                    case "Pending":
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="fas fa-clock me-1"></i>Onay Bekliyor
+                                                        </span>
+                                                        break;
+                                                    case "Approved":
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check me-1"></i>Onaylandı
+                                                        </span>
+                                                        break;
+                                                    case "Rejected":
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-times me-1"></i>Reddedildi
+                                                        </span>
+                                                        break;
+                                                    case "InProgress":
+                                                        <span class="badge bg-primary">
+                                                            <i class="fas fa-play me-1"></i>Devam Ediyor
+                                                        </span>
+                                                        break;
+                                                    case "Completed":
+                                                        <span class="badge bg-secondary">
+                                                            <i class="fas fa-check-double me-1"></i>Tamamlandı
+                                                        </span>
+                                                        break;
+                                                    case "Cancelled":
+                                                        <span class="badge bg-dark">
+                                                            <i class="fas fa-ban me-1"></i>İptal Edildi
+                                                        </span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-light text-dark">@leave.StatusText</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>
+                                                <small>@leave.RequestDate.ToString("dd.MM.yyyy HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(leave.ApprovedByName))
+                                                {
+                                                    <small>
+                                                        @leave.ApprovedByName
+                                                        <br>
+                                                        <span class="text-muted">@leave.ApprovedAt?.ToString("dd.MM.yyyy")</span>
+                                                    </small>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">-</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group-vertical btn-group-sm">
+                                                    <a asp-action="Details" asp-route-id="@leave.Id" 
+                                                       class="btn btn-outline-info btn-sm" title="Detayları Görüntüle">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    
+                                                    @if (leave.Status.ToString() == "Pending" && isEmployeeView)
+                                                    {
+                                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                                onclick="cancelLeave(@leave.Id)" title="İptal Et">
+                                                            <i class="fas fa-ban"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Özet Bilgiler -->
+                        <div class="row mt-4">
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-primary">@Model.Count()</h5>
+                                        <small>Toplam İzin</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-warning">@Model.Count(l => l.Status.ToString() == "Pending")</h5>
+                                        <small>Bekleyen</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-success">@Model.Count(l => l.Status.ToString() == "Approved")</h5>
+                                        <small>Onaylanan</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-info">@Model.Where(l => l.Status.ToString() == "Approved").Sum(l => l.TotalDays)</h5>
+                                        <small>Toplam Gün</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">@currentYear yılında hiç izin talebiniz bulunmamaktadır.</h5>
+                            <p class="text-muted">İlk izin talebinizi oluşturmak için aşağıdaki butonu kullanabilirsiniz.</p>
+                            <a asp-action="Create" class="btn btn-success">
+                                <i class="fas fa-plus me-2"></i>İlk İzin Talebimi Oluştur
+                            </a>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Son güncelleme: @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
+                        </small>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-home me-1"></i>Ana Sayfa
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // DataTable initialization
+            if ($('#leavesTable tbody tr').length > 0) {
+                $('#leavesTable').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json"
+                    },
+                    "pageLength": 10,
+                    "order": [[5, "desc"]], // Talep tarihine göre sırala
+                    "columnDefs": [
+                        { "orderable": false, "targets": [7] } // İşlemler sütunu sıralanamaz
+                    ]
+                });
+            }
+
+            // Yıl filtresi değişikliği
+            $('#yearFilter').on('change', function() {
+                const selectedYear = $(this).val();
+                window.location.href = '@Url.Action("MyLeaves")?year=' + selectedYear;
+            });
+        });
+
+        // Durum filtresi
+        function filterByStatus(status) {
+            const table = $('#leavesTable').DataTable();
+            
+            if (status === 'all') {
+                table.column(4).search('').draw();
+            } else {
+                table.column(4).search(status).draw();
+            }
+            
+            // Aktif butonu vurgula
+            $('.btn-group .btn').removeClass('active');
+            $(`button[onclick="filterByStatus('${status}')"]`).addClass('active');
+        }
+
+        // İzin iptal etme
+        function cancelLeave(leaveId) {
+            if (confirm('Bu izin talebini iptal etmek istediğinizden emin misiniz?')) {
+                // AJAX ile iptal işlemi
+                $.ajax({
+                    url: '@Url.Action("Cancel")',
+                    type: 'POST',
+                    data: {
+                        id: leaveId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result.success) {
+                            toastr.success('İzin talebi başarıyla iptal edildi.');
+                            location.reload();
+                        } else {
+                            toastr.error(result.message || 'İptal işlemi başarısız.');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('İptal işlemi sırasında bir hata oluştu.');
+                    }
+                });
+            }
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card {
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.075);
+        }
+        
+        .badge {
+            font-size: 0.875em;
+        }
+        
+        .btn-group-vertical .btn {
+            margin-bottom: 2px;
+        }
+        
+        .btn-group .btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .card-body .alert {
+            border-radius: 8px;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+        
+        .card-footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .fa-3x {
+            font-size: 3rem;
+        }
+    </style>
+}

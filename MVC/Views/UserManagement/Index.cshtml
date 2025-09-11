@@ -1,0 +1,289 @@
+@model List<MVC.Models.UserManagementViewModel>
+@{
+    ViewData["Title"] = "Kullanıcı Yönetimi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-users-cog me-2"></i>Kullanıcı Yönetimi
+                        </h4>
+                        <a asp-action="CreateUser" class="btn btn-light btn-sm">
+                            <i class="fas fa-user-plus me-1"></i>Yeni Kullanıcı
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped" id="usersTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Ad Soyad</th>
+                                        <th>Email</th>
+                                        <th>Rol</th>
+                                        <th>Durum</th>
+                                        <th>Oluşturma Tarihi</th>
+                                        <th>Son Giriş</th>
+                                        <th width="200">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center text-white me-2">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong>@user.FullName</strong>
+                                                        @if (user.PersonId.HasValue)
+                                                        {
+                                                            <br><small class="text-muted">Personel ID: @user.PersonId</small>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="text-primary">@user.Email</span>
+                                            </td>
+                                            <td>
+                                                @if (user.Roles.Any())
+                                                {
+                                                    @foreach (var role in user.Roles)
+                                                    {
+                                                        <span class="badge bg-info me-1">@role</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Rol Yok</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge @(user.IsActive ? "bg-success" : "bg-danger")">
+                                                    <i class="fas @(user.IsActive ? "fa-check-circle" : "fa-times-circle") me-1"></i>
+                                                    @user.StatusDisplay
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small>@user.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                @if (user.LastLoginAt.HasValue)
+                                                {
+                                                    <small class="text-success">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        @user.LastLoginAt.Value.ToString("dd.MM.yyyy HH:mm")
+                                                    </small>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">Hiç giriş yapmamış</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a asp-action="EditUser" asp-route-id="@user.Id" 
+                                                       class="btn btn-outline-primary" title="Düzenle">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    
+                                                    <button type="button" class="btn btn-outline-warning" 
+                                                            onclick="showResetPasswordModal(@user.Id, '@user.FullName')" title="Şifre Sıfırla">
+                                                        <i class="fas fa-key"></i>
+                                                    </button>
+                                                    
+                                                    <button type="button" class="btn btn-outline-@(user.IsActive ? "danger" : "success")" 
+                                                            onclick="toggleUserStatus(@user.Id, '@user.FullName', @user.IsActive.ToString().ToLower())" 
+                                                            title="@(user.IsActive ? "Pasif Yap" : "Aktif Yap")">
+                                                        <i class="fas @(user.IsActive ? "fa-user-slash" : "fa-user-check")"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">
+                                        Toplam <strong>@Model.Count</strong> kullanıcı
+                                        (<strong>@Model.Count(u => u.IsActive)</strong> aktif, 
+                                         <strong>@Model.Count(u => !u.IsActive)</strong> pasif)
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Henüz kullanıcı bulunmamaktadır</h5>
+                            <p class="text-muted">İlk kullanıcıyı oluşturmak için "Yeni Kullanıcı" butonunu kullanın.</p>
+                            <a asp-action="CreateUser" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-1"></i>Yeni Kullanıcı Oluştur
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-key me-2"></i>Şifre Sıfırla
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="resetPasswordForm">
+                    <input type="hidden" id="resetUserId" />
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong><span id="resetUserName"></span></strong> kullanıcısının şifresini sıfırlamak üzeresiniz.
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Yeni Şifre</label>
+                        <input type="password" class="form-control" id="newPassword" required minlength="6">
+                        <div class="form-text">Şifre en az 6 karakter olmalıdır.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Şifre Tekrarı</label>
+                        <input type="password" class="form-control" id="confirmPassword" required minlength="6">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-warning" onclick="resetUserPassword()">
+                    <i class="fas fa-key me-1"></i>Şifreyi Sıfırla
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // DataTables initialization
+        $(document).ready(function() {
+            $('#usersTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json"
+                },
+                "order": [[ 4, "desc" ]],
+                "pageLength": 25,
+                "responsive": true
+            });
+        });
+
+        // Reset Password Modal
+        function showResetPasswordModal(userId, userName) {
+            $('#resetUserId').val(userId);
+            $('#resetUserName').text(userName);
+            $('#newPassword').val('');
+            $('#confirmPassword').val('');
+            $('#resetPasswordModal').modal('show');
+        }
+
+        function resetUserPassword() {
+            const userId = $('#resetUserId').val();
+            const newPassword = $('#newPassword').val();
+            const confirmPassword = $('#confirmPassword').val();
+
+            if (newPassword.length < 6) {
+                alert('Şifre en az 6 karakter olmalıdır.');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('Şifre ve şifre tekrarı uyuşmuyor.');
+                return;
+            }
+
+            if (confirm('Kullanıcının şifresini sıfırlamak istediğinizden emin misiniz?')) {
+                $.ajax({
+                    url: '@Url.Action("ResetUserPassword")',
+                    type: 'POST',
+                    data: {
+                        id: userId,
+                        newPassword: newPassword,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#resetPasswordModal').modal('hide');
+                            alert(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Şifre sıfırlama sırasında hata oluştu.');
+                    }
+                });
+            }
+        }
+
+        // Toggle User Status
+        function toggleUserStatus(userId, userName, isActive) {
+            const action = isActive ? 'pasif yapmak' : 'aktif yapmak';
+            
+            if (confirm(`${userName} kullanıcısını ${action} istediğinizden emin misiniz?`)) {
+                $.ajax({
+                    url: '@Url.Action("ToggleUserStatus")',
+                    type: 'POST',
+                    data: {
+                        id: userId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Kullanıcı durumu değiştirme sırasında hata oluştu.');
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -1,10 +1,12 @@
 using AutoMapper;
 using BLL.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using MVC.Models;
 
 namespace MVC.Controllers;
 
+[Authorize(Roles = "Admin,Manager")] // Sadece Admin ve Manager izin türlerini yönetebilir
 public class LeaveTypeController : Controller
 {
     private readonly ILeaveTypeService _leaveTypeService;

@@ -112,5 +112,10 @@ public class ViewModelMappingProfile : Profile
         CreateMap<LeaveBalanceCreateViewModel, LeaveBalanceCreateDto>();
         CreateMap<LeaveBalanceEditViewModel, LeaveBalanceUpdateDto>();
         CreateMap<LeaveBalanceAdjustmentViewModel, LeaveBalanceAdjustmentDto>();
+        
+        // Auth DTO to ViewModel mappings
+        CreateMap<UserProfileDto, UserProfileViewModel>();
+        CreateMap<LoginRequestDto, LoginViewModel>().ReverseMap();
+        CreateMap<RegisterRequestDto, RegisterViewModel>().ReverseMap();
     }
 }

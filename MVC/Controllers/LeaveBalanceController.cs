@@ -2,10 +2,13 @@ using AutoMapper;
 using BLL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using MVC.Models;
 
 namespace MVC.Controllers;
 
+// DEPRECATED: Bu modül kaldırıldı, artık kullanılmıyor
+// [Authorize(Roles = "Admin,Manager")]
 public class LeaveBalanceController : Controller
 {
     private readonly ILeaveBalanceService _leaveBalanceService;

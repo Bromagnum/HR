@@ -199,6 +199,9 @@ public class PersonDetailViewModel
     [Display(Name = "Pozisyon")]
     public string? Position { get; set; }
     
+    [Display(Name = "Pozisyon Adı")]
+    public string? PositionName { get; set; }
+    
     [Display(Name = "Departman")]
     public string? DepartmentName { get; set; }
     

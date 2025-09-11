@@ -1,0 +1,330 @@
+@model IEnumerable<WorkLogListViewModel>
+@{
+    ViewData["Title"] = "Çalışma Kayıtlarım";
+    var isEmployeeView = ViewData["IsEmployeeView"] as bool? ?? false;
+    var personId = ViewData["PersonId"] as int? ?? 0;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-clock me-2"></i>@ViewData["Title"]
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (isEmployeeView)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Bilgi:</strong> Bu sayfada sadece sizin çalışma kayıtlarınızı görüntüleyebilirsiniz. 
+                            Kayıtlarınızla ilgili herhangi bir sorun varsa yöneticinize başvurun.
+                        </div>
+                    }
+
+                    <!-- Tarih Filtreleme -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-alt me-1"></i>Başlangıç Tarihi
+                            </label>
+                            <input type="date" class="form-control" id="startDate" 
+                                   value="@DateTime.Today.AddDays(-30).ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-alt me-1"></i>Bitiş Tarihi
+                            </label>
+                            <input type="date" class="form-control" id="endDate" 
+                                   value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="button" class="btn btn-primary" onclick="filterByDate()">
+                                <i class="fas fa-filter me-1"></i>Filtrele
+                            </button>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end justify-content-end">
+                            <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                                <i class="fas fa-file-excel me-1"></i>Excel'e Aktar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Çalışma Kayıtları Tablosu -->
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="workLogsTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><i class="fas fa-calendar me-1"></i>Tarih</th>
+                                        <th><i class="fas fa-sign-in-alt me-1"></i>Giriş Saati</th>
+                                        <th><i class="fas fa-sign-out-alt me-1"></i>Çıkış Saati</th>
+                                        <th><i class="fas fa-clock me-1"></i>Toplam Süre</th>
+                                        <th><i class="fas fa-coffee me-1"></i>Mola Süresi</th>
+                                        <th><i class="fas fa-business-time me-1"></i>Net Çalışma</th>
+                                        <th><i class="fas fa-plus-circle me-1"></i>Fazla Mesai</th>
+                                        <th><i class="fas fa-info-circle me-1"></i>Durum</th>
+                                        <th><i class="fas fa-comment me-1"></i>Notlar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var workLog in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@workLog.Date.ToString("dd.MM.yyyy")</strong>
+                                                <br>
+                                                <small class="text-muted">@workLog.Date.ToString("dddd")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    @workLog.StartTime.ToString("hh\\:mm")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (workLog.EndTime.HasValue)
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        @workLog.EndTime.Value.ToString("hh\\:mm")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@workLog.TotalHours.ToString("F2") saat</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-warning text-dark">
+                                                    0.0 saat
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">
+                                                    @workLog.RegularHours.ToString("F2") saat
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (workLog.IsOvertime)
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="fas fa-plus me-1"></i>Var
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-light text-dark">Yok</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (workLog.Status == "Completed")
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Tamamlandı
+                                                    </span>
+                                                }
+                                                else if (workLog.Status == "InProgress")
+                                                {
+                                                    <span class="badge bg-primary">
+                                                        <i class="fas fa-play me-1"></i>Devam Ediyor
+                                                    </span>
+                                                }
+                                                else if (workLog.Status == "Pending")
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="fas fa-clock me-1"></i>Beklemede
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@workLog.Status</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="text-muted">-</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Özet Bilgiler -->
+                        <div class="row mt-4">
+                            <div class="col-md-2">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-primary">@Model.Count()</h5>
+                                        <small>Toplam Gün</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-success">@Model.Sum(w => w.TotalHours).ToString("F1")</h5>
+                                        <small>Toplam Saat</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-info">@Model.Sum(w => w.RegularHours).ToString("F1")</h5>
+                                        <small>Net Çalışma</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-warning">@Model.Count(w => w.IsOvertime)</h5>
+                                        <small>Fazla Mesai</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-success">@Model.Count(w => w.Status == "Completed")</h5>
+                                        <small>Tamamlanan</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-primary">@(Model.Any() ? (Model.Sum(w => w.TotalHours) / Model.Count()).ToString("F1") : "0")</h5>
+                                        <small>Ortalama/Gün</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Henüz çalışma kaydınız bulunmamaktadır.</h5>
+                            <p class="text-muted">Çalışma kayıtlarınız sistem tarafından otomatik olarak oluşturulur.</p>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Son güncelleme: @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
+                        </small>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-home me-1"></i>Ana Sayfa
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // DataTable initialization
+            if ($('#workLogsTable tbody tr').length > 0) {
+                $('#workLogsTable').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json"
+                    },
+                    "pageLength": 15,
+                    "order": [[0, "desc"]], // Tarihe göre sırala
+                    "columnDefs": [
+                        { "orderable": false, "targets": [8] } // Notlar sütunu sıralanamaz
+                    ]
+                });
+            }
+        });
+
+        // Tarih filtreleme
+        function filterByDate() {
+            const startDate = $('#startDate').val();
+            const endDate = $('#endDate').val();
+            
+            if (!startDate || !endDate) {
+                alert('Lütfen başlangıç ve bitiş tarihlerini seçin.');
+                return;
+            }
+            
+            if (startDate > endDate) {
+                alert('Başlangıç tarihi bitiş tarihinden küçük olmalıdır.');
+                return;
+            }
+            
+            // Sayfayı yeniden yükle
+            const url = new URL(window.location.href);
+            url.searchParams.set('startDate', startDate);
+            url.searchParams.set('endDate', endDate);
+            window.location.href = url.toString();
+        }
+
+        // Excel export
+        function exportToExcel() {
+            const startDate = $('#startDate').val();
+            const endDate = $('#endDate').val();
+            
+            let exportUrl = '@Url.Action("ExportToExcel", "WorkLog")';
+            
+            if (startDate && endDate) {
+                exportUrl += `?startDate=${startDate}&endDate=${endDate}&personId=@personId`;
+            } else {
+                exportUrl += `?personId=@personId`;
+            }
+            
+            window.open(exportUrl, '_blank');
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .table-hover tbody tr:hover {
+            background-color: rgba(23, 162, 184, 0.075);
+        }
+        
+        .badge {
+            font-size: 0.875em;
+        }
+        
+        .card-body .alert {
+            border-radius: 8px;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+        
+        .card-footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .fa-3x {
+            font-size: 3rem;
+        }
+        
+        .card.bg-light .card-body {
+            padding: 1rem 0.5rem;
+        }
+        
+        .card.bg-light h5 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+    </style>
+}

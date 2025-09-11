@@ -1,10 +1,11 @@
 using DAL.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 namespace DAL.Context;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -19,6 +20,10 @@ public class AppDbContext : DbContext
     public DbSet<LeaveType> LeaveTypes { get; set; }
     public DbSet<Leave> Leaves { get; set; }
     public DbSet<LeaveBalance> LeaveBalances { get; set; }
+    
+    // Authentication Tables
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<UserLoginLog> UserLoginLogs { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -340,7 +345,13 @@ public class AppDbContext : DbContext
             new Leave { Id = 6, PersonId = 15, LeaveTypeId = 4, StartDate = new DateTime(2025, 10, 10), EndDate = new DateTime(2025, 10, 12), TotalDays = 3, Reason = "Evlilik", Status = LeaveStatus.Completed, RequestDate = new DateTime(2025, 9, 15), ApprovedById = 13, ApprovedAt = new DateTime(2025, 9, 16), ApprovalNotes = "Tebrikler! Mutluluklar dileriz.", DocumentPath = "/documents/marriage_certificate_15.pdf", IsUrgent = false, IsActive = true, CreatedAt = new DateTime(2025, 9, 15) },
             
             // Rejected leave
-            new Leave { Id = 7, PersonId = 19, LeaveTypeId = 1, StartDate = new DateTime(2025, 12, 23), EndDate = new DateTime(2025, 12, 30), TotalDays = 6, Reason = "Tatil planı", Status = LeaveStatus.Rejected, RequestDate = new DateTime(2025, 12, 3), ApprovedById = 1, ApprovedAt = new DateTime(2025, 12, 4), RejectionReason = "Yılsonu yoğunluğu nedeniyle bu tarihlerde izin verilemez. Ocak ayında tekrar başvurun.", IsUrgent = false, IsActive = true, CreatedAt = new DateTime(2025, 12, 3) }
+            new Leave { Id = 7, PersonId = 19, LeaveTypeId = 1, StartDate = new DateTime(2025, 12, 23), EndDate = new DateTime(2025, 12, 30), TotalDays = 6, Reason = "Tatil planı", Status = LeaveStatus.Rejected, RequestDate = new DateTime(2025, 12, 3), ApprovedById = 1, ApprovedAt = new DateTime(2025, 12, 4), RejectionReason = "Yılsonu yoğunluğu nedeniyle bu tarihlerde izin verilemez. Ocak ayında tekrar başvurun.", IsUrgent = false, IsActive = true, CreatedAt = new DateTime(2025, 12, 3) },
+            
+            // Additional leaves for Department 1 (HR) employees for testing Manager filtering
+            new Leave { Id = 8, PersonId = 2, LeaveTypeId = 1, StartDate = new DateTime(2025, 12, 16), EndDate = new DateTime(2025, 12, 18), TotalDays = 3, Reason = "Aile ziyareti", Status = LeaveStatus.Pending, RequestDate = new DateTime(2025, 12, 5), IsUrgent = false, IsActive = true, CreatedAt = new DateTime(2025, 12, 5) },
+            new Leave { Id = 9, PersonId = 4, LeaveTypeId = 2, StartDate = new DateTime(2025, 12, 10), EndDate = new DateTime(2025, 12, 12), TotalDays = 3, Reason = "Doktor kontrolü", Status = LeaveStatus.Approved, RequestDate = new DateTime(2025, 12, 3), ApprovedById = 1, ApprovedAt = new DateTime(2025, 12, 4), ApprovalNotes = "Sağlık raporu onaylandı", DocumentPath = "/documents/medical_4.pdf", IsUrgent = true, IsActive = true, CreatedAt = new DateTime(2025, 12, 3) },
+            new Leave { Id = 10, PersonId = 7, LeaveTypeId = 1, StartDate = new DateTime(2025, 12, 20), EndDate = new DateTime(2025, 12, 24), TotalDays = 5, Reason = "Yılbaşı öncesi tatil", Status = LeaveStatus.Pending, RequestDate = new DateTime(2025, 12, 6), HandoverNotes = "Tüm işler tamamlandı", IsUrgent = false, IsActive = true, CreatedAt = new DateTime(2025, 12, 6) },
+            new Leave { Id = 11, PersonId = 10, LeaveTypeId = 1, StartDate = new DateTime(2025, 11, 25), EndDate = new DateTime(2025, 11, 27), TotalDays = 3, Reason = "Kişisel işler", Status = LeaveStatus.Completed, RequestDate = new DateTime(2025, 11, 15), ApprovedById = 1, ApprovedAt = new DateTime(2025, 11, 16), ApprovalNotes = "Onaylandı", IsUrgent = false, IsActive = true, CreatedAt = new DateTime(2025, 11, 15) }
         );
     }
     

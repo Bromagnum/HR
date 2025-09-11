@@ -1,0 +1,160 @@
+@model MVC.Models.EditUserViewModel
+@{
+    ViewData["Title"] = "Kullanıcı Düzenle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-user-edit me-2"></i>Kullanıcı Düzenle
+                        </h4>
+                        <a asp-action="Index" class="btn btn-dark btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="EditUser" method="post">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="Id" type="hidden" />
+                        
+                        <div class="row">
+                            <!-- Personal Information -->
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light mb-4">
+                                    <div class="card-header bg-transparent border-0">
+                                        <h6 class="mb-0 text-primary">
+                                            <i class="fas fa-user me-1"></i>Kişisel Bilgiler
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="FirstName" class="form-label">Ad</label>
+                                            <input asp-for="FirstName" class="form-control" placeholder="Ad giriniz" />
+                                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label asp-for="LastName" class="form-label">Soyad</label>
+                                            <input asp-for="LastName" class="form-control" placeholder="Soyad giriniz" />
+                                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label asp-for="Email" class="form-label">Email Adresi</label>
+                                            <input asp-for="Email" type="email" class="form-control" placeholder="email@example.com" />
+                                            <span asp-validation-for="Email" class="text-danger small"></span>
+                                            <div class="form-text">Bu email adresi kullanıcı adı olarak kullanılacaktır.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- System Information -->
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light mb-4">
+                                    <div class="card-header bg-transparent border-0">
+                                        <h6 class="mb-0 text-primary">
+                                            <i class="fas fa-cog me-1"></i>Sistem Bilgileri
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="Role" class="form-label">Rol</label>
+                                            <select asp-for="Role" class="form-select" asp-items="ViewBag.Roles">
+                                                <option value="">Rol seçiniz</option>
+                                            </select>
+                                            <span asp-validation-for="Role" class="text-danger small"></span>
+                                            <div class="form-text">
+                                                <strong>Admin:</strong> Tüm yetkilere sahip<br>
+                                                <strong>Manager:</strong> Departman yöneticisi<br>
+                                                <strong>Employee:</strong> Standart çalışan
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label asp-for="PersonId" class="form-label">Personel</label>
+                                            <select asp-for="PersonId" class="form-select" asp-items="ViewBag.Persons">
+                                                <option value="">Personel seçiniz (opsiyonel)</option>
+                                            </select>
+                                            <span asp-validation-for="PersonId" class="text-danger small"></span>
+                                            <div class="form-text">Mevcut personel kaydı ile ilişkilendirebilirsiniz.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label asp-for="DepartmentId" class="form-label">Departman</label>
+                                            <select asp-for="DepartmentId" class="form-select" asp-items="ViewBag.Departments">
+                                                <option value="">Departman seçiniz (opsiyonel)</option>
+                                            </select>
+                                            <span asp-validation-for="DepartmentId" class="text-danger small"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                                <label asp-for="IsActive" class="form-check-label">
+                                                    Kullanıcı Aktif
+                                                </label>
+                                            </div>
+                                            <div class="form-text">Pasif kullanıcılar sisteme giriş yapamaz.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password Notice -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Şifre Değiştirme:</strong>
+                                    Kullanıcının şifresini değiştirmek için kullanıcı listesindeki "Şifre Sıfırla" butonunu kullanın.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes Section -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="Notes" class="form-label">Notlar (Opsiyonel)</label>
+                                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Kullanıcı hakkında notlar..."></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>İptal
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-1"></i>Değişiklikleri Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

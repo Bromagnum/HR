@@ -3,35 +3,65 @@ using BLL.DTOs;
 using BLL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using MVC.Models;
+using MVC.Services;
 
 namespace MVC.Controllers;
 
+[Authorize] // Tüm çalışanlar eğitim bilgilerini görüntüleyebilir
 public class EducationController : Controller
 {
     private readonly IEducationService _educationService;
     private readonly IPersonService _personService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
 
-    public EducationController(IEducationService educationService, IPersonService personService, IMapper mapper)
+    public EducationController(IEducationService educationService, IPersonService personService, ICurrentUserService currentUserService, IMapper mapper)
     {
         _educationService = educationService;
         _personService = personService;
+        _currentUserService = currentUserService;
         _mapper = mapper;
     }
 
     // GET: Education
     public async Task<IActionResult> Index()
     {
-        var result = await _educationService.GetAllAsync();
-        if (!result.Success)
+        // Employee sadece kendi eğitimlerini görebilir
+        if (_currentUserService.IsInRole("Employee"))
         {
-            TempData["Error"] = result.Message;
+            var currentPersonId = _currentUserService.PersonId;
+            if (!currentPersonId.HasValue)
+            {
+                TempData["Error"] = "Personel kimliği alınamadı. Lütfen yöneticinize başvurun.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _educationService.GetByPersonIdAsync(currentPersonId.Value);
+            if (!result.Success)
+            {
+                TempData["Error"] = result.Message;
+                return View("MyEducations", new List<EducationListViewModel>());
+            }
+
+            var viewModels = _mapper.Map<List<EducationListViewModel>>(result.Data);
+            ViewData["Title"] = "Eğitimlerim";
+            ViewData["IsEmployeeView"] = true;
+            ViewData["PersonId"] = currentPersonId.Value;
+            return View("MyEducations", viewModels);
+        }
+
+        // Admin/Manager için tüm eğitimler
+        var allResult = await _educationService.GetAllAsync();
+        if (!allResult.Success)
+        {
+            TempData["Error"] = allResult.Message;
             return View(new List<EducationListViewModel>());
         }
 
-        var viewModel = _mapper.Map<List<EducationListViewModel>>(result.Data);
-        return View(viewModel);
+        var allViewModels = _mapper.Map<List<EducationListViewModel>>(allResult.Data);
+        return View(allViewModels);
     }
 
     // GET: Education/Details/5
@@ -51,6 +81,29 @@ public class EducationController : Controller
     // GET: Education/Create
     public async Task<IActionResult> Create()
     {
+        // Employee sadece kendisi için eğitim ekleyebilir
+        if (_currentUserService.IsInRole("Employee"))
+        {
+            var currentPersonId = _currentUserService.PersonId;
+            if (!currentPersonId.HasValue)
+            {
+                TempData["Error"] = "Personel kimliği alınamadı. Lütfen yöneticinize başvurun.";
+                return RedirectToAction("Index");
+            }
+
+            var viewModel = new EducationCreateViewModel
+            {
+                PersonId = currentPersonId.Value
+            };
+
+            // Employee için sadece kendi adını dropdown'da göster
+            await LoadPersonSelectListForEmployeeAsync(currentPersonId.Value);
+            ViewData["Title"] = "Yeni Eğitim Ekle";
+            ViewData["IsEmployeeView"] = true;
+            return View("CreateEmployee", viewModel);
+        }
+
+        // Admin/Manager için tüm personeller
         await LoadPersonSelectListAsync();
         return View(new EducationCreateViewModel());
     }
@@ -60,10 +113,34 @@ public class EducationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(EducationCreateViewModel model)
     {
+        // Employee güvenlik kontrolü
+        if (_currentUserService.IsInRole("Employee"))
+        {
+            var currentPersonId = _currentUserService.PersonId;
+            if (!currentPersonId.HasValue)
+            {
+                TempData["Error"] = "Personel kimliği alınamadı. Lütfen yöneticinize başvurun.";
+                return RedirectToAction("Index");
+            }
+            
+            // Employee sadece kendi PersonId'si için eğitim oluşturabilir
+            model.PersonId = currentPersonId.Value;
+        }
+
         if (!ModelState.IsValid)
         {
-            await LoadPersonSelectListAsync();
-            return View(model);
+            if (_currentUserService.IsInRole("Employee"))
+            {
+                await LoadPersonSelectListForEmployeeAsync(model.PersonId);
+                ViewData["Title"] = "Yeni Eğitim Ekle";
+                ViewData["IsEmployeeView"] = true;
+                return View("CreateEmployee", model);
+            }
+            else
+            {
+                await LoadPersonSelectListAsync();
+                return View(model);
+            }
         }
 
         var createDto = _mapper.Map<EducationCreateDto>(model);
@@ -76,8 +153,19 @@ public class EducationController : Controller
         }
 
         TempData["Error"] = result.Message;
-        await LoadPersonSelectListAsync();
-        return View(model);
+        
+        if (_currentUserService.IsInRole("Employee"))
+        {
+            await LoadPersonSelectListForEmployeeAsync(model.PersonId);
+            ViewData["Title"] = "Yeni Eğitim Ekle";
+            ViewData["IsEmployeeView"] = true;
+            return View("CreateEmployee", model);
+        }
+        else
+        {
+            await LoadPersonSelectListAsync();
+            return View(model);
+        }
     }
 
     // GET: Education/Edit/5
@@ -339,6 +427,27 @@ public class EducationController : Controller
                 })
                 .OrderBy(x => x.Text)
                 .ToList();
+        }
+        else
+        {
+            ViewBag.PersonSelectList = new List<SelectListItem>();
+        }
+    }
+
+    private async Task LoadPersonSelectListForEmployeeAsync(int personId)
+    {
+        var personResult = await _personService.GetByIdAsync(personId);
+        if (personResult.Success && personResult.Data != null)
+        {
+            ViewBag.PersonSelectList = new List<SelectListItem>
+            {
+                new SelectListItem
+                {
+                    Value = personResult.Data.Id.ToString(),
+                    Text = $"{personResult.Data.FirstName} {personResult.Data.LastName} ({personResult.Data.EmployeeNumber})",
+                    Selected = true
+                }
+            };
         }
         else
         {

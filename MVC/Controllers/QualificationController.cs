@@ -3,20 +3,25 @@ using BLL.DTOs;
 using BLL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using MVC.Models;
+using MVC.Services;
 
 namespace MVC.Controllers;
 
+[Authorize] // Tüm çalışanlar yeterlilik bilgilerini görüntüleyebilir
 public class QualificationController : Controller
 {
     private readonly IQualificationService _qualificationService;
     private readonly IPersonService _personService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
 
-    public QualificationController(IQualificationService qualificationService, IPersonService personService, IMapper mapper)
+    public QualificationController(IQualificationService qualificationService, IPersonService personService, ICurrentUserService currentUserService, IMapper mapper)
     {
         _qualificationService = qualificationService;
         _personService = personService;
+        _currentUserService = currentUserService;
         _mapper = mapper;
     }
 

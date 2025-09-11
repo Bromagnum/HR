@@ -98,6 +98,83 @@ namespace MVC.Controllers
             return View(viewModel);
         }
 
+        // GET: WorkLog/Create - Sadece Admin/Manager
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Create()
+        {
+            var viewModel = new WorkLogCreateViewModel();
+            await LoadCreateSelectListsAsync(viewModel);
+            return View(viewModel);
+        }
+
+        // POST: WorkLog/Create - Sadece Admin/Manager
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Create(WorkLogCreateViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var dto = _mapper.Map<WorkLogCreateDto>(viewModel);
+                var result = await _workLogService.CreateAsync(dto);
+
+                if (result.Success)
+                {
+                    TempData["Success"] = result.Message;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                TempData["Error"] = result.Message;
+            }
+
+            await LoadCreateSelectListsAsync(viewModel);
+            return View(viewModel);
+        }
+
+        // GET: WorkLog/Edit/5 - Sadece Admin/Manager
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var result = await _workLogService.GetByIdAsync(id);
+            if (!result.Success)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            var viewModel = _mapper.Map<WorkLogEditViewModel>(result.Data);
+            await LoadEditSelectListsAsync(viewModel);
+            return View(viewModel);
+        }
+
+        // POST: WorkLog/Edit/5 - Sadece Admin/Manager
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Edit(int id, WorkLogEditViewModel viewModel)
+        {
+            if (id != viewModel.Id)
+            {
+                return BadRequest();
+            }
+
+            if (ModelState.IsValid)
+            {
+                var dto = _mapper.Map<WorkLogUpdateDto>(viewModel);
+                var result = await _workLogService.UpdateAsync(dto);
+
+                if (result.Success)
+                {
+                    TempData["Success"] = result.Message;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                TempData["Error"] = result.Message;
+            }
+
+            await LoadEditSelectListsAsync(viewModel);
+            return View(viewModel);
+        }
 
         // POST: WorkLog/Delete/5 - Sadece Admin/Manager
         [HttpPost]
@@ -119,5 +196,30 @@ namespace MVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        private async Task LoadCreateSelectListsAsync(WorkLogCreateViewModel viewModel)
+        {
+            var personsResult = await _personService.GetAllAsync();
+            if (personsResult.Success)
+            {
+                ViewBag.PersonSelectList = personsResult.Data
+                    .Where(p => p.IsActive)
+                    .Select(p => new SelectListItem
+                    {
+                        Value = p.Id.ToString(),
+                        Text = $"{p.FirstName} {p.LastName} ({p.EmployeeNumber})"
+                    })
+                    .OrderBy(x => x.Text)
+                    .ToList();
+            }
+            else
+            {
+                ViewBag.PersonSelectList = new List<SelectListItem>();
+            }
+        }
+
+        private async Task LoadEditSelectListsAsync(WorkLogEditViewModel viewModel)
+        {
+            await LoadCreateSelectListsAsync(new WorkLogCreateViewModel());
+        }
     }
 }

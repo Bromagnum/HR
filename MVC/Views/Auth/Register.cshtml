@@ -1,0 +1,115 @@
+@model MVC.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Kayıt Ol";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                <div class="card-header">
+                    <h3 class="text-center font-weight-light my-4">
+                        <i class="fas fa-user-plus me-2"></i>Hesap Oluştur
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-controller="Auth" asp-action="Register" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="FirstName" class="form-control" id="inputFirstName" type="text" placeholder="Ad" />
+                                    <label for="inputFirstName">Ad</label>
+                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="LastName" class="form-control" id="inputLastName" type="text" placeholder="Soyad" />
+                                    <label for="inputLastName">Soyad</label>
+                                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control" id="inputEmail" type="email" placeholder="name@example.com" />
+                            <label for="inputEmail">Email Adresi</label>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="Password" class="form-control" id="inputPassword" type="password" placeholder="Şifre" />
+                                    <label for="inputPassword">Şifre</label>
+                                    <span asp-validation-for="Password" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="ConfirmPassword" class="form-control" id="inputPasswordConfirm" type="password" placeholder="Şifre Tekrarı" />
+                                    <label for="inputPasswordConfirm">Şifre Tekrarı</label>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Şifre Gereksinimleri:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>En az 6 karakter olmalıdır</li>
+                                <li>En az bir rakam içermelidir</li>
+                                <li>En az bir küçük harf içermelidir</li>
+                            </ul>
+                        </div>
+                        
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="mt-4 mb-0">
+                            <div class="d-grid">
+                                <button class="btn btn-primary btn-block" type="submit">
+                                    <i class="fas fa-user-plus me-1"></i>Hesap Oluştur
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <div class="small">
+                        <a asp-controller="Auth" asp-action="Login">Zaten hesabınız var mı? Giriş yapın!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Password strength indicator
+        document.getElementById('inputPassword').addEventListener('input', function(e) {
+            const password = e.target.value;
+            const requirements = {
+                length: password.length >= 6,
+                number: /\d/.test(password),
+                lowercase: /[a-z]/.test(password)
+            };
+            
+            // Update UI based on requirements (optional enhancement)
+            console.log('Password requirements:', requirements);
+        });
+    </script>
+}

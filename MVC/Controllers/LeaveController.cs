@@ -2,17 +2,20 @@ using AutoMapper;
 using BLL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using MVC.Models;
 using DAL.Entities;
 
 namespace MVC.Controllers;
 
+[Authorize] // Tüm çalışanlar erişebilir
 public class LeaveController : Controller
 {
     private readonly ILeaveService _leaveService;
     private readonly ILeaveTypeService _leaveTypeService;
     private readonly IPersonService _personService;
     private readonly IDepartmentService _departmentService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
 
     public LeaveController(
@@ -20,25 +23,60 @@ public class LeaveController : Controller
         ILeaveTypeService leaveTypeService,
         IPersonService personService,
         IDepartmentService departmentService,
+        ICurrentUserService currentUserService,
         IMapper mapper)
     {
         _leaveService = leaveService;
         _leaveTypeService = leaveTypeService;
         _personService = personService;
         _departmentService = departmentService;
+        _currentUserService = currentUserService;
         _mapper = mapper;
     }
 
     // GET: Leave
     public async Task<IActionResult> Index(LeaveFilterViewModel filter)
     {
+        // Employee sadece kendi izinlerini görsün
+        if (_currentUserService.IsInRole("Employee"))
+        {
+            return RedirectToAction("MyLeaves");
+        }
+
         // Prepare filter dropdowns
         await PrepareFilterViewData(filter);
 
         var filterDto = _mapper.Map<BLL.DTOs.LeaveFilterDto>(filter);
-        var result = string.IsNullOrEmpty(filter.SearchTerm) && !filter.PersonId.HasValue && !filter.LeaveTypeId.HasValue && !filter.Status.HasValue
-            ? await _leaveService.GetAllAsync()
-            : await _leaveService.GetFilteredAsync(filterDto);
+        
+        // Apply department filtering for Managers
+        if (_currentUserService.IsInRole("Manager"))
+        {
+            var managerDepartmentId = _currentUserService.DepartmentId;
+            System.Diagnostics.Debug.WriteLine($"Manager accessing Leave Index - DepartmentId: {managerDepartmentId}");
+            
+            if (!managerDepartmentId.HasValue)
+            {
+                TempData["Error"] = "Departman bilginiz bulunamadı. Lütfen yöneticinize başvurun.";
+                return View(new List<LeaveListViewModel>());
+            }
+            
+            // Set department filter for manager
+            filterDto.DepartmentId = managerDepartmentId.Value;
+            System.Diagnostics.Debug.WriteLine($"Department filter applied: {managerDepartmentId.Value}");
+        }
+
+        // For Managers, always use filtered approach (department filtering is applied)
+        // For Admins, use GetAllAsync only if no filters are applied
+        var hasFilters = !string.IsNullOrEmpty(filter.SearchTerm) || filter.PersonId.HasValue || 
+                         filter.LeaveTypeId.HasValue || filter.Status.HasValue || filterDto.DepartmentId.HasValue;
+        
+        System.Diagnostics.Debug.WriteLine($"LeaveController.Index - hasFilters: {hasFilters}, DepartmentId: {filterDto.DepartmentId}");
+        
+        var result = hasFilters 
+            ? await _leaveService.GetFilteredAsync(filterDto)
+            : await _leaveService.GetAllAsync();
+            
+        System.Diagnostics.Debug.WriteLine($"LeaveController.Index - Result Success: {result.IsSuccess}, Count: {result.Data?.Count() ?? 0}");
 
         if (!result.IsSuccess)
         {
@@ -52,25 +90,32 @@ public class LeaveController : Controller
     }
 
 
-    // GET: Leave/MyLeaves
+    // GET: Leave/MyLeaves - Employee için kendi izinleri
     public async Task<IActionResult> MyLeaves(int? year)
     {
-        // In a real application, you would get the current user's ID from authentication
-        int currentUserId = 1; // TODO: Get from current user
+        var currentPersonId = _currentUserService.PersonId;
+        if (!currentPersonId.HasValue)
+        {
+            TempData["Error"] = "Personel kimliği alınamadı. Lütfen yöneticinize başvurun.";
+            return RedirectToAction("Index", "Home");
+        }
         
         if (year == null) year = DateTime.Now.Year;
 
-        var result = await _leaveService.GetLeavesByPersonAsync(currentUserId, year);
+        var result = await _leaveService.GetLeavesByPersonAsync(currentPersonId.Value, year);
         if (!result.IsSuccess)
         {
             TempData["Error"] = result.Message;
-            return View("Index", new List<LeaveListViewModel>());
+            return View(new List<LeaveListViewModel>());
         }
 
         var viewModels = _mapper.Map<List<LeaveListViewModel>>(result.Data);
-        ViewData["Title"] = $"Benim İzinlerim ({year})";
-        ViewData["Year"] = year;
-        return View("Index", viewModels);
+        ViewData["Title"] = $"İzinlerim ({year})";
+        ViewData["CurrentYear"] = year;
+        ViewData["PersonId"] = currentPersonId.Value;
+        ViewData["IsEmployeeView"] = _currentUserService.IsInRole("Employee");
+        
+        return View(viewModels);
     }
 
     // GET: Leave/Calendar
@@ -119,9 +164,33 @@ public class LeaveController : Controller
     // GET: Leave/Create
     public async Task<IActionResult> Create()
     {
-        var viewModel = new LeaveCreateViewModel();
-        await PrepareCreateEditViewData(viewModel);
-        return View(viewModel);
+        // Employee için özelleştirilmiş form
+        if (_currentUserService.IsInRole("Employee"))
+        {
+            var currentPersonId = _currentUserService.PersonId;
+            if (!currentPersonId.HasValue)
+            {
+                TempData["Error"] = "Personel kimliği alınamadı. Lütfen yöneticinize başvurun.";
+                return RedirectToAction("MyLeaves");
+            }
+
+            await LoadLeaveTypes();
+            var viewModel = new LeaveCreateViewModel
+            {
+                PersonId = currentPersonId.Value,
+                StartDate = DateTime.Today.AddDays(1),
+                EndDate = DateTime.Today.AddDays(1)
+            };
+            
+            ViewData["Title"] = "Yeni İzin Talebi";
+            ViewData["IsEmployeeView"] = true;
+            return View("CreateEmployee", viewModel);
+        }
+
+        // Admin/Manager için tam form
+        var adminViewModel = new LeaveCreateViewModel();
+        await PrepareCreateEditViewData(adminViewModel);
+        return View(adminViewModel);
     }
 
     // POST: Leave/Create
@@ -302,7 +371,7 @@ public class LeaveController : Controller
 
         var dto = _mapper.Map<BLL.DTOs.LeaveApprovalDto>(viewModel);
         dto.IsApproved = viewModel.IsApproved;
-        dto.ApprovedById = 1; // TODO: Get current user ID from session/claims
+        dto.ApprovedById = _currentUserService.UserId ?? throw new UnauthorizedAccessException("Kullanıcı kimliği alınamadı.");
         dto.RejectionReason = viewModel.IsApproved ? null : viewModel.ApprovalNotes;
 
         var result = viewModel.IsApproved 
@@ -324,7 +393,7 @@ public class LeaveController : Controller
     [HttpPost]
     public async Task<IActionResult> Cancel(int id)
     {
-        int currentUserId = 1; // TODO: Get from current user
+        int currentUserId = _currentUserService.UserId ?? throw new UnauthorizedAccessException("Kullanıcı kimliği alınamadı.");
 
         var result = await _leaveService.CancelAsync(id, currentUserId);
         if (!result.IsSuccess)
@@ -450,10 +519,11 @@ public class LeaveController : Controller
         try
         {
             // Create a test leave request
+            var currentPersonId = _currentUserService.PersonId ?? throw new UnauthorizedAccessException("Personel kimliği alınamadı.");
             var testDto = new BLL.DTOs.LeaveCreateDto
             {
-                PersonId = 1,
-                LeaveTypeId = 1,
+                PersonId = currentPersonId,
+                LeaveTypeId = 1, // Using first leave type for testing
                 StartDate = DateTime.Today.AddDays(1),
                 EndDate = DateTime.Today.AddDays(3),
                 Reason = "Test izin talebi",
@@ -484,6 +554,14 @@ public class LeaveController : Controller
     }
 
     #region Private Helper Methods
+
+    private async Task LoadLeaveTypes()
+    {
+        var leaveTypesResult = await _leaveTypeService.GetActiveAsync();
+        ViewBag.LeaveTypes = leaveTypesResult.IsSuccess && leaveTypesResult.Data != null
+            ? new SelectList(leaveTypesResult.Data, "Id", "Name")
+            : new SelectList(Enumerable.Empty<SelectListItem>());
+    }
 
     private async Task PrepareFilterViewData(LeaveFilterViewModel filter)
     {

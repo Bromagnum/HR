@@ -1,0 +1,297 @@
+@model LeaveCreateViewModel
+@{
+    ViewData["Title"] = "Yeni İzin Talebi";
+    var isEmployeeView = ViewData["IsEmployeeView"] as bool? ?? false;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-calendar-plus me-2"></i>@ViewData["Title"]
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (isEmployeeView)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Bilgi:</strong> İzin talebiniz oluşturulduktan sonra departman yöneticinizin onayını bekleyecektir.
+                            Onay süreci tamamlandığında bilgilendirileceksiniz.
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post" class="needs-validation" novalidate>
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(m => m.PersonId)
+                        
+                        <div class="row">
+                            <!-- İzin Türü -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="LeaveTypeId" class="form-label">
+                                        <i class="fas fa-tags me-1"></i>İzin Türü <span class="text-danger">*</span>
+                                    </label>
+                                    <select asp-for="LeaveTypeId" class="form-select" asp-items="ViewBag.LeaveTypes" required>
+                                        <option value="">İzin türü seçiniz...</option>
+                                    </select>
+                                    <span asp-validation-for="LeaveTypeId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Toplam Gün -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-calendar-day me-1"></i>Toplam Gün
+                                    </label>
+                                    <input type="number" class="form-control" id="totalDays" readonly 
+                                           value="1" style="background-color: #f8f9fa;">
+                                    <div class="form-text">Tarih seçimine göre otomatik hesaplanır</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Başlangıç Tarihi -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="StartDate" class="form-label">
+                                        <i class="fas fa-calendar-alt me-1"></i>Başlangıç Tarihi <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="StartDate" type="date" class="form-control" 
+                                           min="@DateTime.Today.ToString("yyyy-MM-dd")" required>
+                                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Bitiş Tarihi -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EndDate" class="form-label">
+                                        <i class="fas fa-calendar-alt me-1"></i>Bitiş Tarihi <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="EndDate" type="date" class="form-control" 
+                                           min="@DateTime.Today.ToString("yyyy-MM-dd")" required>
+                                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- İzin Nedeni -->
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="Reason" class="form-label">
+                                        <i class="fas fa-comment me-1"></i>İzin Nedeni <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea asp-for="Reason" class="form-control" rows="3" 
+                                              placeholder="İzin alma nedeninizi detaylıca açıklayın..." 
+                                              maxlength="500" required></textarea>
+                                    <div class="form-text">Maksimum 500 karakter</div>
+                                    <span asp-validation-for="Reason" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Ek Notlar -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Notes" class="form-label">
+                                        <i class="fas fa-sticky-note me-1"></i>Ek Notlar
+                                    </label>
+                                    <textarea asp-for="Notes" class="form-control" rows="2" 
+                                              placeholder="Varsa ek açıklamalar..." maxlength="300"></textarea>
+                                    <div class="form-text">Opsiyonel - Maksimum 300 karakter</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Acil Durum İletişim -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EmergencyContact" class="form-label">
+                                        <i class="fas fa-phone me-1"></i>Acil Durum İletişim
+                                    </label>
+                                    <input asp-for="EmergencyContact" type="text" class="form-control" 
+                                           placeholder="Acil durumda ulaşılacak kişi" maxlength="100">
+                                    <div class="form-text">İzin süresince acil durumlarda ulaşılacak kişi</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Acil Durum Telefon -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EmergencyPhone" class="form-label">
+                                        <i class="fas fa-phone-alt me-1"></i>Acil Durum Telefon
+                                    </label>
+                                    <input asp-for="EmergencyPhone" type="tel" class="form-control" 
+                                           placeholder="0555 123 45 67" maxlength="20">
+                                    <div class="form-text">Acil durum telefon numarası</div>
+                                </div>
+                            </div>
+                            
+                            <!-- İş Devri Notları -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="HandoverNotes" class="form-label">
+                                        <i class="fas fa-handshake me-1"></i>İş Devri Notları
+                                    </label>
+                                    <textarea asp-for="HandoverNotes" class="form-control" rows="2" 
+                                              placeholder="İşlerinizi nasıl devrettiğinizi açıklayın..." maxlength="500"></textarea>
+                                    <div class="form-text">İş devri ile ilgili açıklamalar</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- İzin Kuralları Uyarısı -->
+                        <div class="alert alert-warning" role="alert">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>İzin Kuralları:</h6>
+                            <ul class="mb-0">
+                                <li>İzin talepleri en az 3 gün önceden yapılmalıdır</li>
+                                <li>Yıllık izin hakları departman politikalarına göre belirlenir</li>
+                                <li>Hastalık izni için sağlık raporu gereklidir</li>
+                                <li>İzin onayı departman yöneticiniz tarafından verilir</li>
+                                <li>İptal işlemleri için yöneticinize başvurun</li>
+                            </ul>
+                        </div>
+
+                        <!-- Form Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="MyLeaves" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>İzinlerime Dön
+                            </a>
+                            
+                            <div class="btn-group">
+                                <button type="reset" class="btn btn-outline-warning">
+                                    <i class="fas fa-undo me-2"></i>Temizle
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-paper-plane me-2"></i>İzin Talebini Gönder
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Tarih değişikliklerini dinle ve toplam günü hesapla
+            function calculateTotalDays() {
+                const startDate = new Date($('#StartDate').val());
+                const endDate = new Date($('#EndDate').val());
+                
+                if (startDate && endDate && endDate >= startDate) {
+                    const timeDiff = endDate.getTime() - startDate.getTime();
+                    const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+                    $('#totalDays').val(dayDiff);
+                } else {
+                    $('#totalDays').val(1);
+                }
+            }
+            
+            $('#StartDate, #EndDate').on('change', calculateTotalDays);
+            
+            // Sayfa yüklendiğinde hesapla
+            calculateTotalDays();
+            
+            // Form validation
+            $('.needs-validation').on('submit', function(e) {
+                const form = this;
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+            
+            // Bitiş tarihi başlangıç tarihinden önce olamaz
+            $('#StartDate').on('change', function() {
+                const startDate = $(this).val();
+                $('#EndDate').attr('min', startDate);
+                
+                // Eğer bitiş tarihi başlangıçtan küçükse, bitiş tarihini başlangıç tarihi yap
+                if ($('#EndDate').val() < startDate) {
+                    $('#EndDate').val(startDate);
+                }
+                calculateTotalDays();
+            });
+            
+            // Karakter sayısı göstergesi
+            $('textarea[maxlength]').on('input', function() {
+                const maxLength = $(this).attr('maxlength');
+                const currentLength = $(this).val().length;
+                const remaining = maxLength - currentLength;
+                
+                let formText = $(this).siblings('.form-text');
+                const originalText = formText.text().split(' - ')[0];
+                formText.text(`${originalText} - Kalan: ${remaining} karakter`);
+                
+                if (remaining < 50) {
+                    formText.addClass('text-warning');
+                } else {
+                    formText.removeClass('text-warning');
+                }
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .form-control:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+        
+        .alert-warning {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .alert-info {
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+        }
+        
+        .card-header {
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .form-text.text-warning {
+            font-weight: bold;
+        }
+        
+        .needs-validation .form-control:invalid {
+            border-color: #dc3545;
+        }
+        
+        .needs-validation .form-control:valid {
+            border-color: #28a745;
+        }
+    </style>
+}

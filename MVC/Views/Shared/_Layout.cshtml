@@ -6,6 +6,8 @@
     <title>@ViewData["Title"] - İKYS</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MVC.styles.css" asp-append-version="true" />
     <!-- Font Awesome CDN -->
@@ -27,163 +29,423 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-users"></i> Personel
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-controller="Person" asp-action="Index">
-                                    <i class="fas fa-list"></i> Personel Listesi
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Person" asp-action="Create">
-                                    <i class="fas fa-user-plus"></i> Yeni Personel
-                                </a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-building"></i> Departman
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-controller="Department" asp-action="Index">
-                                    <i class="fas fa-list"></i> Departman Listesi
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Department" asp-action="Tree">
-                                    <i class="fas fa-sitemap"></i> Ağaç Görünümü
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-controller="Department" asp-action="Create">
-                                    <i class="fas fa-plus"></i> Yeni Departman
-                                </a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-graduation-cap"></i> Eğitim
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-controller="Education" asp-action="Index">
-                                    <i class="fas fa-list"></i> Eğitim Listesi
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Education" asp-action="Ongoing">
-                                    <i class="fas fa-clock"></i> Devam Eden Eğitimler
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Education" asp-action="Completed">
-                                    <i class="fas fa-check-circle"></i> Tamamlanan Eğitimler
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-controller="Education" asp-action="Create">
-                                    <i class="fas fa-plus"></i> Yeni Eğitim Ekle
-                                </a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-certificate"></i> Yeterlilik
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-controller="Qualification" asp-action="Index">
-                                    <i class="fas fa-list"></i> Yeterlilik Listesi
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Qualification" asp-action="ExpiringSoon">
-                                    <i class="fas fa-clock"></i> Süresi Yaklaşanlar
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Qualification" asp-action="Expired">
-                                    <i class="fas fa-exclamation-triangle"></i> Süresi Dolmuşlar
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-controller="Qualification" asp-action="Create">
-                                    <i class="fas fa-plus"></i> Yeni Yeterlilik Ekle
-                                </a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-briefcase"></i> Pozisyon
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-controller="Position" asp-action="Index">
-                                    <i class="fas fa-list"></i> Pozisyon Listesi
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Position" asp-action="Available">
-                                    <i class="fas fa-check-circle"></i> Müsait Pozisyonlar
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">Seviyeye Göre</h6></li>
-                                <li><a class="dropdown-item" asp-controller="Position" asp-action="ByLevel" asp-route-level="Junior">
-                                    <i class="fas fa-seedling"></i> Junior
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Position" asp-action="ByLevel" asp-route-level="Senior">
-                                    <i class="fas fa-star"></i> Senior
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Position" asp-action="ByLevel" asp-route-level="Manager">
-                                    <i class="fas fa-user-tie"></i> Manager
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-controller="Position" asp-action="Create">
-                                    <i class="fas fa-plus"></i> Yeni Pozisyon Ekle
-                                </a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-clock"></i> Çalışma Saati
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="Index">
-                                    <i class="fas fa-list"></i> Çalışma Kayıtları
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="CheckIn">
-                                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">Raporlar</h6></li>
-                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="TimeSheet">
-                                    <i class="fas fa-table"></i> Zaman Çizelgesi
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="OvertimeReport">
-                                    <i class="fas fa-clock"></i> Mesai Raporu
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="LateArrivalReport">
-                                    <i class="fas fa-exclamation-triangle"></i> Geç Gelme Raporu
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="Create">
-                                    <i class="fas fa-plus"></i> Yeni Kayıt Ekle
-                                </a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-calendar-check"></i> İzin Yönetimi
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><h6 class="dropdown-header">İzin Türleri</h6></li>
-                                <li><a class="dropdown-item" asp-controller="LeaveType" asp-action="Index">
-                                    <i class="fas fa-list"></i> İzin Türleri
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="LeaveType" asp-action="Active">
-                                    <i class="fas fa-check-circle"></i> Aktif İzin Türleri
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="LeaveType" asp-action="Create">
-                                    <i class="fas fa-plus"></i> Yeni İzin Türü
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">İzin Talepleri</h6></li>
-                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="Index">
-                                    <i class="fas fa-calendar-alt"></i> Tüm İzinler
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="PendingApprovals">
-                                    <i class="fas fa-hourglass-half"></i> Onay Bekleyenler
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="Calendar">
-                                    <i class="fas fa-calendar"></i> İzin Takvimi
-                                </a></li>
-                                <li><a class="dropdown-item" asp-controller="Leave" asp-action="Create">
-                                    <i class="fas fa-plus"></i> Yeni İzin Talebi
-                                </a></li>
-                            </ul>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <!-- ADMIN - Full Access to All Modules -->
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <!-- Kullanıcı Yönetimi - Admin: User Management -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-users-cog"></i> Kullanıcı Yönetimi
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="UserManagement" asp-action="Index">
+                                            <i class="fas fa-list"></i> Kullanıcı Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="UserManagement" asp-action="CreateUser">
+                                            <i class="fas fa-user-plus"></i> Yeni Kullanıcı
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Personel Yönetimi - Admin: Full CRUD -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-users"></i> Personel
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Person" asp-action="Index">
+                                            <i class="fas fa-list"></i> Personel Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Person" asp-action="Create">
+                                            <i class="fas fa-user-plus"></i> Yeni Personel
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Departman Yönetimi - Admin: Full CRUD -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-building"></i> Departman
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Department" asp-action="Index">
+                                            <i class="fas fa-list"></i> Departman Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Department" asp-action="Tree">
+                                            <i class="fas fa-sitemap"></i> Ağaç Görünümü
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Department" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Departman
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Pozisyon Yönetimi - Admin: Full CRUD -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-briefcase"></i> Pozisyon
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Position" asp-action="Index">
+                                            <i class="fas fa-list"></i> Pozisyon Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Position" asp-action="Available">
+                                            <i class="fas fa-check-circle"></i> Müsait Pozisyonlar
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Seviyeye Göre</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Position" asp-action="ByLevel" asp-route-level="Junior">
+                                            <i class="fas fa-seedling"></i> Junior
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Position" asp-action="ByLevel" asp-route-level="Senior">
+                                            <i class="fas fa-star"></i> Senior
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Position" asp-action="ByLevel" asp-route-level="Manager">
+                                            <i class="fas fa-user-tie"></i> Manager
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Position" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Pozisyon Ekle
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- İzin Türü Yönetimi - Admin: Full CRUD -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-calendar-check"></i> İzin Yönetimi
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><h6 class="dropdown-header">İzin Türleri</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="LeaveType" asp-action="Index">
+                                            <i class="fas fa-list"></i> İzin Türleri
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="LeaveType" asp-action="Active">
+                                            <i class="fas fa-check-circle"></i> Aktif İzin Türleri
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="LeaveType" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni İzin Türü
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">İzin Talepleri</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Leave" asp-action="Index">
+                                            <i class="fas fa-calendar-alt"></i> Tüm İzinler
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Leave" asp-action="PendingApprovals">
+                                            <i class="fas fa-hourglass-half"></i> Onay Bekleyenler
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Leave" asp-action="Calendar">
+                                            <i class="fas fa-calendar"></i> İzin Takvimi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Leave" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni İzin Talebi
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Eğitim Yönetimi - Admin: All Records -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-graduation-cap"></i> Eğitim
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Education" asp-action="Index">
+                                            <i class="fas fa-list"></i> Eğitim Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Education" asp-action="Ongoing">
+                                            <i class="fas fa-clock"></i> Devam Eden Eğitimler
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Education" asp-action="Completed">
+                                            <i class="fas fa-check-circle"></i> Tamamlanan Eğitimler
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Education" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Eğitim Ekle
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Yeterlilik Yönetimi - Admin: All Records -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-certificate"></i> Yeterlilik
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Qualification" asp-action="Index">
+                                            <i class="fas fa-list"></i> Yeterlilik Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Qualification" asp-action="ExpiringSoon">
+                                            <i class="fas fa-clock"></i> Süresi Yaklaşanlar
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Qualification" asp-action="Expired">
+                                            <i class="fas fa-exclamation-triangle"></i> Süresi Dolmuşlar
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Qualification" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Yeterlilik Ekle
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Çalışma Saati Yönetimi - Admin: All Records -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-clock"></i> Çalışma Saati
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="Index">
+                                            <i class="fas fa-list"></i> Çalışma Kayıtları
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="CheckIn">
+                                            <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Raporlar</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="TimeSheet">
+                                            <i class="fas fa-table"></i> Zaman Çizelgesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="OvertimeReport">
+                                            <i class="fas fa-clock"></i> Mesai Raporu
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="LateArrivalReport">
+                                            <i class="fas fa-exclamation-triangle"></i> Geç Gelme Raporu
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Kayıt Ekle
+                                        </a></li>
+                                    </ul>
+                                </li>
+                            }
+                            
+                            <!-- MANAGER - Department/Branch Manager Access -->
+                            @if (User.IsInRole("Manager"))
+                            {
+                                <!-- Kullanıcı Yönetimi - Manager: Department Users -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-users-cog"></i> Kullanıcı Yönetimi
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="UserManagement" asp-action="Index">
+                                            <i class="fas fa-list"></i> Kullanıcı Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="UserManagement" asp-action="CreateUser">
+                                            <i class="fas fa-user-plus"></i> Yeni Kullanıcı
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Personel Yönetimi - Manager: Only Own Department -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-users"></i> Personel
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Person" asp-action="Index">
+                                            <i class="fas fa-list"></i> Personel Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Person" asp-action="Create">
+                                            <i class="fas fa-user-plus"></i> Yeni Personel
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- İzin Yönetimi - Manager: Department Leaves -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-calendar-check"></i> İzin Yönetimi
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><h6 class="dropdown-header">İzin Talepleri</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Leave" asp-action="Index">
+                                            <i class="fas fa-calendar-alt"></i> Departman İzinleri
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Leave" asp-action="PendingApprovals">
+                                            <i class="fas fa-hourglass-half"></i> Onay Bekleyenler
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Leave" asp-action="Calendar">
+                                            <i class="fas fa-calendar"></i> İzin Takvimi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Leave" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni İzin Talebi
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Eğitim Yönetimi - Manager: Department Records -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-graduation-cap"></i> Eğitim
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Education" asp-action="Index">
+                                            <i class="fas fa-list"></i> Departman Eğitimleri
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Education" asp-action="Ongoing">
+                                            <i class="fas fa-clock"></i> Devam Eden Eğitimler
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Education" asp-action="Completed">
+                                            <i class="fas fa-check-circle"></i> Tamamlanan Eğitimler
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Education" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Eğitim Ekle
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Yeterlilik Yönetimi - Manager: Department Records -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-certificate"></i> Yeterlilik
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Qualification" asp-action="Index">
+                                            <i class="fas fa-list"></i> Departman Yeterlilikleri
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Qualification" asp-action="ExpiringSoon">
+                                            <i class="fas fa-clock"></i> Süresi Yaklaşanlar
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Qualification" asp-action="Expired">
+                                            <i class="fas fa-exclamation-triangle"></i> Süresi Dolmuşlar
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Qualification" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Yeterlilik Ekle
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Çalışma Saati - Manager: Department Records -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-clock"></i> Çalışma Saati
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="Index">
+                                            <i class="fas fa-list"></i> Departman Kayıtları
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="CheckIn">
+                                            <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Raporlar</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="TimeSheet">
+                                            <i class="fas fa-table"></i> Zaman Çizelgesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="OvertimeReport">
+                                            <i class="fas fa-clock"></i> Mesai Raporu
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="LateArrivalReport">
+                                            <i class="fas fa-exclamation-triangle"></i> Geç Gelme Raporu
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="WorkLog" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Kayıt Ekle
+                                        </a></li>
+                                    </ul>
+                                </li>
+                            }
+                            
+                <!-- EMPLOYEE - Limited Access -->
+                @if (User.IsInRole("Employee"))
+                {
+                    <!-- Profilim - Employee: Own Profile -->
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-controller="Person" asp-action="MyProfile">
+                            <i class="fas fa-user"></i> Profilim
+                        </a>
+                    </li>
+                    
+                    <!-- İzin Talepleri - Employee: Only Own Leaves -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-calendar-check"></i> İzinlerim
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-controller="Leave" asp-action="MyLeaves">
+                                <i class="fas fa-calendar-alt"></i> İzin Listesi
+                            </a></li>
+                            <li><a class="dropdown-item" asp-controller="Leave" asp-action="Create">
+                                <i class="fas fa-plus"></i> Yeni İzin Talebi
+                            </a></li>
+                            <li><a class="dropdown-item" asp-controller="Leave" asp-action="Calendar">
+                                <i class="fas fa-calendar"></i> İzin Takvimi
+                            </a></li>
+                        </ul>
+                    </li>
+                                
+                                <!-- Eğitim - Employee: Only Own Records -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-graduation-cap"></i> Eğitimlerim
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Education" asp-action="Index">
+                                            <i class="fas fa-list"></i> Eğitim Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Education" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Eğitim Ekle
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Yeterlilik - Employee: Only Own Records -->
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Qualification" asp-action="Index">
+                                        <i class="fas fa-certificate"></i> Yeterliliklerim
+                                    </a>
+                                </li>
+                                
+                                <!-- Çalışma Saati - Employee: Only Own Records -->
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="WorkLog" asp-action="Index">
+                                        <i class="fas fa-clock"></i> Çalışma Kayıtlarım
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                    
+                    <!-- User Authentication Menu -->
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-circle"></i> @(User.Identity.Name ?? "Kullanıcı")
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" asp-controller="Auth" asp-action="Profile">
+                                        <i class="fas fa-user me-2"></i>Profil
+                                    </a></li>
+                                    <li><a class="dropdown-item" asp-controller="Auth" asp-action="ChangePassword">
+                                        <i class="fas fa-key me-2"></i>Şifre Değiştir
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Login">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Giriş Yap
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -202,6 +464,9 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables for table functionality -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     <!-- SheetJS for Excel export functionality -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
