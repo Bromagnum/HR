@@ -13,17 +13,35 @@
                         İzin Detayları
                     </h3>
                     <div class="btn-group">
+                        @{
+                            var currentUserPersonId = ViewData["CurrentUserPersonId"] as int?;
+                            var isEmployeeViewingOwnLeave = User.IsInRole("Employee") && currentUserPersonId == Model.PersonId;
+                            var canApprove = User.IsInRole("Admin") || (User.IsInRole("Manager") && ViewData["CanApproveLeave"] as bool? == true);
+                            var canEdit = Model.Status == DAL.Entities.LeaveStatus.Pending && 
+                                         (User.IsInRole("Admin") || User.IsInRole("Manager") || isEmployeeViewingOwnLeave);
+                        }
+
                         @if (Model.Status == DAL.Entities.LeaveStatus.Pending)
                         {
-                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
-                                <i class="fas fa-edit me-1"></i>
-                                Düzenle
-                            </a>
-                            <a asp-action="Approve" asp-route-id="@Model.Id" class="btn btn-success">
-                                <i class="fas fa-check me-1"></i>
-                                Onayla/Reddet
-                            </a>
+                            @* Employee can only edit their own pending leave requests *@
+                            @if (canEdit)
+                            {
+                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                    <i class="fas fa-edit me-1"></i>
+                                    Düzenle
+                                </a>
+                            }
+                            
+                            @* Only Admin and authorized Managers can approve/reject *@
+                            @if (canApprove)
+                            {
+                                <a asp-action="Approve" asp-route-id="@Model.Id" class="btn btn-success">
+                                    <i class="fas fa-check me-1"></i>
+                                    Onayla/Reddet
+                                </a>
+                            }
                         }
+                        
                         <a asp-action="Index" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-1"></i>
                             Geri Dön

@@ -1,0 +1,183 @@
+@model IEnumerable<QualificationListViewModel>
+
+@{
+    ViewBag.Title = "Yeterliliklerim";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">
+                            <i class="fas fa-certificate me-2"></i>Yeterliliklerim
+                        </h3>
+                        <div class="btn-group">
+                            <a href="@Url.Action("Create")" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Yeni Yeterlilik Ekle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Bu sayfada sadece <strong>kendi yeterlilik bilgilerinizi</strong> görüntüleyebilir ve yönetebilirsiniz.
+                    </div>
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <!-- Özet Bilgiler -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-certificate fa-2x mb-2"></i>
+                                        <h4>@Model.Count()</h4>
+                                        <small>Toplam Yeterlilik</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                        <h4>@Model.Count(q => q.IsActive && !q.IsExpired)</h4>
+                                        <small>Geçerli</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-clock fa-2x mb-2"></i>
+                                        <h4>@Model.Count(q => q.IsExpiringSoon)</h4>
+                                        <small>Süresi Yaklaşan</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                        <h4>@Model.Count(q => q.IsExpired)</h4>
+                                        <small>Süresi Dolmuş</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table id="qualificationTable" class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Yeterlilik Adı</th>
+                                        <th>Kategori</th>
+                                        <th>Veren Kurum</th>
+                                        <th>Alınma Tarihi</th>
+                                        <th>Geçerlilik</th>
+                                        <th>Durum</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var qualification in Model)
+                                    {
+                                        <tr class="@(qualification.IsActive ? "" : "table-secondary") @(qualification.IsExpired ? "table-danger" : qualification.IsExpiringSoon ? "table-warning" : "")">
+                                            <td>
+                                                <strong>@qualification.Name</strong>
+                                                @if (!string.IsNullOrEmpty(qualification.Level))
+                                                {
+                                                    <br><small class="text-muted">Seviye: @qualification.Level</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@qualification.Category</span>
+                                            </td>
+                                            <td>@qualification.IssuingAuthority</td>
+                                            <td>@qualification.IssueDate.ToString("dd.MM.yyyy")</td>
+                                            <td>
+                                                @if (qualification.ExpirationDate.HasValue)
+                                                {
+                                                    @qualification.ExpirationDate.Value.ToString("dd.MM.yyyy")
+                                                    @if (qualification.IsExpired)
+                                                    {
+                                                        <br><span class="badge bg-danger">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>Süresi Dolmuş
+                                                        </span>
+                                                    }
+                                                    else if (qualification.IsExpiringSoon)
+                                                    {
+                                                        <br><span class="badge bg-warning text-dark">
+                                                            <i class="fas fa-clock me-1"></i>Süresi Yaklaşıyor
+                                                        </span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-infinity me-1"></i>Süresiz
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (qualification.IsActive)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Aktif
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-times me-1"></i>Pasif
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@qualification.Id" class="btn btn-info btn-sm" title="Detay">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Henüz yeterlilik bilginiz bulunmuyor</h5>
+                            <p class="text-muted">İlk yeterlilik bilginizi eklemek için aşağıdaki butona tıklayın.</p>
+                            <a href="@Url.Action("Create")" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>İlk Yeterlilik Bilgimi Ekle
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#qualificationTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json"
+                },
+                "pageLength": 10,
+                "order": [[ 3, "desc" ]], // Alınma tarihine göre sırala
+                "columnDefs": [
+                    { "orderable": false, "targets": [6] } // İşlemler sütunu sıralanmasın
+                ]
+            });
+        });
+    </script>
+}

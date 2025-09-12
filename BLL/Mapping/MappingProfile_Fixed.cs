@@ -117,10 +117,12 @@ public class MappingProfile : Profile
 
         // WorkLog Mappings
         CreateMap<WorkLog, WorkLogListDto>()
-            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => src.Person != null ? $"{src.Person.FirstName} {src.Person.LastName}" : ""));
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => src.Person != null ? $"{src.Person.FirstName} {src.Person.LastName}" : ""))
+            .ForMember(dest => dest.PersonEmployeeNumber, opt => opt.MapFrom(src => src.Person != null ? src.Person.EmployeeNumber : ""));
 
         CreateMap<WorkLog, WorkLogDetailDto>()
-            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => src.Person != null ? $"{src.Person.FirstName} {src.Person.LastName}" : ""));
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => src.Person != null ? $"{src.Person.FirstName} {src.Person.LastName}" : ""))
+            .ForMember(dest => dest.PersonEmployeeNumber, opt => opt.MapFrom(src => src.Person != null ? src.Person.EmployeeNumber : ""));
 
         CreateMap<WorkLogCreateDto, WorkLog>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -148,12 +150,14 @@ public class MappingProfile : Profile
         CreateMap<Leave, LeaveListDto>()
             .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => src.Person != null ? $"{src.Person.FirstName} {src.Person.LastName}" : ""))
             .ForMember(dest => dest.LeaveTypeName, opt => opt.MapFrom(src => src.LeaveType != null ? src.LeaveType.Name : ""))
-            .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => src.ApprovedBy != null ? $"{src.ApprovedBy.FirstName} {src.ApprovedBy.LastName}" : null));
+            .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => src.ApprovedBy != null ? $"{src.ApprovedBy.FirstName} {src.ApprovedBy.LastName}" : null))
+            .ForMember(dest => dest.HandoverToPersonName, opt => opt.MapFrom(src => src.HandoverToPerson != null ? $"{src.HandoverToPerson.FirstName} {src.HandoverToPerson.LastName}" : null));
 
         CreateMap<Leave, LeaveDetailDto>()
             .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => src.Person != null ? $"{src.Person.FirstName} {src.Person.LastName}" : ""))
             .ForMember(dest => dest.LeaveTypeName, opt => opt.MapFrom(src => src.LeaveType != null ? src.LeaveType.Name : ""))
-            .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => src.ApprovedBy != null ? $"{src.ApprovedBy.FirstName} {src.ApprovedBy.LastName}" : null));
+            .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => src.ApprovedBy != null ? $"{src.ApprovedBy.FirstName} {src.ApprovedBy.LastName}" : null))
+            .ForMember(dest => dest.HandoverToPersonName, opt => opt.MapFrom(src => src.HandoverToPerson != null ? $"{src.HandoverToPerson.FirstName} {src.HandoverToPerson.LastName}" : null));
 
         CreateMap<LeaveCreateDto, Leave>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())

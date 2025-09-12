@@ -100,9 +100,12 @@
                 <div class="card-body">
                     <h5 class="card-title">Hızlı İşlemler</h5>
                     <div class="d-grid gap-2">
-                        <a asp-controller="Person" asp-action="Create" class="btn btn-outline-primary mb-2">
-                            <i class="fas fa-user-plus"></i> Yeni Personel Ekle
-                        </a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Person" asp-action="Create" class="btn btn-outline-primary mb-2">
+                                <i class="fas fa-user-plus"></i> Yeni Personel Ekle
+                            </a>
+                        }
                         <a asp-controller="Department" asp-action="Create" class="btn btn-outline-success mb-2">
                             <i class="fas fa-plus"></i> Yeni Departman Ekle
                         </a>

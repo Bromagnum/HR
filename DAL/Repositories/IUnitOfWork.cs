@@ -12,6 +12,15 @@ public interface IUnitOfWork : IDisposable
     ILeaveRepository Leaves { get; }
     ILeaveBalanceRepository LeaveBalances { get; }
     
+    // CV and Job Application Repositories
+    ICandidateRepository Candidates { get; }
+    IJobApplicationRepository JobApplications { get; }
+    ICandidateEducationRepository CandidateEducations { get; }
+    ICandidateExperienceRepository CandidateExperiences { get; }
+    ICandidateSkillRepository CandidateSkills { get; }
+    IInterviewNoteRepository InterviewNotes { get; }
+    IApplicationDocumentRepository ApplicationDocuments { get; }
+    
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();
     Task CommitTransactionAsync();

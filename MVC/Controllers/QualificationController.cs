@@ -28,15 +28,40 @@ public class QualificationController : Controller
     // GET: Qualification
     public async Task<IActionResult> Index(string searchTerm, string selectedCategory, bool showExpiredOnly = false, bool showExpiringSoon = false)
     {
-        var result = await _qualificationService.GetAllAsync();
-        
-        if (!result.Success)
+        // Employee sadece kendi yeterliliklerini görebilir
+        if (_currentUserService.IsInRole("Employee"))
         {
-            TempData["Error"] = result.Message;
+            var currentPersonId = _currentUserService.PersonId;
+            if (!currentPersonId.HasValue)
+            {
+                TempData["Error"] = "Personel kimliği alınamadı. Lütfen yöneticinize başvurun.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _qualificationService.GetByPersonIdAsync(currentPersonId.Value);
+            if (!result.Success)
+            {
+                TempData["Error"] = result.Message;
+                return View("MyQualifications", new List<QualificationListViewModel>());
+            }
+
+            var viewModels = _mapper.Map<List<QualificationListViewModel>>(result.Data);
+            ViewData["Title"] = "Yeterliliklerim";
+            ViewData["IsEmployeeView"] = true;
+            ViewData["PersonId"] = currentPersonId.Value;
+            return View("MyQualifications", viewModels);
+        }
+
+        // Admin/Manager için tüm yeterlilikler
+        var allResult = await _qualificationService.GetAllAsync();
+        
+        if (!allResult.Success)
+        {
+            TempData["Error"] = allResult.Message;
             return View(new QualificationIndexViewModel());
         }
 
-        var qualificationViewModels = _mapper.Map<IEnumerable<QualificationListViewModel>>(result.Data);
+        var qualificationViewModels = _mapper.Map<IEnumerable<QualificationListViewModel>>(allResult.Data);
 
         // Apply filters
         if (!string.IsNullOrEmpty(searchTerm))
@@ -100,6 +125,25 @@ public class QualificationController : Controller
     // GET: Qualification/Create
     public async Task<IActionResult> Create()
     {
+        // Employee sadece kendisi için yeterlilik ekleyebilir
+        if (_currentUserService.IsInRole("Employee"))
+        {
+            var currentPersonId = _currentUserService.PersonId;
+            if (!currentPersonId.HasValue)
+            {
+                TempData["Error"] = "Personel kimliği alınamadı. Lütfen yöneticinize başvurun.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            await LoadPersonSelectListForEmployeeAsync(currentPersonId.Value);
+            var viewModel = new QualificationCreateViewModel
+            {
+                PersonId = currentPersonId.Value
+            };
+            ViewData["IsEmployeeView"] = true;
+            return View(viewModel);
+        }
+
         await LoadPersonSelectListAsync();
         return View(new QualificationCreateViewModel());
     }
@@ -109,6 +153,20 @@ public class QualificationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(QualificationCreateViewModel viewModel)
     {
+        // Employee sadece kendisi için yeterlilik ekleyebilir
+        if (_currentUserService.IsInRole("Employee"))
+        {
+            var currentPersonId = _currentUserService.PersonId;
+            if (!currentPersonId.HasValue)
+            {
+                TempData["Error"] = "Personel kimliği alınamadı. Lütfen yöneticinize başvurun.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            // PersonId'yi zorla set et
+            viewModel.PersonId = currentPersonId.Value;
+        }
+
         if (ModelState.IsValid)
         {
             var dto = _mapper.Map<QualificationCreateDto>(viewModel);
@@ -132,11 +190,22 @@ public class QualificationController : Controller
             }
         }
 
-        await LoadPersonSelectListAsync();
+        // Employee için özel dropdown
+        if (_currentUserService.IsInRole("Employee"))
+        {
+            await LoadPersonSelectListForEmployeeAsync(viewModel.PersonId);
+            ViewData["IsEmployeeView"] = true;
+        }
+        else
+        {
+            await LoadPersonSelectListAsync();
+        }
+        
         return View(viewModel);
     }
 
     // GET: Qualification/Edit/5
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Edit(int id)
     {
         var result = await _qualificationService.GetByIdAsync(id);
@@ -155,6 +224,7 @@ public class QualificationController : Controller
     // POST: Qualification/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Edit(int id, QualificationEditViewModel viewModel)
     {
         if (id != viewModel.Id)
@@ -191,6 +261,7 @@ public class QualificationController : Controller
     }
 
     // GET: Qualification/Delete/5
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _qualificationService.GetByIdAsync(id);
@@ -208,6 +279,7 @@ public class QualificationController : Controller
     // POST: Qualification/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var result = await _qualificationService.DeleteAsync(id);
@@ -223,6 +295,7 @@ public class QualificationController : Controller
     // POST: Qualification/ChangeStatus/5
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> ChangeStatus(int id, bool isActive)
     {
         var result = await _qualificationService.ChangeStatusAsync(id, isActive);
@@ -362,6 +435,29 @@ public class QualificationController : Controller
                 })
                 .OrderBy(x => x.Text)
                 .ToList();
+        }
+        else
+        {
+            ViewBag.PersonSelectList = new List<SelectListItem>();
+        }
+    }
+
+    private async Task LoadPersonSelectListForEmployeeAsync(int personId)
+    {
+        var personResult = await _personService.GetByIdAsync(personId);
+        
+        if (personResult.Success && personResult.Data != null)
+        {
+            var person = personResult.Data;
+            ViewBag.PersonSelectList = new List<SelectListItem>
+            {
+                new SelectListItem
+                {
+                    Value = person.Id.ToString(),
+                    Text = $"{person.FirstName} {person.LastName}",
+                    Selected = true
+                }
+            };
         }
         else
         {

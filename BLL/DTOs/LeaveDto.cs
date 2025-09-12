@@ -35,6 +35,7 @@ public class LeaveDetailDto
     public string PersonName { get; set; } = string.Empty;
     public string EmployeeNumber { get; set; } = string.Empty;
     public string DepartmentName { get; set; } = string.Empty;
+    public int DepartmentId { get; set; }
     public int LeaveTypeId { get; set; }
     public string LeaveTypeName { get; set; } = string.Empty;
     public string LeaveTypeColor { get; set; } = string.Empty;

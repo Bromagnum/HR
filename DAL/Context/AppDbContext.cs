@@ -25,6 +25,15 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<UserLoginLog> UserLoginLogs { get; set; }
     
+    // CV and Job Application Tables
+    public DbSet<Candidate> Candidates { get; set; }
+    public DbSet<JobApplication> JobApplications { get; set; }
+    public DbSet<CandidateEducation> CandidateEducations { get; set; }
+    public DbSet<CandidateExperience> CandidateExperiences { get; set; }
+    public DbSet<CandidateSkill> CandidateSkills { get; set; }
+    public DbSet<InterviewNote> InterviewNotes { get; set; }
+    public DbSet<ApplicationDocument> ApplicationDocuments { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

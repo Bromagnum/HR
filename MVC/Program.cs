@@ -14,6 +14,27 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DefaultCorsPolicy", builder =>
+    {
+        builder
+            .WithOrigins("https://localhost:10943") // Add your frontend URL
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+    
+    options.AddPolicy("ApiCorsPolicy", builder =>
+    {
+        builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 // Configure cookies for HTTPS-only operation
 if (builder.Environment.IsDevelopment())
 {
@@ -83,6 +104,15 @@ builder.Services.AddScoped<ILeaveTypeRepository, LeaveTypeRepository>();
 builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 builder.Services.AddScoped<ILeaveBalanceRepository, LeaveBalanceRepository>();
 
+// CV and Job Application Repositories
+builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
+builder.Services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
+builder.Services.AddScoped<ICandidateEducationRepository, CandidateEducationRepository>();
+builder.Services.AddScoped<ICandidateExperienceRepository, CandidateExperienceRepository>();
+builder.Services.AddScoped<ICandidateSkillRepository, CandidateSkillRepository>();
+builder.Services.AddScoped<IInterviewNoteRepository, InterviewNoteRepository>();
+builder.Services.AddScoped<IApplicationDocumentRepository, ApplicationDocumentRepository>();
+
 // Services
 builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
@@ -100,6 +130,7 @@ builder.Services.AddScoped<BLL.Services.Export.IExcelExportService, BLL.Services
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+// builder.Services.AddScoped<ITwoFactorService, TwoFactorService>(); // Temporarily disabled due to package issues
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddHttpContextAccessor();
 
@@ -127,7 +158,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// Configure Identity Authentication (Cookie-based for now)
+// Configure Identity Authentication (Cookie-based)
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Auth/Login";
@@ -140,10 +171,18 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
-builder.Services.AddAuthorization();
+// JWT Authentication will be added later when package issues are resolved
+
+// Configure Authorization Policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("ManagerOrAbove", policy => policy.RequireRole("Admin", "Manager"));
+    options.AddPolicy("AllRoles", policy => policy.RequireRole("Admin", "Manager", "Employee"));
+});
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(MVC.Mapping.ViewModelMappingProfile));
+builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(MVC.Mapping.ViewModelMappingProfile), typeof(BLL.Mapping.CandidateMappingProfile), typeof(BLL.Mapping.JobApplicationMappingProfile));
 
 // Localization for Turkish culture
 builder.Services.Configure<RequestLocalizationOptions>(options =>
@@ -193,6 +232,9 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRequestLocalization();
+
+// Enable CORS
+app.UseCors("DefaultCorsPolicy");
 
 // Enable cookie policy and session
 app.UseCookiePolicy();

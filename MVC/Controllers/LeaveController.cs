@@ -158,6 +158,28 @@ public class LeaveController : Controller
         }
 
         var viewModel = _mapper.Map<LeaveDetailViewModel>(result.Data);
+        
+        // Authorization data for view
+        ViewData["CurrentUserPersonId"] = _currentUserService.PersonId;
+        
+        // Check if current user can approve this leave
+        bool canApprove = false;
+        if (_currentUserService.IsInRole("Admin"))
+        {
+            canApprove = true;
+        }
+        else if (_currentUserService.IsInRole("Manager"))
+        {
+            // Manager can approve if the leave belongs to someone in their department
+            var currentUserDepartmentId = _currentUserService.DepartmentId;
+            if (currentUserDepartmentId.HasValue && result.Data?.DepartmentId == currentUserDepartmentId.Value)
+            {
+                canApprove = true;
+            }
+        }
+        
+        ViewData["CanApproveLeave"] = canApprove;
+        
         return View(viewModel);
     }
 
@@ -257,6 +279,37 @@ public class LeaveController : Controller
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        // Authorization check
+        bool canEdit = false;
+        if (_currentUserService.IsInRole("Admin"))
+        {
+            canEdit = true;
+        }
+        else if (_currentUserService.IsInRole("Manager"))
+        {
+            // Manager can edit leaves in their department
+            var currentUserDepartmentId = _currentUserService.DepartmentId;
+            if (currentUserDepartmentId.HasValue && result.Data?.DepartmentId == currentUserDepartmentId.Value)
+            {
+                canEdit = true;
+            }
+        }
+        else if (_currentUserService.IsInRole("Employee"))
+        {
+            // Employee can only edit their own leaves
+            var currentUserPersonId = _currentUserService.PersonId;
+            if (currentUserPersonId.HasValue && result.Data?.PersonId == currentUserPersonId.Value)
+            {
+                canEdit = true;
+            }
+        }
+
+        if (!canEdit)
+        {
+            TempData["Error"] = "Bu izin talebini düzenleme yetkiniz bulunmamaktadır.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         var viewModel = _mapper.Map<LeaveEditViewModel>(result.Data);
         await PrepareCreateEditViewData(viewModel);
         return View(viewModel);
@@ -339,6 +392,28 @@ public class LeaveController : Controller
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        // Authorization check - Only Admin and authorized Managers can approve
+        bool canApprove = false;
+        if (_currentUserService.IsInRole("Admin"))
+        {
+            canApprove = true;
+        }
+        else if (_currentUserService.IsInRole("Manager"))
+        {
+            // Manager can approve if the leave belongs to someone in their department
+            var currentUserDepartmentId = _currentUserService.DepartmentId;
+            if (currentUserDepartmentId.HasValue && result.Data?.DepartmentId == currentUserDepartmentId.Value)
+            {
+                canApprove = true;
+            }
+        }
+
+        if (!canApprove)
+        {
+            TempData["Error"] = "Bu izin talebini onaylama/reddetme yetkiniz bulunmamaktadır.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         var viewModel = new LeaveApprovalViewModel
         {
             Id = result.Data.Id,
@@ -347,7 +422,7 @@ public class LeaveController : Controller
             DateRange = $"{result.Data.StartDate:dd.MM.yyyy} - {result.Data.EndDate:dd.MM.yyyy}",
             TotalDays = result.Data.TotalDays,
             Reason = result.Data.Reason,
-            ApprovedById = 1 // TODO: Get current user ID
+            ApprovedById = _currentUserService.UserId ?? 1
         };
 
         return View(viewModel);

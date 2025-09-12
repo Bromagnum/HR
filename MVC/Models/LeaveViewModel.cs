@@ -85,6 +85,8 @@ public class LeaveDetailViewModel
 {
     public int Id { get; set; }
     
+    public int PersonId { get; set; }
+    
     [Display(Name = "Personel")]
     public string PersonName { get; set; } = string.Empty;
     
@@ -93,6 +95,8 @@ public class LeaveDetailViewModel
     
     [Display(Name = "Departman")]
     public string DepartmentName { get; set; } = string.Empty;
+    
+    public int DepartmentId { get; set; }
     
     [Display(Name = "İzin Türü")]
     public string LeaveTypeName { get; set; } = string.Empty;

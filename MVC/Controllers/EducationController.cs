@@ -434,6 +434,35 @@ public class EducationController : Controller
         }
     }
 
+    // Employee sadece kendisi için personel listesi
+    private async Task LoadPersonSelectListForEmployeeAsync()
+    {
+        var currentPersonId = _currentUserService.PersonId;
+        if (!currentPersonId.HasValue)
+        {
+            ViewBag.PersonSelectList = new List<SelectListItem>();
+            return;
+        }
+
+        var personResult = await _personService.GetByIdAsync(currentPersonId.Value);
+        if (personResult.Success)
+        {
+            ViewBag.PersonSelectList = new List<SelectListItem>
+            {
+                new SelectListItem
+                {
+                    Value = personResult.Data.Id.ToString(),
+                    Text = $"{personResult.Data.FirstName} {personResult.Data.LastName} ({personResult.Data.EmployeeNumber})",
+                    Selected = true
+                }
+            };
+        }
+        else
+        {
+            ViewBag.PersonSelectList = new List<SelectListItem>();
+        }
+    }
+
     private async Task LoadPersonSelectListForEmployeeAsync(int personId)
     {
         var personResult = await _personService.GetByIdAsync(personId);

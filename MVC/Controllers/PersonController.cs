@@ -147,18 +147,18 @@ public class PersonController : Controller
         return RedirectToAction("Index");
     }
 
-    // GET: Person/Create - Sadece Admin ve Manager
-    [Authorize(Roles = "Admin,Manager")]
+    // GET: Person/Create - Sadece Admin
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create()
     {
         await LoadDepartments();
         return View();
     }
 
-    // POST: Person/Create - Sadece Admin ve Manager
+    // POST: Person/Create - Sadece Admin
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(PersonCreateViewModel viewModel)
     {
         if (ModelState.IsValid)
