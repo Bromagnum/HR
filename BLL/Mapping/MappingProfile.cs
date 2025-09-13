@@ -11,7 +11,9 @@ public class MappingProfile : Profile
         // Person Mappings
         CreateMap<Person, PersonListDto>()
             .ForMember(dest => dest.DepartmentName, 
-                       opt => opt.MapFrom(src => src.Department != null ? src.Department.Name : null));
+                       opt => opt.MapFrom(src => src.Department != null ? src.Department.Name : null))
+            .ForMember(dest => dest.PositionName, 
+                       opt => opt.MapFrom(src => src.Position != null ? src.Position.Name : null));
 
         CreateMap<Person, PersonDetailDto>()
             .ForMember(dest => dest.DepartmentName, 
@@ -193,5 +195,103 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
             .ForMember(dest => dest.Person, opt => opt.Ignore())
             .ForMember(dest => dest.LeaveType, opt => opt.Ignore());
+
+        // Payroll Mappings
+        CreateMap<Payroll, PayrollListDto>()
+            .ForMember(dest => dest.PersonFullName, opt => opt.MapFrom(src => src.Person != null ? $"{src.Person.FirstName} {src.Person.LastName}" : ""))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person != null && src.Person.Department != null ? src.Person.Department.Name : ""))
+            .ForMember(dest => dest.EmployeeNumber, opt => opt.MapFrom(src => src.Person != null ? src.Person.EmployeeNumber ?? "" : ""))
+            .ForMember(dest => dest.MonthName, opt => opt.MapFrom(src => src.MonthName))
+            .ForMember(dest => dest.PayrollPeriod, opt => opt.MapFrom(src => src.PayrollPeriod))
+            .ForMember(dest => dest.GrossSalary, opt => opt.MapFrom(src => src.GrossSalary))
+            .ForMember(dest => dest.PreparedByName, opt => opt.MapFrom(src => src.PreparedBy != null ? $"{src.PreparedBy.FirstName} {src.PreparedBy.LastName}" : null));
+
+        CreateMap<Payroll, PayrollDetailDto>()
+            .ForMember(dest => dest.PersonFullName, opt => opt.MapFrom(src => src.Person != null ? $"{src.Person.FirstName} {src.Person.LastName}" : ""))
+            .ForMember(dest => dest.PersonFirstName, opt => opt.MapFrom(src => src.Person != null ? src.Person.FirstName : ""))
+            .ForMember(dest => dest.PersonLastName, opt => opt.MapFrom(src => src.Person != null ? src.Person.LastName : ""))
+            .ForMember(dest => dest.PersonTcKimlikNo, opt => opt.MapFrom(src => src.Person != null ? src.Person.TcKimlikNo : ""))
+            .ForMember(dest => dest.PersonEmployeeNumber, opt => opt.MapFrom(src => src.Person != null ? src.Person.EmployeeNumber ?? "" : ""))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person != null && src.Person.Department != null ? src.Person.Department.Name : ""))
+            .ForMember(dest => dest.PositionName, opt => opt.MapFrom(src => src.Person != null && src.Person.Position != null ? src.Person.Position.Name : ""))
+            .ForMember(dest => dest.MonthName, opt => opt.MapFrom(src => src.MonthName))
+            .ForMember(dest => dest.PayrollPeriod, opt => opt.MapFrom(src => src.PayrollPeriod))
+            .ForMember(dest => dest.GrossSalary, opt => opt.MapFrom(src => src.GrossSalary))
+            .ForMember(dest => dest.PreparedByName, opt => opt.MapFrom(src => src.PreparedBy != null ? $"{src.PreparedBy.FirstName} {src.PreparedBy.LastName}" : null));
+
+        CreateMap<PayrollCreateDto, Payroll>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.NetSalary, opt => opt.Ignore()) // Servis tarafından hesaplanacak
+            .ForMember(dest => dest.PreparedDate, opt => opt.Ignore()) // Servis tarafından set edilecek
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.PreparedBy, opt => opt.Ignore());
+
+        CreateMap<PayrollUpdateDto, Payroll>()
+            .ForMember(dest => dest.NetSalary, opt => opt.Ignore()) // Servis tarafından hesaplanacak
+            .ForMember(dest => dest.PreparedDate, opt => opt.Ignore()) // Mevcut değer korunacak
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.PreparedBy, opt => opt.Ignore());
+
+        // TMK Mappings
+        CreateMap<Organization, OrganizationListDto>()
+            .ForMember(dest => dest.ParentOrganizationName, opt => opt.MapFrom(src => src.ParentOrganization != null ? src.ParentOrganization.Name : null))
+            .ForMember(dest => dest.ManagerPersonName, opt => opt.MapFrom(src => src.ManagerPerson != null ? $"{src.ManagerPerson.FirstName} {src.ManagerPerson.LastName}" : null))
+            .ForMember(dest => dest.SubOrganizationsCount, opt => opt.MapFrom(src => src.SubOrganizations.Count))
+            .ForMember(dest => dest.MaterialsCount, opt => opt.MapFrom(src => src.Materials.Count));
+
+        CreateMap<Organization, OrganizationDetailDto>()
+            .ForMember(dest => dest.ParentOrganizationName, opt => opt.MapFrom(src => src.ParentOrganization != null ? src.ParentOrganization.Name : null))
+            .ForMember(dest => dest.ManagerPersonName, opt => opt.MapFrom(src => src.ManagerPerson != null ? $"{src.ManagerPerson.FirstName} {src.ManagerPerson.LastName}" : null))
+            .ForMember(dest => dest.SubOrganizations, opt => opt.MapFrom(src => src.SubOrganizations.Where(o => o.IsActive)))
+            .ForMember(dest => dest.Materials, opt => opt.MapFrom(src => src.Materials.Where(m => m.IsActive)));
+
+        CreateMap<Organization, OrganizationTreeDto>()
+            .ForMember(dest => dest.MaterialsCount, opt => opt.MapFrom(src => src.Materials.Count))
+            .ForMember(dest => dest.Children, opt => opt.MapFrom(src => src.SubOrganizations.Where(o => o.IsActive)));
+
+        CreateMap<OrganizationCreateDto, Organization>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ParentOrganization, opt => opt.Ignore())
+            .ForMember(dest => dest.SubOrganizations, opt => opt.Ignore())
+            .ForMember(dest => dest.ManagerPerson, opt => opt.Ignore())
+            .ForMember(dest => dest.Materials, opt => opt.Ignore());
+
+        CreateMap<OrganizationUpdateDto, Organization>()
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.ParentOrganization, opt => opt.Ignore())
+            .ForMember(dest => dest.SubOrganizations, opt => opt.Ignore())
+            .ForMember(dest => dest.ManagerPerson, opt => opt.Ignore())
+            .ForMember(dest => dest.Materials, opt => opt.Ignore());
+
+        CreateMap<Material, MaterialListDto>()
+            .ForMember(dest => dest.TotalValue, opt => opt.MapFrom(src => src.TotalValue))
+            .ForMember(dest => dest.StockStatus, opt => opt.MapFrom(src => src.StockStatus))
+            .ForMember(dest => dest.IsLowStock, opt => opt.MapFrom(src => src.IsLowStock))
+            .ForMember(dest => dest.OrganizationName, opt => opt.MapFrom(src => src.Organization != null ? src.Organization.Name : null));
+
+        CreateMap<Material, MaterialDetailDto>()
+            .ForMember(dest => dest.TotalValue, opt => opt.MapFrom(src => src.TotalValue))
+            .ForMember(dest => dest.StockStatus, opt => opt.MapFrom(src => src.StockStatus))
+            .ForMember(dest => dest.IsLowStock, opt => opt.MapFrom(src => src.IsLowStock))
+            .ForMember(dest => dest.IsOverStock, opt => opt.MapFrom(src => src.IsOverStock))
+            .ForMember(dest => dest.OrganizationName, opt => opt.MapFrom(src => src.Organization != null ? src.Organization.Name : null));
+
+        CreateMap<MaterialCreateDto, Material>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Organization, opt => opt.Ignore());
+
+        CreateMap<MaterialUpdateDto, Material>()
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.Organization, opt => opt.Ignore());
     }
 }

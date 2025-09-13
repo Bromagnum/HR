@@ -1,0 +1,229 @@
+@model IEnumerable<OrganizationListViewModel>
+
+@{
+    ViewData["Title"] = "Organizasyon Listesi";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-sitemap text-primary"></i>
+            Organizasyon Listesi
+        </h2>
+        @if (User.IsInRole("Admin"))
+        {
+            <div>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Yeni Organizasyon
+                </a>
+                <a asp-action="Tree" class="btn btn-info">
+                    <i class="fas fa-project-diagram"></i> Org. Şeması
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter"></i> Filtreler
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Organizasyon Adı</label>
+                        <input type="text" name="Name" class="form-control" placeholder="Organizasyon adı..." />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kod</label>
+                        <input type="text" name="Code" class="form-control" placeholder="Kod..." />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Yönetici</label>
+                        <input type="text" name="Manager" class="form-control" placeholder="Yönetici..." />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Durum</label>
+                        <select name="IsActive" class="form-select">
+                            <option value="">Tümü</option>
+                            <option value="true">Aktif</option>
+                            <option value="false">Pasif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Filtrele
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Temizle
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-list"></i> Organizasyonlar
+                <span class="badge bg-secondary">@Model.Count() kayıt</span>
+            </h5>
+            @if (User.IsInRole("Admin"))
+            {
+                <div>
+                    <button type="button" class="btn btn-success btn-sm" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Excel'e Aktar
+                    </button>
+                </div>
+            }
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Kod</th>
+                                <th>Ad</th>
+                                <th>Üst Organizasyon</th>
+                                <th>Yönetici</th>
+                                <th>Alt Org.</th>
+                                <th>Malzeme</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <code>@item.Code</code>
+                                    </td>
+                                    <td>
+                                        <strong>@item.Name</strong>
+                                        @if (!string.IsNullOrEmpty(item.Description))
+                                        {
+                                            <br><small class="text-muted">@item.Description</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.ParentOrganizationName))
+                                        {
+                                            <span class="badge bg-info">@item.ParentOrganizationName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Üst Düzey</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.ManagerPersonName))
+                                        {
+                                            <i class="fas fa-user"></i> @item.ManagerPersonName
+                                        }
+                                        else if (!string.IsNullOrEmpty(item.Manager))
+                                        {
+                                            <i class="fas fa-user-tie"></i> @item.Manager
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">@item.SubOrganizationsCount</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">@item.MaterialsCount</span>
+                                    </td>
+                                    <td>
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="badge bg-success">Aktif</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Pasif</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Detay">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Düzenle">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-danger btn-sm" title="Sil" onclick="deleteOrganization(@item.Id, '@item.Name')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Henüz organizasyon bulunmuyor</h5>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-action="Create" class="btn btn-primary mt-2">
+                            <i class="fas fa-plus"></i> İlk Organizasyonu Ekle
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Form -->
+<form id="deleteForm" method="post" style="display: none;">
+    <input name="__RequestVerificationToken" type="hidden" value="@Html.AntiForgeryToken().ToString()" />
+</form>
+
+@section Scripts {
+    <script>
+        function deleteOrganization(id, name) {
+            if (confirm(`"${name}" organizasyonunu silmek istediğinizden emin misiniz?`)) {
+                const form = document.getElementById('deleteForm');
+                form.action = '@Url.Action("Delete")' + '/' + id;
+                form.submit();
+            }
+        }
+
+        function exportToExcel() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("ExportToExcel")';
+            
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '__RequestVerificationToken';
+            tokenInput.value = token;
+            form.appendChild(tokenInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+    </script>
+}

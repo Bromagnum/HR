@@ -1,0 +1,303 @@
+@model MaterialStockSummaryViewModel
+
+@{
+    ViewData["Title"] = "Stok Özet Raporu";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-chart-bar text-primary"></i>
+            Stok Özet Raporu
+        </h2>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-list"></i> Malzeme Listesi
+            </a>
+            <a asp-action="LowStock" class="btn btn-warning">
+                <i class="fas fa-exclamation-triangle"></i> Düşük Stok
+            </a>
+            @if (User.IsInRole("Admin"))
+            {
+                <button onclick="printReport()" class="btn btn-info">
+                    <i class="fas fa-print"></i> Yazdır
+                </button>
+                <button onclick="exportToExcel()" class="btn btn-primary">
+                    <i class="fas fa-file-excel"></i> Excel'e Aktar
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Özet Kartları -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-boxes fa-2x mb-2"></i>
+                    <h4>@Model.TotalMaterials</h4>
+                    <p class="mb-0">@Html.DisplayNameFor(m => m.TotalMaterials)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <h4>@Model.LowStockCount</h4>
+                    <p class="mb-0">@Html.DisplayNameFor(m => m.LowStockCount)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-arrow-up fa-2x mb-2"></i>
+                    <h4>@Model.OverStockCount</h4>
+                    <p class="mb-0">@Html.DisplayNameFor(m => m.OverStockCount)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                    <h4>@Model.TotalStockValue.ToString("C0")</h4>
+                    <p class="mb-0">@Html.DisplayNameFor(m => m.TotalStockValue)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stok Durumu Çizelgesi -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> Stok Durumu Dağılımı
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="stockStatusChart" width="400" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Kategori Bazında Değer
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryValueChart" width="400" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kategori Özet Tablosu -->
+    @if (Model.CategorySummary?.Any() == true)
+    {
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-table"></i> Kategori Bazında Detay
+                </h5>
+                <span class="badge bg-primary fs-6">@Model.CategorySummary.Count kategori</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>@Html.DisplayNameFor(m => m.CategorySummary.First().Category)</th>
+                                <th>@Html.DisplayNameFor(m => m.CategorySummary.First().Count)</th>
+                                <th>@Html.DisplayNameFor(m => m.CategorySummary.First().TotalValue)</th>
+                                <th>Ortalama Değer</th>
+                                <th>Pay</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var category in Model.CategorySummary.OrderByDescending(c => c.TotalValue))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@category.Category</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@category.Count malzeme</span>
+                                    </td>
+                                    <td>
+                                        <strong>@category.TotalValue.ToString("C2")</strong>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var avgValue = category.Count > 0 ? category.TotalValue / category.Count : 0;
+                                        }
+                                        @avgValue.ToString("C2")
+                                    </td>
+                                    <td>
+                                        @{
+                                            var percentage = Model.TotalStockValue > 0 ? (category.TotalValue / Model.TotalStockValue * 100) : 0;
+                                        }
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" style="width: @percentage.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)%">
+                                                @percentage.ToString("F1")%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Index" asp-route-category="@category.Category" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-list"></i> Listele
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-chart-bar fa-5x text-muted mb-3"></i>
+            <h4 class="text-muted">Henüz kategori verisi yok</h4>
+            <p class="text-muted">Malzeme ekleyerek stok özetini oluşturabilirsiniz.</p>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> İlk Malzemeyi Ekle
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 0.5rem;
+        }
+        
+        .progress {
+            background-color: #e9ecef;
+        }
+        
+        .progress-bar {
+            background-color: #007bff;
+        }
+        
+        .table th {
+            border-top: none;
+        }
+        
+        @@media print {
+            .btn, .card-header {
+                display: none !important;
+            }
+        }
+    </style>
+
+    <script>
+        // Stok Durumu Pasta Grafiği
+        const stockStatusCtx = document.getElementById('stockStatusChart').getContext('2d');
+        const normalStock = @Model.TotalMaterials - @Model.LowStockCount - @Model.OverStockCount;
+        
+        new Chart(stockStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Normal Stok', 'Düşük Stok', 'Fazla Stok'],
+                datasets: [{
+                    data: [normalStock, @Model.LowStockCount, @Model.OverStockCount],
+                    backgroundColor: [
+                        '#28a745',
+                        '#ffc107', 
+                        '#dc3545'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Kategori Değer Çubuk Grafiği
+        @if (Model.CategorySummary?.Any() == true)
+        {
+            <text>
+            const categoryValueCtx = document.getElementById('categoryValueChart').getContext('2d');
+            
+            new Chart(categoryValueCtx, {
+                type: 'bar',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.CategorySummary.Select(c => $"'{c.Category}'")))],
+                    datasets: [{
+                        label: 'Toplam Değer (₺)',
+                        data: [@string.Join(",", Model.CategorySummary.Select(c => c.TotalValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)))],
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return '₺' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Toplam Değer: ₺' + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            </text>
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function exportToExcel() {
+            // Excel export functionality - placeholder
+            alert('Excel export özelliği geliştiriliyor...');
+        }
+    </script>
+}

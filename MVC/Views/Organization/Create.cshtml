@@ -1,0 +1,195 @@
+@model OrganizationCreateViewModel
+
+@{
+    ViewData["Title"] = "Yeni Organizasyon Ekle";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-plus-circle text-primary"></i>
+            Yeni Organizasyon Ekle
+        </h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Geri
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-building"></i> Organizasyon Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label">Organizasyon Adı *</label>
+                                    <input asp-for="Name" class="form-control" placeholder="Organizasyon adını giriniz" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Code" class="form-label">Kod *</label>
+                                    <input asp-for="Code" class="form-control" placeholder="Organizasyon kodunu giriniz" />
+                                    <span asp-validation-for="Code" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Type" class="form-label">Tip *</label>
+                                    <select asp-for="Type" class="form-select">
+                                        <option value="">Tip Seçiniz</option>
+                                        <option value="Genel Müdürlük">Genel Müdürlük</option>
+                                        <option value="Müdürlük">Müdürlük</option>
+                                        <option value="Şube">Şube</option>
+                                        <option value="Birim">Birim</option>
+                                        <option value="Departman">Departman</option>
+                                        <option value="Ekip">Ekip</option>
+                                    </select>
+                                    <span asp-validation-for="Type" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="ParentOrganizationId" class="form-label">Üst Organizasyon</label>
+                                    <select asp-for="ParentOrganizationId" class="form-select" asp-items="ViewBag.ParentOrganizationSelectList">
+                                        <option value="">Ana Organizasyon</option>
+                                    </select>
+                                    <span asp-validation-for="ParentOrganizationId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="ManagerPersonId" class="form-label">Yönetici</label>
+                                    <select asp-for="ManagerPersonId" class="form-select" asp-items="ViewBag.PersonSelectList">
+                                        <option value="">Yönetici Seçiniz</option>
+                                    </select>
+                                    <span asp-validation-for="ManagerPersonId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Level" class="form-label">Seviye</label>
+                                    <input asp-for="Level" class="form-control" type="number" min="0" max="10" placeholder="Organizasyon seviyesi" />
+                                    <span asp-validation-for="Level" class="text-danger"></span>
+                                    <div class="form-text">0: Ana seviye, 1: Alt seviye, vs.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Açıklama</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Organizasyon açıklamasını giriniz..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" />
+                                <label asp-for="IsActive" class="form-check-label">
+                                    Aktif
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Kaydet
+                                </button>
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> İptal
+                                </a>
+                            </div>
+                            <button type="reset" class="btn btn-outline-warning">
+                                <i class="fas fa-undo"></i> Temizle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Yardım Kartı -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle"></i> Yardım
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <p><strong>Organizasyon Adı:</strong> Organizasyonun tam adı</p>
+                        <p><strong>Kod:</strong> Organizasyon için benzersiz kod</p>
+                        <p><strong>Tip:</strong> Organizasyon türü (Müdürlük, Şube, vb.)</p>
+                        <p><strong>Üst Organizasyon:</strong> Bu organizasyonun bağlı olduğu üst seviye</p>
+                        <p><strong>Yönetici:</strong> Organizasyonu yöneten kişi</p>
+                        <p><strong>Seviye:</strong> Hiyerarşideki seviye (0=Ana, 1=Alt, vb.)</p>
+                    </small>
+                </div>
+            </div>
+
+            <!-- Örnek Hiyerarşi -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-sitemap"></i> Örnek Hiyerarşi
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <div class="text-muted">
+                            <div>📋 Genel Müdürlük (Seviye 0)</div>
+                            <div class="ms-3">├── 📁 İnsan Kaynakları Müdürlüğü (Seviye 1)</div>
+                            <div class="ms-4">│&nbsp;&nbsp;&nbsp;&nbsp;├── 👥 Personel Şubesi (Seviye 2)</div>
+                            <div class="ms-4">│&nbsp;&nbsp;&nbsp;&nbsp;└── 📊 Bordro Şubesi (Seviye 2)</div>
+                            <div class="ms-3">└── 💰 Mali İşler Müdürlüğü (Seviye 1)</div>
+                        </div>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Parent organization değiştiğinde level'i otomatik güncelle
+            $('#ParentOrganizationId').change(function() {
+                if ($(this).val()) {
+                    // Seçilen parent'ın level'ini al ve 1 ekle (bu API call gerektirecek)
+                    // Şimdilik basit bir implementasyon
+                    var currentLevel = parseInt($('#Level').val()) || 0;
+                    if (currentLevel === 0) {
+                        $('#Level').val(1);
+                    }
+                } else {
+                    $('#Level').val(0);
+                }
+            });
+
+            // Kod alanı için otomatik büyük harf
+            $('#Code').on('input', function() {
+                $(this).val($(this).val().toUpperCase());
+            });
+        });
+    </script>
+}

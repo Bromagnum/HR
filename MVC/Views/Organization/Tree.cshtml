@@ -1,0 +1,413 @@
+@model List<OrganizationTreeViewModel>
+
+@{
+    ViewData["Title"] = "Organizasyon Şeması";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-sitemap text-primary"></i>
+            Organizasyon Şeması
+        </h2>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-list"></i> Liste Görünümü
+            </a>
+            <a asp-action="Create" class="btn btn-success">
+                <i class="fas fa-plus"></i> Yeni Organizasyon
+            </a>
+            <button type="button" class="btn btn-info" onclick="expandAll()">
+                <i class="fas fa-expand-arrows-alt"></i> Tümünü Aç
+            </button>
+            <button type="button" class="btn btn-warning" onclick="collapseAll()">
+                <i class="fas fa-compress-arrows-alt"></i> Tümünü Kapat
+            </button>
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="ExportToExcel" class="btn btn-primary">
+                    <i class="fas fa-file-excel"></i> Excel'e Aktar
+                </a>
+            }
+        </div>
+    </div>
+
+    @if (Model?.Any() == true)
+    {
+        <!-- Filtre Bölümü -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-filter"></i> Filtreler
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Organizasyon Ara</label>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Organizasyon adı giriniz...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tip Filtresi</label>
+                        <select id="typeFilter" class="form-select">
+                            <option value="">Tüm Tipler</option>
+                            <option value="Genel Müdürlük">Genel Müdürlük</option>
+                            <option value="Müdürlük">Müdürlük</option>
+                            <option value="Şube">Şube</option>
+                            <option value="Birim">Birim</option>
+                            <option value="Departman">Departman</option>
+                            <option value="Ekip">Ekip</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Durum Filtresi</label>
+                        <select id="statusFilter" class="form-select">
+                            <option value="">Tüm Durumlar</option>
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Pasif</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                            <i class="fas fa-times"></i> Temizle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Organizasyon Ağacı -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-tree"></i> Organizasyon Hiyerarşisi
+                </h5>
+                <div>
+                    <small class="text-muted">Toplam: <span id="totalCount">@Model.Count</span> organizasyon</small>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="organizationTree">
+                    @foreach (var org in Model)
+                    {
+                        @await Html.PartialAsync("_OrganizationTreeNode", org)
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- İstatistikler -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h4>@Model.Count</h4>
+                        <p class="mb-0">Toplam Organizasyon</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h4>@Model.Count(o => o.IsActive)</h4>
+                        <p class="mb-0">Aktif Organizasyon</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <h4>@Model.Count(o => o.ParentOrganizationId == null)</h4>
+                        <p class="mb-0">Ana Organizasyon</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h4>@(Model.Max(o => o.Level) + 1)</h4>
+                        <p class="mb-0">Maksimum Seviye</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-building fa-5x text-muted mb-3"></i>
+            <h4 class="text-muted">Henüz organizasyon eklenmemiş</h4>
+            <p class="text-muted">İlk organizasyonunuzu ekleyerek başlayın.</p>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> İlk Organizasyonu Ekle
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <style>
+        .org-node {
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .org-node:hover {
+            background-color: #e9ecef;
+            border-color: #007bff;
+        }
+        
+        .org-node.inactive {
+            opacity: 0.6;
+            background-color: #f5f5f5;
+        }
+        
+        .org-children {
+            margin-left: 30px;
+            margin-top: 10px;
+            padding-left: 15px;
+            border-left: 2px solid #dee2e6;
+        }
+        
+        .org-toggle {
+            cursor: pointer;
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .org-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .org-details {
+            flex-grow: 1;
+        }
+        
+        .org-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .highlighted {
+            background-color: #fff3cd !important;
+            border-color: #ffc107 !important;
+        }
+    </style>
+
+    <script>
+        let allNodes = [];
+        
+        $(document).ready(function() {
+            // Tüm node'ları topla
+            collectAllNodes();
+            
+            // Arama fonksiyonu
+            $('#searchInput').on('input', function() {
+                filterNodes();
+            });
+            
+            // Tip filtresi
+            $('#typeFilter').change(function() {
+                filterNodes();
+            });
+            
+            // Durum filtresi
+            $('#statusFilter').change(function() {
+                filterNodes();
+            });
+        });
+        
+        function collectAllNodes() {
+            allNodes = [];
+            $('.org-node').each(function() {
+                let node = {
+                    element: $(this),
+                    name: $(this).data('name'),
+                    type: $(this).data('type'),
+                    isActive: $(this).data('active'),
+                    code: $(this).data('code')
+                };
+                allNodes.push(node);
+            });
+        }
+        
+        function filterNodes() {
+            let searchTerm = $('#searchInput').val().toLowerCase();
+            let typeFilter = $('#typeFilter').val();
+            let statusFilter = $('#statusFilter').val();
+            
+            let visibleCount = 0;
+            
+            allNodes.forEach(function(node) {
+                let visible = true;
+                
+                // Arama filtresi
+                if (searchTerm && !node.name.toLowerCase().includes(searchTerm) && 
+                    !node.code.toLowerCase().includes(searchTerm)) {
+                    visible = false;
+                }
+                
+                // Tip filtresi
+                if (typeFilter && node.type !== typeFilter) {
+                    visible = false;
+                }
+                
+                // Durum filtresi
+                if (statusFilter === 'active' && !node.isActive) {
+                    visible = false;
+                } else if (statusFilter === 'inactive' && node.isActive) {
+                    visible = false;
+                }
+                
+                // Vurgulamayı temizle
+                node.element.removeClass('highlighted');
+                
+                if (visible) {
+                    node.element.show();
+                    visibleCount++;
+                    
+                    // Arama terimini vurgula
+                    if (searchTerm) {
+                        node.element.addClass('highlighted');
+                    }
+                } else {
+                    node.element.hide();
+                }
+            });
+            
+            // Sayacı güncelle
+            $('#totalCount').text(visibleCount);
+        }
+        
+        function clearFilters() {
+            $('#searchInput').val('');
+            $('#typeFilter').val('');
+            $('#statusFilter').val('');
+            filterNodes();
+        }
+        
+        function toggleNode(nodeId) {
+            let children = $(`#children-${nodeId}`);
+            let toggle = $(`#toggle-${nodeId}`);
+            
+            if (children.is(':visible')) {
+                children.hide();
+                toggle.removeClass('fa-minus-square').addClass('fa-plus-square');
+            } else {
+                children.show();
+                toggle.removeClass('fa-plus-square').addClass('fa-minus-square');
+            }
+        }
+        
+        function expandAll() {
+            $('.org-children').show();
+            $('.org-toggle').removeClass('fa-plus-square').addClass('fa-minus-square');
+        }
+        
+        function collapseAll() {
+            $('.org-children').hide();
+            $('.org-toggle').removeClass('fa-minus-square').addClass('fa-plus-square');
+        }
+        
+        function showDetails(id) {
+            window.location.href = '@Url.Action("Details")/' + id;
+        }
+        
+        function editOrganization(id) {
+            window.location.href = '@Url.Action("Edit")/' + id;
+        }
+        
+        function deleteOrganization(id, name) {
+            if (confirm(`"${name}" organizasyonunu silmek istediğinizden emin misiniz?`)) {
+                let form = $('<form>', {
+                    'method': 'POST',
+                    'action': '@Url.Action("Delete")'
+                });
+                
+                form.append($('<input>', {
+                    'type': 'hidden',
+                    'name': 'id',
+                    'value': id
+                }));
+                
+                form.append($('<input>', {
+                    'type': 'hidden',
+                    'name': '__RequestVerificationToken',
+                    'value': $('input[name="__RequestVerificationToken"]').val()
+                }));
+                
+                $('body').append(form);
+                form.submit();
+            }
+        }
+    </script>
+}
+
+@if (Model?.Any() == true)
+{
+    @foreach (var org in Model)
+    {
+        <div class="org-node @(org.IsActive ? "" : "inactive")" 
+             data-name="@org.Name" 
+             data-type="@org.Type" 
+             data-active="@org.IsActive.ToString().ToLower()"
+             data-code="@org.Code">
+            <div class="org-info">
+                <div class="org-details">
+                    <div class="d-flex align-items-center">
+                        @if (org.SubOrganizations?.Any() == true)
+                        {
+                            <i id="toggle-@org.Id" class="fas fa-minus-square org-toggle me-2" onclick="toggleNode(@org.Id)"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-circle me-2" style="font-size: 8px; color: #dee2e6;"></i>
+                        }
+                        <strong>@org.Name</strong>
+                        <span class="badge bg-secondary ms-2">@org.Type</span>
+                        @if (org.IsActive)
+                        {
+                            <span class="badge bg-success ms-1">Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger ms-1">Pasif</span>
+                        }
+                    </div>
+                    <div class="text-muted small mt-1">
+                        Kod: @org.Code | Seviye: @org.Level
+                        @if (!string.IsNullOrEmpty(org.ManagerPersonName))
+                        {
+                            <text> | Yönetici: @org.ManagerPersonName</text>
+                        }
+                    </div>
+                </div>
+                <div class="org-actions">
+                    <button onclick="showDetails(@org.Id)" class="btn btn-info btn-sm" title="Detayları Görüntüle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button onclick="editOrganization(@org.Id)" class="btn btn-warning btn-sm" title="Düzenle">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteOrganization(@org.Id, '@org.Name')" class="btn btn-danger btn-sm" title="Sil">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        @if (org.SubOrganizations?.Any() == true)
+        {
+            <div id="children-@org.Id" class="org-children">
+                <!-- Alt organizasyonlar burada görüntülenecek -->
+                <p class="text-muted small">@org.SubOrganizations.Count() alt organizasyon</p>
+            </div>
+        }
+    }
+}

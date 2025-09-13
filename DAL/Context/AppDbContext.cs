@@ -21,18 +21,25 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<Leave> Leaves { get; set; }
     public DbSet<LeaveBalance> LeaveBalances { get; set; }
     
+    // Payroll Tables
+    public DbSet<Payroll> Payrolls { get; set; }
+    
+    // TMK Tables
+    public DbSet<Organization> Organizations { get; set; }
+    public DbSet<Material> Materials { get; set; }
+    
     // Authentication Tables
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<UserLoginLog> UserLoginLogs { get; set; }
     
-    // CV and Job Application Tables
-    public DbSet<Candidate> Candidates { get; set; }
-    public DbSet<JobApplication> JobApplications { get; set; }
-    public DbSet<CandidateEducation> CandidateEducations { get; set; }
-    public DbSet<CandidateExperience> CandidateExperiences { get; set; }
-    public DbSet<CandidateSkill> CandidateSkills { get; set; }
-    public DbSet<InterviewNote> InterviewNotes { get; set; }
-    public DbSet<ApplicationDocument> ApplicationDocuments { get; set; }
+    // CV and Job Application Tables - Temporarily Disabled
+    // public DbSet<Candidate> Candidates { get; set; }
+    // public DbSet<JobApplication> JobApplications { get; set; }
+    // public DbSet<CandidateEducation> CandidateEducations { get; set; }
+    // public DbSet<CandidateExperience> CandidateExperiences { get; set; }
+    // public DbSet<CandidateSkill> CandidateSkills { get; set; }
+    // public DbSet<InterviewNote> InterviewNotes { get; set; }
+    // public DbSet<ApplicationDocument> ApplicationDocuments { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -361,6 +368,326 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
             new Leave { Id = 9, PersonId = 4, LeaveTypeId = 2, StartDate = new DateTime(2025, 12, 10), EndDate = new DateTime(2025, 12, 12), TotalDays = 3, Reason = "Doktor kontrolü", Status = LeaveStatus.Approved, RequestDate = new DateTime(2025, 12, 3), ApprovedById = 1, ApprovedAt = new DateTime(2025, 12, 4), ApprovalNotes = "Sağlık raporu onaylandı", DocumentPath = "/documents/medical_4.pdf", IsUrgent = true, IsActive = true, CreatedAt = new DateTime(2025, 12, 3) },
             new Leave { Id = 10, PersonId = 7, LeaveTypeId = 1, StartDate = new DateTime(2025, 12, 20), EndDate = new DateTime(2025, 12, 24), TotalDays = 5, Reason = "Yılbaşı öncesi tatil", Status = LeaveStatus.Pending, RequestDate = new DateTime(2025, 12, 6), HandoverNotes = "Tüm işler tamamlandı", IsUrgent = false, IsActive = true, CreatedAt = new DateTime(2025, 12, 6) },
             new Leave { Id = 11, PersonId = 10, LeaveTypeId = 1, StartDate = new DateTime(2025, 11, 25), EndDate = new DateTime(2025, 11, 27), TotalDays = 3, Reason = "Kişisel işler", Status = LeaveStatus.Completed, RequestDate = new DateTime(2025, 11, 15), ApprovedById = 1, ApprovedAt = new DateTime(2025, 11, 16), ApprovalNotes = "Onaylandı", IsUrgent = false, IsActive = true, CreatedAt = new DateTime(2025, 11, 15) }
+        );
+
+        // Seed Payroll Data for Testing (3 months: November 2024, December 2024, January 2025)
+        var payrolls = new List<Payroll>();
+        int payrollId = 1;
+        var random = new Random(42); // Fixed seed for consistent test data
+
+        // Define months to generate payroll data for
+        var payrollMonths = new[]
+        {
+            new { Year = 2024, Month = 11 }, // November 2024
+            new { Year = 2024, Month = 12 }, // December 2024
+            new { Year = 2025, Month = 1 }   // January 2025
+        };
+
+        foreach (var month in payrollMonths)
+        {
+            for (int personId = 1; personId <= 21; personId++)
+            {
+                // Get person's base salary from Person seed data
+                decimal baseSalary = personId switch
+                {
+                    1 => 15000m, 2 => 12000m, 3 => 18000m, 4 => 13000m, 5 => 22000m,
+                    6 => 14000m, 7 => 16000m, 8 => 11000m, 9 => 25000m, 10 => 13500m,
+                    11 => 17000m, 12 => 12500m, 13 => 28000m, 14 => 14500m, 15 => 19000m,
+                    16 => 11500m, 17 => 26000m, 18 => 13200m, 19 => 17500m, 20 => 23000m,
+                    21 => 14200m,
+                    _ => 12000m
+                };
+
+                // Add some variation for allowances and bonuses
+                decimal allowances = Math.Round(baseSalary * (0.10m + (decimal)(random.NextDouble() * 0.15)), 2); // 10-25% of base salary
+                decimal bonuses = 0m;
+                
+                // December bonus (year-end bonus)
+                if (month.Month == 12)
+                {
+                    bonuses = Math.Round(baseSalary * (0.5m + (decimal)(random.NextDouble() * 0.5)), 2); // 50-100% of base salary
+                }
+                // Performance bonus for some employees in January
+                else if (month.Month == 1 && personId % 3 == 0)
+                {
+                    bonuses = Math.Round(baseSalary * (0.1m + (decimal)(random.NextDouble() * 0.2)), 2); // 10-30% of base salary
+                }
+
+                // Calculate gross salary
+                decimal grossSalary = baseSalary + allowances + bonuses;
+
+                // Calculate deductions (simplified)
+                decimal totalDeductions = Math.Round(grossSalary * (0.25m + (decimal)(random.NextDouble() * 0.05)), 2); // 25-30% total deductions
+
+                // Calculate net salary
+                decimal netSalary = grossSalary - totalDeductions;
+
+                // Payment date (usually between 25th-30th of the month)
+                DateTime? paymentDate = new DateTime(month.Year, month.Month, 25 + random.Next(6));
+
+                // Description based on month
+                string description = month.Month switch
+                {
+                    11 => "Kasım 2024 Maaşı",
+                    12 => "Aralık 2024 Maaşı + Yılsonu İkramiyesi",
+                    1 => "Ocak 2025 Maaşı",
+                    _ => $"{month.Month}/{month.Year} Maaşı"
+                };
+
+                payrolls.Add(new Payroll
+                {
+                    Id = payrollId++,
+                    PersonId = personId,
+                    Year = month.Year,
+                    Month = month.Month,
+                    BasicSalary = baseSalary,
+                    Allowances = allowances,
+                    Bonuses = bonuses,
+                    Deductions = totalDeductions,
+                    NetSalary = netSalary,
+                    Description = description,
+                    PreparedDate = new DateTime(month.Year, month.Month, 20), // Prepared on 20th of each month
+                    PreparedById = 1, // Admin user
+                    PaymentDate = paymentDate,
+                    CreatedAt = new DateTime(month.Year, month.Month, 20),
+                    UpdatedAt = null,
+                    IsActive = true
+                });
+            }
+        }
+
+        modelBuilder.Entity<Payroll>().HasData(payrolls.ToArray());
+
+        // Seed Organizations (TMK Temel Mesleki Komperanslar Modülü)
+        modelBuilder.Entity<Organization>().HasData(
+            new Organization
+            {
+                Id = 1,
+                Name = "Genel Müdürlük",
+                Description = "Ana organizasyon birimi",
+                Code = "GM001",
+                ParentOrganizationId = null,
+                Address = "İstanbul, Türkiye",
+                Phone = "0212 123 45 67",
+                Email = "genel@ikys.com",
+                Manager = "Genel Müdür",
+                ManagerPersonId = 1,
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            new Organization
+            {
+                Id = 2,
+                Name = "İnsan Kaynakları Bölümü",
+                Description = "İnsan kaynakları yönetimi",
+                Code = "IK001",
+                ParentOrganizationId = 1,
+                Address = "İstanbul, Türkiye",
+                Phone = "0212 123 45 68",
+                Email = "ik@ikys.com",
+                Manager = "İK Müdürü",
+                ManagerPersonId = 2,
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            new Organization
+            {
+                Id = 3,
+                Name = "Bilgi İşlem Bölümü",
+                Description = "Teknoloji ve bilgi işlem",
+                Code = "BI001",
+                ParentOrganizationId = 1,
+                Address = "İstanbul, Türkiye",
+                Phone = "0212 123 45 69",
+                Email = "bi@ikys.com",
+                Manager = "BI Müdürü",
+                ManagerPersonId = 3,
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            new Organization
+            {
+                Id = 4,
+                Name = "Muhasebe Bölümü",
+                Description = "Mali işler ve muhasebe",
+                Code = "MH001",
+                ParentOrganizationId = 1,
+                Address = "İstanbul, Türkiye",
+                Phone = "0212 123 45 70",
+                Email = "muhasebe@ikys.com",
+                Manager = "Muhasebe Müdürü",
+                ManagerPersonId = 5,
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            }
+        );
+
+        // Seed Materials (Malzeme Yönetimi)
+        modelBuilder.Entity<Material>().HasData(
+            // Ofis Malzemeleri
+            new Material
+            {
+                Id = 1,
+                Name = "A4 Kağıt",
+                Description = "Beyaz A4 yazıcı kağıdı",
+                Code = "OF001",
+                Category = "Ofis Malzemeleri",
+                Unit = "Paket",
+                UnitPrice = 25.50m,
+                StockQuantity = 150,
+                MinStockLevel = 20,
+                MaxStockLevel = 200,
+                Supplier = "Kağıt A.Ş.",
+                Location = "Depo-A-01",
+                OrganizationId = 2,
+                IsConsumable = true,
+                LastPurchaseDate = DateTime.Now.AddDays(-15),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            new Material
+            {
+                Id = 2,
+                Name = "Toner Kartuş",
+                Description = "HP LaserJet toner kartuşu",
+                Code = "OF002",
+                Category = "Ofis Malzemeleri",
+                Unit = "Adet",
+                UnitPrice = 350.00m,
+                StockQuantity = 12,
+                MinStockLevel = 5,
+                MaxStockLevel = 25,
+                Supplier = "Teknoloji Ltd.",
+                Location = "Depo-A-02",
+                OrganizationId = 3,
+                IsConsumable = true,
+                LastPurchaseDate = DateTime.Now.AddDays(-8),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            // Bilgisayar Ekipmanları
+            new Material
+            {
+                Id = 3,
+                Name = "Klavye",
+                Description = "Mekanik klavye",
+                Code = "BT001",
+                Category = "Bilgisayar Ekipmanları",
+                Unit = "Adet",
+                UnitPrice = 150.00m,
+                StockQuantity = 8,
+                MinStockLevel = 3,
+                MaxStockLevel = 15,
+                Supplier = "Teknoloji Ltd.",
+                Location = "Depo-B-01",
+                OrganizationId = 3,
+                IsConsumable = false,
+                LastPurchaseDate = DateTime.Now.AddDays(-30),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            new Material
+            {
+                Id = 4,
+                Name = "Mouse",
+                Description = "Optik mouse",
+                Code = "BT002",
+                Category = "Bilgisayar Ekipmanları",
+                Unit = "Adet",
+                UnitPrice = 75.00m,
+                StockQuantity = 15,
+                MinStockLevel = 5,
+                MaxStockLevel = 20,
+                Supplier = "Teknoloji Ltd.",
+                Location = "Depo-B-02",
+                OrganizationId = 3,
+                IsConsumable = false,
+                LastPurchaseDate = DateTime.Now.AddDays(-20),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            // Temizlik Malzemeleri
+            new Material
+            {
+                Id = 5,
+                Name = "Deterjan",
+                Description = "Genel temizlik deterjanı",
+                Code = "TM001",
+                Category = "Temizlik Malzemeleri",
+                Unit = "Litre",
+                UnitPrice = 18.50m,
+                StockQuantity = 25,
+                MinStockLevel = 10,
+                MaxStockLevel = 50,
+                Supplier = "Temizlik A.Ş.",
+                Location = "Depo-C-01",
+                OrganizationId = 1,
+                IsConsumable = true,
+                LastPurchaseDate = DateTime.Now.AddDays(-12),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            new Material
+            {
+                Id = 6,
+                Name = "Kağıt Havlu",
+                Description = "Beyaz kağıt havlu",
+                Code = "TM002",
+                Category = "Temizlik Malzemeleri",
+                Unit = "Paket",
+                UnitPrice = 12.00m,
+                StockQuantity = 35,
+                MinStockLevel = 15,
+                MaxStockLevel = 60,
+                Supplier = "Temizlik A.Ş.",
+                Location = "Depo-C-02",
+                OrganizationId = 1,
+                IsConsumable = true,
+                LastPurchaseDate = DateTime.Now.AddDays(-5),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            // Kırtasiye
+            new Material
+            {
+                Id = 7,
+                Name = "Kalem",
+                Description = "Mavi tükenmez kalem",
+                Code = "KR001",
+                Category = "Kırtasiye",
+                Unit = "Adet",
+                UnitPrice = 3.50m,
+                StockQuantity = 100,
+                MinStockLevel = 30,
+                MaxStockLevel = 150,
+                Supplier = "Kırtasiye Ltd.",
+                Location = "Depo-A-03",
+                OrganizationId = 2,
+                IsConsumable = true,
+                LastPurchaseDate = DateTime.Now.AddDays(-10),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            new Material
+            {
+                Id = 8,
+                Name = "Dosya",
+                Description = "Plastik klasör dosya",
+                Code = "KR002",
+                Category = "Kırtasiye",
+                Unit = "Adet",
+                UnitPrice = 8.75m,
+                StockQuantity = 45,
+                MinStockLevel = 20,
+                MaxStockLevel = 80,
+                Supplier = "Kırtasiye Ltd.",
+                Location = "Depo-A-04",
+                OrganizationId = 2,
+                IsConsumable = false,
+                LastPurchaseDate = DateTime.Now.AddDays(-18),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            }
         );
     }
     

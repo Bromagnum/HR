@@ -1,0 +1,268 @@
+@model PayrollEditViewModel
+
+@{
+    ViewData["Title"] = "Bordro Düzenle";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-edit text-primary"></i>
+            Bordro Düzenle
+        </h2>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Bordro Listesi
+            </a>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info">
+                <i class="fas fa-eye"></i> Detayları Görüntüle
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-money-bill-wave"></i> Bordro Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <input asp-for="Id" type="hidden" />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="PersonId" class="form-label">Personel</label>
+                                    <select asp-for="PersonId" class="form-select" asp-items="ViewBag.PersonSelectList">
+                                        <option value="">Personel Seçiniz</option>
+                                    </select>
+                                    <span asp-validation-for="PersonId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label asp-for="Year" class="form-label">Yıl</label>
+                                    <select asp-for="Year" class="form-select">
+                                        @for (int year = DateTime.Now.Year + 1; year >= DateTime.Now.Year - 5; year--)
+                                        {
+                                            <option value="@year">@year</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="Year" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label asp-for="Month" class="form-label">Ay</label>
+                                    <select asp-for="Month" class="form-select">
+                                        @for (int month = 1; month <= 12; month++)
+                                        {
+                                            <option value="@month">@DateTime.Parse($"2024-{month:00}-01").ToString("MMMM", new System.Globalization.CultureInfo("tr-TR"))</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="Month" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="BasicSalary" class="form-label">Temel Maaş</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₺</span>
+                                        <input asp-for="BasicSalary" class="form-control" type="number" step="0.01" min="0" />
+                                    </div>
+                                    <span asp-validation-for="BasicSalary" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Allowances" class="form-label">Ödenekler</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₺</span>
+                                        <input asp-for="Allowances" class="form-control" type="number" step="0.01" min="0" />
+                                    </div>
+                                    <span asp-validation-for="Allowances" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Bonuses" class="form-label">Primler</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₺</span>
+                                        <input asp-for="Bonuses" class="form-control" type="number" step="0.01" min="0" />
+                                    </div>
+                                    <span asp-validation-for="Bonuses" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="SocialSecurityDeduction" class="form-label">SGK Kesintisi</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₺</span>
+                                        <input asp-for="SocialSecurityDeduction" class="form-control" type="number" step="0.01" min="0" />
+                                    </div>
+                                    <span asp-validation-for="SocialSecurityDeduction" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="IncomeTaxDeduction" class="form-label">Gelir Vergisi</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₺</span>
+                                        <input asp-for="IncomeTaxDeduction" class="form-control" type="number" step="0.01" min="0" />
+                                    </div>
+                                    <span asp-validation-for="IncomeTaxDeduction" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="OtherDeductions" class="form-label">Diğer Kesintiler</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₺</span>
+                                        <input asp-for="OtherDeductions" class="form-control" type="number" step="0.01" min="0" />
+                                    </div>
+                                    <span asp-validation-for="OtherDeductions" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="PaymentDate" class="form-label">Ödeme Tarihi</label>
+                                    <input asp-for="PaymentDate" class="form-control" type="date" />
+                                    <span asp-validation-for="PaymentDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Notes" class="form-label">Notlar</label>
+                                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Bordro ile ilgili notlar..."></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Güncelle
+                                </button>
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> İptal
+                                </a>
+                                <button type="button" class="btn btn-info" onclick="calculateSalary()">
+                                    <i class="fas fa-calculator"></i> Hesapla
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Calculation Summary -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calculator"></i> Hesaplama Özeti
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Brüt Maaş</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₺</span>
+                            <input id="grossSalary" class="form-control" readonly />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Toplam Kesintiler</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₺</span>
+                            <input id="totalDeductions" class="form-control" readonly />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Net Maaş</strong></label>
+                        <div class="input-group">
+                            <span class="input-group-text">₺</span>
+                            <input id="netSalary" class="form-control fw-bold text-success" readonly />
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Not:</strong> Hesaplama otomatik olarak yapılır. "Hesapla" butonuna tıklayarak güncel hesaplamayı görebilirsiniz.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Card -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle"></i> Yardım
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <strong>Temel Maaş:</strong> Personelin aylık temel maaşı<br>
+                        <strong>Ödenekler:</strong> Yemek, yol vs. ödenekler<br>
+                        <strong>Primler:</strong> Performans, övergötürü primi<br>
+                        <strong>SGK Kesintisi:</strong> Sosyal güvenlik kesintisi<br>
+                        <strong>Gelir Vergisi:</strong> Gelir vergisi kesintisi<br>
+                        <strong>Diğer Kesintiler:</strong> Avans, ceza vs.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Auto-calculate on input change
+            $('input[type="number"]').on('input', function() {
+                calculateSalary();
+            });
+            
+            // Initial calculation
+            calculateSalary();
+        });
+
+        function calculateSalary() {
+            const basicSalary = parseFloat($('#BasicSalary').val()) || 0;
+            const allowances = parseFloat($('#Allowances').val()) || 0;
+            const bonuses = parseFloat($('#Bonuses').val()) || 0;
+            
+            const socialSecurityDeduction = parseFloat($('#SocialSecurityDeduction').val()) || 0;
+            const incomeTaxDeduction = parseFloat($('#IncomeTaxDeduction').val()) || 0;
+            const otherDeductions = parseFloat($('#OtherDeductions').val()) || 0;
+            
+            const grossSalary = basicSalary + allowances + bonuses;
+            const totalDeductions = socialSecurityDeduction + incomeTaxDeduction + otherDeductions;
+            const netSalary = grossSalary - totalDeductions;
+            
+            $('#grossSalary').val(grossSalary.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+            $('#totalDeductions').val(totalDeductions.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+            $('#netSalary').val(netSalary.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        }
+    </script>
+}

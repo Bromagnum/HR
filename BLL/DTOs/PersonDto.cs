@@ -12,6 +12,8 @@ public class PersonListDto
     public string? EmployeeNumber { get; set; }
     public string? Position { get; set; }
     public string? DepartmentName { get; set; }
+    public int? DepartmentId { get; set; }
+    public string? PositionName { get; set; }
     public DateTime? HireDate { get; set; }
     public decimal? Salary { get; set; }
     public bool IsActive { get; set; }

@@ -146,6 +146,58 @@
                                     </ul>
                                 </li>
                                 
+                                <!-- Bordro Yönetimi - Admin & Manager Only -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-money-bill-wave"></i> Bordro
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Payroll" asp-action="Index">
+                                            <i class="fas fa-list"></i> Bordro Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Payroll" asp-action="PeriodSummary">
+                                            <i class="fas fa-chart-bar"></i> Dönem Raporu
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Payroll" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Bordro
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- TMK (Teknik Malzeme Kontrol) - Admin & Manager Only -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-tools"></i> TMK
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><h6 class="dropdown-header">Organizasyon</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Organization" asp-action="Index">
+                                            <i class="fas fa-sitemap"></i> Organizasyon Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Organization" asp-action="Tree">
+                                            <i class="fas fa-project-diagram"></i> Org. Şeması
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Organization" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Organizasyon
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Malzeme</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Material" asp-action="Index">
+                                            <i class="fas fa-boxes"></i> Malzeme Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Material" asp-action="LowStock">
+                                            <i class="fas fa-exclamation-triangle text-warning"></i> Düşük Stok
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Material" asp-action="StockSummary">
+                                            <i class="fas fa-chart-pie"></i> Stok Özeti
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Material" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Malzeme
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
                                 <!-- Eğitim Yönetimi - Admin: All Records -->
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
@@ -250,6 +302,48 @@
                                         </a></li>
                                         <li><a class="dropdown-item" asp-controller="Person" asp-action="Create">
                                             <i class="fas fa-user-plus"></i> Yeni Personel
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- Bordro Yönetimi - Manager: Department Payrolls -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-money-bill-wave"></i> Bordro
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Payroll" asp-action="Index">
+                                            <i class="fas fa-list"></i> Bordro Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Payroll" asp-action="PeriodSummary">
+                                            <i class="fas fa-chart-bar"></i> Dönem Raporu
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Payroll" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni Bordro
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- TMK (Teknik Malzeme Kontrol) - Manager: Department Scope -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-tools"></i> TMK
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><h6 class="dropdown-header">Organizasyon</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Organization" asp-action="Index">
+                                            <i class="fas fa-sitemap"></i> Organizasyon Listesi
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Malzeme</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Material" asp-action="Index">
+                                            <i class="fas fa-boxes"></i> Malzeme Listesi
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Material" asp-action="LowStock">
+                                            <i class="fas fa-exclamation-triangle text-warning"></i> Düşük Stok
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Material" asp-action="StockSummary">
+                                            <i class="fas fa-chart-pie"></i> Stok Özeti
                                         </a></li>
                                     </ul>
                                 </li>

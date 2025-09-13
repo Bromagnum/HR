@@ -1,0 +1,283 @@
+@model MaterialCreateViewModel
+
+@{
+    ViewData["Title"] = "Yeni Malzeme Ekle";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-plus-circle text-primary"></i>
+            Yeni Malzeme Ekle
+        </h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Geri
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-box"></i> Malzeme Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label">Malzeme Adı *</label>
+                                    <input asp-for="Name" class="form-control" placeholder="Malzeme adını giriniz" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Code" class="form-label">Malzeme Kodu *</label>
+                                    <input asp-for="Code" class="form-control" placeholder="Malzeme kodunu giriniz" />
+                                    <span asp-validation-for="Code" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Category" class="form-label">Kategori *</label>
+                                    <select asp-for="Category" class="form-select">
+                                        <option value="">Kategori Seçiniz</option>
+                                        <option value="Kırtasiye">Kırtasiye</option>
+                                        <option value="Elektronik">Elektronik</option>
+                                        <option value="Temizlik">Temizlik</option>
+                                        <option value="Mobilya">Mobilya</option>
+                                        <option value="Bilgisayar">Bilgisayar</option>
+                                        <option value="Araç Gereç">Araç Gereç</option>
+                                        <option value="Tıbbi Malzeme">Tıbbi Malzeme</option>
+                                        <option value="Gıda">Gıda</option>
+                                        <option value="Diğer">Diğer</option>
+                                    </select>
+                                    <span asp-validation-for="Category" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="OrganizationId" class="form-label">Sorumlu Organizasyon *</label>
+                                    <select asp-for="OrganizationId" class="form-select" asp-items="ViewBag.OrganizationSelectList">
+                                        <option value="">Organizasyon Seçiniz</option>
+                                    </select>
+                                    <span asp-validation-for="OrganizationId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Unit" class="form-label">Ölçü Birimi *</label>
+                                    <select asp-for="Unit" class="form-select">
+                                        <option value="">Birim Seçiniz</option>
+                                        <option value="Adet">Adet</option>
+                                        <option value="Kg">Kilogram (Kg)</option>
+                                        <option value="Lt">Litre (Lt)</option>
+                                        <option value="M">Metre (M)</option>
+                                        <option value="M2">Metrekare (M²)</option>
+                                        <option value="M3">Metreküp (M³)</option>
+                                        <option value="Kutu">Kutu</option>
+                                        <option value="Paket">Paket</option>
+                                        <option value="Takım">Takım</option>
+                                        <option value="Çift">Çift</option>
+                                    </select>
+                                    <span asp-validation-for="Unit" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="UnitPrice" class="form-label">Birim Fiyat *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₺</span>
+                                        <input asp-for="UnitPrice" class="form-control" type="number" step="0.01" min="0" placeholder="0,00" />
+                                    </div>
+                                    <span asp-validation-for="UnitPrice" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="StockQuantity" class="form-label">Mevcut Stok *</label>
+                                    <input asp-for="StockQuantity" class="form-control" type="number" min="0" placeholder="0" />
+                                    <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="MinStockQuantity" class="form-label">Minimum Stok *</label>
+                                    <input asp-for="MinStockQuantity" class="form-control" type="number" min="0" placeholder="0" />
+                                    <span asp-validation-for="MinStockQuantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="MaxStockQuantity" class="form-label">Maksimum Stok *</label>
+                                    <input asp-for="MaxStockQuantity" class="form-control" type="number" min="0" placeholder="0" />
+                                    <span asp-validation-for="MaxStockQuantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Açıklama</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Malzeme açıklamasını giriniz..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" />
+                                <label asp-for="IsActive" class="form-check-label">
+                                    Aktif
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Kaydet
+                                </button>
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> İptal
+                                </a>
+                            </div>
+                            <button type="reset" class="btn btn-outline-warning">
+                                <i class="fas fa-undo"></i> Temizle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Hesaplama Alanı -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-calculator"></i> Toplam Değer Hesaplama
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Toplam Değer</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₺</span>
+                            <input id="totalValue" class="form-control" readonly />
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Not:</strong> Toplam değer = Mevcut Stok × Birim Fiyat
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yardım Kartı -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle"></i> Yardım
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <p><strong>Malzeme Adı:</strong> Malzemenin tam adı</p>
+                        <p><strong>Kod:</strong> Malzeme için benzersiz kod</p>
+                        <p><strong>Kategori:</strong> Malzeme kategorisi</p>
+                        <p><strong>Organizasyon:</strong> Malzemeden sorumlu birim</p>
+                        <p><strong>Birim:</strong> Ölçü birimi (Adet, Kg, Lt, vb.)</p>
+                        <p><strong>Minimum Stok:</strong> Uyarı verileceği seviye</p>
+                        <p class="mb-0"><strong>Maksimum Stok:</strong> İdeal üst sınır</p>
+                    </small>
+                </div>
+            </div>
+
+            <!-- Stok Uyarıları -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Stok Uyarıları
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <div class="text-warning mb-2">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Mevcut stok minimum stoktan az ise "Düşük Stok" uyarısı verilir.
+                        </div>
+                        <div class="text-info">
+                            <i class="fas fa-info-circle"></i>
+                            Mevcut stok maksimum stoktan fazla ise "Fazla Stok" uyarısı verilir.
+                        </div>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Toplam değer hesaplama
+            function calculateTotalValue() {
+                const stockQuantity = parseFloat($('#StockQuantity').val()) || 0;
+                const unitPrice = parseFloat($('#UnitPrice').val()) || 0;
+                const totalValue = stockQuantity * unitPrice;
+                
+                $('#totalValue').val(totalValue.toLocaleString('tr-TR', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                }));
+            }
+
+            // Stok ve fiyat değiştiğinde hesapla
+            $('#StockQuantity, #UnitPrice').on('input', function() {
+                calculateTotalValue();
+            });
+
+            // Kod alanı için otomatik büyük harf
+            $('#Code').on('input', function() {
+                $(this).val($(this).val().toUpperCase());
+            });
+
+            // Minimum stok kontrolü
+            $('#MinStockQuantity, #MaxStockQuantity').on('input', function() {
+                const minStock = parseFloat($('#MinStockQuantity').val()) || 0;
+                const maxStock = parseFloat($('#MaxStockQuantity').val()) || 0;
+                
+                if (minStock > maxStock && maxStock > 0) {
+                    $('#MaxStockQuantity').addClass('is-invalid');
+                    if (!$('#MaxStockQuantity').next('.invalid-feedback').length) {
+                        $('#MaxStockQuantity').after('<div class="invalid-feedback">Maksimum stok minimum stoktan büyük olmalıdır.</div>');
+                    }
+                } else {
+                    $('#MaxStockQuantity').removeClass('is-invalid');
+                    $('#MaxStockQuantity').next('.invalid-feedback').remove();
+                }
+            });
+
+            // İlk hesaplama
+            calculateTotalValue();
+        });
+    </script>
+}

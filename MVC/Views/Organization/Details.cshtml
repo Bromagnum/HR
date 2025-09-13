@@ -1,0 +1,305 @@
+@model OrganizationDetailViewModel
+
+@{
+    ViewData["Title"] = "Organizasyon Detayları";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-building text-primary"></i>
+            Organizasyon Detayları
+        </h2>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Geri
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Düzenle
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash"></i> Sil
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Temel Bilgiler -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Temel Bilgiler
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">ID:</dt>
+                                <dd class="col-sm-8">@Model.Id</dd>
+                                
+                                <dt class="col-sm-4">Organizasyon Adı:</dt>
+                                <dd class="col-sm-8"><strong>@Model.Name</strong></dd>
+                                
+                                <dt class="col-sm-4">Kodu:</dt>
+                                <dd class="col-sm-8">@Model.Code</dd>
+                                
+                                <dt class="col-sm-4">Tipi:</dt>
+                                <dd class="col-sm-8">
+                                    <span class="badge bg-info">@Model.Type</span>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">Üst Organizasyon:</dt>
+                                <dd class="col-sm-8">
+                                    @if (!string.IsNullOrEmpty(Model.ParentOrganizationName))
+                                    {
+                                        <a asp-action="Details" asp-route-id="@Model.ParentOrganizationId">
+                                            @Model.ParentOrganizationName
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Ana Organizasyon</span>
+                                    }
+                                </dd>
+                                
+                                <dt class="col-sm-4">Seviye:</dt>
+                                <dd class="col-sm-8">@Model.Level</dd>
+                                
+                                <dt class="col-sm-4">Durum:</dt>
+                                <dd class="col-sm-8">
+                                    @if (Model.IsActive)
+                                    {
+                                        <span class="badge bg-success">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Pasif</span>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <dt>Açıklama:</dt>
+                                <dd>@Model.Description</dd>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Yönetici Bilgileri -->
+            @if (!string.IsNullOrEmpty(Model.ManagerPersonName))
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-tie"></i> Yönetici Bilgileri
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-3">Yönetici:</dt>
+                            <dd class="col-sm-9">
+                                <strong>@Model.ManagerPersonName</strong>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            }
+
+            <!-- Alt Organizasyonlar -->
+            @if (Model.SubOrganizations?.Any() == true)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sitemap"></i> Alt Organizasyonlar (@Model.SubOrganizations.Count())
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Organizasyon Adı</th>
+                                        <th>Kod</th>
+                                        <th>Tip</th>
+                                        <th>Yönetici</th>
+                                        <th>Durum</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var subOrg in Model.SubOrganizations)
+                                    {
+                                        <tr>
+                                            <td><strong>@subOrg.Name</strong></td>
+                                            <td>@subOrg.Code</td>
+                                            <td>@subOrg.Type</td>
+                                            <td>@(subOrg.ManagerPersonName ?? "-")</td>
+                                            <td>
+                                                @if (subOrg.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Aktif</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Pasif</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a asp-action="Details" asp-route-id="@subOrg.Id" class="btn btn-info btn-sm" title="Detay">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Malzemeler -->
+            @if (Model.Materials?.Any() == true)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-boxes"></i> Malzemeler (@Model.Materials.Count())
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Malzeme Adı</th>
+                                        <th>Kategori</th>
+                                        <th>Stok</th>
+                                        <th>Durum</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var material in Model.Materials)
+                                    {
+                                        <tr>
+                                            <td><strong>@material.Name</strong></td>
+                                            <td>@material.Category</td>
+                                            <td>@material.StockQuantity @material.Unit</td>
+                                            <td>
+                                                @if (material.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Aktif</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Pasif</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a asp-controller="Material" asp-action="Details" asp-route-id="@material.Id" class="btn btn-info btn-sm" title="Detay">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-4">
+            <!-- Hızlı İstatistikler -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> İstatistikler
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-primary">@(Model.SubOrganizations?.Count() ?? 0)</h4>
+                                <small class="text-muted">Alt Organizasyon</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">@(Model.Materials?.Count() ?? 0)</h4>
+                            <small class="text-muted">Malzeme</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sistem Bilgileri -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cog"></i> Sistem Bilgileri
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <dl class="row mb-0">
+                            <dt class="col-6">Oluşturulma:</dt>
+                            <dd class="col-6">@Model.CreatedAt.ToString("dd.MM.yyyy")</dd>
+                            
+                            @if (Model.UpdatedAt.HasValue)
+                            {
+                                <dt class="col-6">Güncelleme:</dt>
+                                <dd class="col-6">@Model.UpdatedAt.Value.ToString("dd.MM.yyyy")</dd>
+                            }
+                        </dl>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Organizasyonu Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bu organizasyonu silmek istediğinizden emin misiniz?</p>
+                <p><strong>@Model.Name</strong></p>
+                @if (Model.SubOrganizations?.Any() == true || Model.Materials?.Any() == true)
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Uyarı:</strong> Bu organizasyonun alt organizasyonları veya malzemeleri bulunmaktadır.
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form asp-action="Delete" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger">Sil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

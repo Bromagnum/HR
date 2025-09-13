@@ -2,11 +2,10 @@ using DAL.Context;
 using DAL.Repositories;
 using DAL.Entities;
 using BLL.Services;
+using BLL.Services.Export;
 using BLL.Mapping;
 using MVC.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,83 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Add CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("DefaultCorsPolicy", builder =>
-    {
-        builder
-            .WithOrigins("https://localhost:10943") // Add your frontend URL
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
-    
-    options.AddPolicy("ApiCorsPolicy", builder =>
-    {
-        builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
-});
-
-// Configure cookies for HTTPS-only operation
-if (builder.Environment.IsDevelopment())
-{
-    // HTTPS-only settings for development
-    builder.Services.AddAntiforgery(options =>
-    {
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Force HTTPS
-        options.Cookie.HttpOnly = true;
-        options.Cookie.Name = "__RequestVerificationToken";
-        options.SuppressXFrameOptionsHeader = false;
-    });
-    
-    // Configure session cookies for HTTPS
-    builder.Services.AddSession(options =>
-    {
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Force HTTPS
-        options.Cookie.HttpOnly = true;
-        options.Cookie.IsEssential = true;
-    });
-    
-    builder.Services.Configure<CookiePolicyOptions>(options =>
-    {
-        options.MinimumSameSitePolicy = SameSiteMode.Lax;
-        options.Secure = CookieSecurePolicy.Always; // Force HTTPS
-        options.CheckConsentNeeded = context => false;
-        options.OnAppendCookie = cookieContext => 
-        {
-            cookieContext.CookieOptions.SameSite = SameSiteMode.Lax;
-            cookieContext.CookieOptions.Secure = true; // Always secure
-            cookieContext.CookieOptions.HttpOnly = true;
-        };
-        options.OnDeleteCookie = cookieContext => 
-        {
-            cookieContext.CookieOptions.SameSite = SameSiteMode.Lax;
-            cookieContext.CookieOptions.Secure = true; // Always secure
-            cookieContext.CookieOptions.HttpOnly = true;
-        };
-    });
-}
-else
-{
-    // Production configuration
-    builder.Services.AddAntiforgery();
-    builder.Services.Configure<CookiePolicyOptions>(options =>
-    {
-        options.MinimumSameSitePolicy = SameSiteMode.Strict;
-        options.Secure = CookieSecurePolicy.Always;
-        options.CheckConsentNeeded = context => true;
-    });
-}
-
-// Database Context
+// Database Context - Using InMemory database (temporary solution)
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseInMemoryDatabase("IKYS"));
 
 // Repository Pattern
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -103,15 +28,11 @@ builder.Services.AddScoped<IWorkLogRepository, WorkLogRepository>();
 builder.Services.AddScoped<ILeaveTypeRepository, LeaveTypeRepository>();
 builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 builder.Services.AddScoped<ILeaveBalanceRepository, LeaveBalanceRepository>();
+builder.Services.AddScoped<IPayrollRepository, PayrollRepository>();
 
-// CV and Job Application Repositories
-builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
-builder.Services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
-builder.Services.AddScoped<ICandidateEducationRepository, CandidateEducationRepository>();
-builder.Services.AddScoped<ICandidateExperienceRepository, CandidateExperienceRepository>();
-builder.Services.AddScoped<ICandidateSkillRepository, CandidateSkillRepository>();
-builder.Services.AddScoped<IInterviewNoteRepository, InterviewNoteRepository>();
-builder.Services.AddScoped<IApplicationDocumentRepository, ApplicationDocumentRepository>();
+// TMK Repositories
+builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 
 // Services
 builder.Services.AddScoped<IPersonService, PersonService>();
@@ -123,14 +44,18 @@ builder.Services.AddScoped<IWorkLogService, WorkLogService>();
 builder.Services.AddScoped<ILeaveTypeService, LeaveTypeService>();
 builder.Services.AddScoped<ILeaveService, LeaveService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
+builder.Services.AddScoped<IPayrollService, PayrollService>();
+
+// TMK Services
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+builder.Services.AddScoped<IMaterialService, MaterialService>();
 
 // Export Services
-builder.Services.AddScoped<BLL.Services.Export.IExcelExportService, BLL.Services.Export.ExcelExportService>();
+builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-// builder.Services.AddScoped<ITwoFactorService, TwoFactorService>(); // Temporarily disabled due to package issues
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddHttpContextAccessor();
 
@@ -171,8 +96,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
-// JWT Authentication will be added later when package issues are resolved
-
 // Configure Authorization Policies
 builder.Services.AddAuthorization(options =>
 {
@@ -182,75 +105,54 @@ builder.Services.AddAuthorization(options =>
 });
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(MVC.Mapping.ViewModelMappingProfile), typeof(BLL.Mapping.CandidateMappingProfile), typeof(BLL.Mapping.JobApplicationMappingProfile));
-
-// Localization for Turkish culture
-builder.Services.Configure<RequestLocalizationOptions>(options =>
-{
-    var supportedCultures = new[] { "tr-TR" };
-    options.SetDefaultCulture(supportedCultures[0])
-           .AddSupportedCultures(supportedCultures)
-           .AddSupportedUICultures(supportedCultures);
-});
+builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(MVC.Mapping.ViewModelMappingProfile));
 
 var app = builder.Build();
 
-        // Database initialization - ONLY for development
-        using (var scope = app.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            
-            // DEVELOPMENT ONLY: Recreate database with seed data
-            if (app.Environment.IsDevelopment())
-            {
-                // WARNING: This will delete and recreate the database!
-                // Only use in development environment
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
-            }
-            else
-            {
-                // PRODUCTION: Only ensure database exists, don't delete
-                context.Database.EnsureCreated();
-            }
-            
-            // Seed Roles and Default Admin User
-            await SeedRolesAndAdminAsync(roleManager, userManager);
-        }
+// Database initialization - ONLY for development
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+    
+    // DEVELOPMENT ONLY: Recreate database with seed data
+    if (app.Environment.IsDevelopment())
+    {
+        // WARNING: This will delete and recreate the database!
+        // Only use in development environment
+        context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
+    }
+    else
+    {
+        // PRODUCTION: Only ensure database exists, don't delete
+        context.Database.EnsureCreated();
+    }
+    
+    // Seed Roles and Default Admin User
+    await SeedRolesAndAdminAsync(roleManager, userManager);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-// Force HTTPS redirection in all environments
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-app.UseRequestLocalization();
-
-// Enable CORS
-app.UseCors("DefaultCorsPolicy");
-
-// Enable cookie policy and session
-app.UseCookiePolicy();
-app.UseSession();
 app.UseRouting();
 
 // Authentication & Authorization (correct order)
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseStaticFiles();
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 
 app.Run();
 
@@ -363,4 +265,3 @@ static async Task SeedRolesAndAdminAsync(RoleManager<ApplicationRole> roleManage
         }
     }
 }
-

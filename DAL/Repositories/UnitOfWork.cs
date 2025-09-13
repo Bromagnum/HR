@@ -17,15 +17,20 @@ public class UnitOfWork : IUnitOfWork
     private ILeaveTypeRepository? _leaveTypes;
     private ILeaveRepository? _leaves;
     private ILeaveBalanceRepository? _leaveBalances;
+    private IPayrollRepository? _payrolls;
     
-    // CV and Job Application Repositories
-    private ICandidateRepository? _candidates;
-    private IJobApplicationRepository? _jobApplications;
-    private ICandidateEducationRepository? _candidateEducations;
-    private ICandidateExperienceRepository? _candidateExperiences;
-    private ICandidateSkillRepository? _candidateSkills;
-    private IInterviewNoteRepository? _interviewNotes;
-    private IApplicationDocumentRepository? _applicationDocuments;
+    // TMK Repositories
+    private IOrganizationRepository? _organizations;
+    private IMaterialRepository? _materials;
+    
+    // CV and Job Application Repositories - Temporarily disabled
+    // private ICandidateRepository? _candidates;
+    // private IJobApplicationRepository? _jobApplications;
+    // private ICandidateEducationRepository? _candidateEducations;
+    // private ICandidateExperienceRepository? _candidateExperiences;
+    // private ICandidateSkillRepository? _candidateSkills;
+    // private IInterviewNoteRepository? _interviewNotes;
+    // private IApplicationDocumentRepository? _applicationDocuments;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -59,27 +64,37 @@ public class UnitOfWork : IUnitOfWork
     public ILeaveBalanceRepository LeaveBalances =>
         _leaveBalances ??= new LeaveBalanceRepository(_context);
 
-    // CV and Job Application Repository Properties
-    public ICandidateRepository Candidates =>
-        _candidates ??= new CandidateRepository(_context);
+    public IPayrollRepository Payrolls =>
+        _payrolls ??= new PayrollRepository(_context);
 
-    public IJobApplicationRepository JobApplications =>
-        _jobApplications ??= new JobApplicationRepository(_context);
+    // TMK Repository Properties
+    public IOrganizationRepository Organizations =>
+        _organizations ??= new OrganizationRepository(_context);
 
-    public ICandidateEducationRepository CandidateEducations =>
-        _candidateEducations ??= new CandidateEducationRepository(_context);
+    public IMaterialRepository Materials =>
+        _materials ??= new MaterialRepository(_context);
 
-    public ICandidateExperienceRepository CandidateExperiences =>
-        _candidateExperiences ??= new CandidateExperienceRepository(_context);
+    // CV and Job Application Repository Properties - Temporarily disabled
+    // public ICandidateRepository Candidates =>
+    //     _candidates ??= new CandidateRepository(_context);
 
-    public ICandidateSkillRepository CandidateSkills =>
-        _candidateSkills ??= new CandidateSkillRepository(_context);
+    // public IJobApplicationRepository JobApplications =>
+    //     _jobApplications ??= new JobApplicationRepository(_context);
 
-    public IInterviewNoteRepository InterviewNotes =>
-        _interviewNotes ??= new InterviewNoteRepository(_context);
+    // public ICandidateEducationRepository CandidateEducations =>
+    //     _candidateEducations ??= new CandidateEducationRepository(_context);
 
-    public IApplicationDocumentRepository ApplicationDocuments =>
-        _applicationDocuments ??= new ApplicationDocumentRepository(_context);
+    // public ICandidateExperienceRepository CandidateExperiences =>
+    //     _candidateExperiences ??= new CandidateExperienceRepository(_context);
+
+    // public ICandidateSkillRepository CandidateSkills =>
+    //     _candidateSkills ??= new CandidateSkillRepository(_context);
+
+    // public IInterviewNoteRepository InterviewNotes =>
+    //     _interviewNotes ??= new InterviewNoteRepository(_context);
+
+    // public IApplicationDocumentRepository ApplicationDocuments =>
+    //     _applicationDocuments ??= new ApplicationDocumentRepository(_context);
 
     public async Task<int> SaveChangesAsync()
     {

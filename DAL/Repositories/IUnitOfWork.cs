@@ -11,15 +11,20 @@ public interface IUnitOfWork : IDisposable
     ILeaveTypeRepository LeaveTypes { get; }
     ILeaveRepository Leaves { get; }
     ILeaveBalanceRepository LeaveBalances { get; }
+    IPayrollRepository Payrolls { get; }
     
-    // CV and Job Application Repositories
-    ICandidateRepository Candidates { get; }
-    IJobApplicationRepository JobApplications { get; }
-    ICandidateEducationRepository CandidateEducations { get; }
-    ICandidateExperienceRepository CandidateExperiences { get; }
-    ICandidateSkillRepository CandidateSkills { get; }
-    IInterviewNoteRepository InterviewNotes { get; }
-    IApplicationDocumentRepository ApplicationDocuments { get; }
+    // TMK Repositories
+    IOrganizationRepository Organizations { get; }
+    IMaterialRepository Materials { get; }
+    
+    // CV and Job Application Repositories - Temporarily disabled
+    // ICandidateRepository Candidates { get; }
+    // IJobApplicationRepository JobApplications { get; }
+    // ICandidateEducationRepository CandidateEducations { get; }
+    // ICandidateExperienceRepository CandidateExperiences { get; }
+    // ICandidateSkillRepository CandidateSkills { get; }
+    // IInterviewNoteRepository InterviewNotes { get; }
+    // IApplicationDocumentRepository ApplicationDocuments { get; }
     
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();

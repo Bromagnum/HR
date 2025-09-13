@@ -117,5 +117,38 @@ public class ViewModelMappingProfile : Profile
         CreateMap<UserProfileDto, UserProfileViewModel>();
         CreateMap<LoginRequestDto, LoginViewModel>().ReverseMap();
         CreateMap<RegisterRequestDto, RegisterViewModel>().ReverseMap();
+
+        // Payroll DTO to ViewModel mappings
+        CreateMap<PayrollListDto, PayrollListViewModel>();
+        CreateMap<PayrollDetailDto, PayrollDetailViewModel>();
+        CreateMap<PayrollDetailDto, PayrollEditViewModel>();
+        CreateMap<PayrollSummaryDto, PayrollSummaryViewModel>();
+        CreateMap<PersonYearlyPayrollSummaryDto, PersonYearlyPayrollSummaryViewModel>();
+        
+        // ViewModel to DTO mappings
+        CreateMap<PayrollCreateViewModel, PayrollCreateDto>();
+        CreateMap<PayrollEditViewModel, PayrollUpdateDto>();
+        CreateMap<PayrollFilterViewModel, PayrollFilterDto>();
+
+        // TMK Organization mappings
+        CreateMap<OrganizationListDto, OrganizationListViewModel>();
+        CreateMap<OrganizationDetailDto, OrganizationDetailViewModel>();
+        CreateMap<OrganizationDetailDto, OrganizationEditViewModel>();
+        CreateMap<OrganizationTreeDto, OrganizationTreeViewModel>();
+        
+        CreateMap<OrganizationCreateViewModel, OrganizationCreateDto>();
+        CreateMap<OrganizationEditViewModel, OrganizationUpdateDto>();
+        CreateMap<OrganizationFilterViewModel, OrganizationFilterDto>();
+
+        // TMK Material mappings
+        CreateMap<MaterialListDto, MaterialListViewModel>();
+        CreateMap<MaterialDetailDto, MaterialDetailViewModel>();
+        CreateMap<MaterialDetailDto, MaterialEditViewModel>();
+        CreateMap<MaterialStockSummaryDto, MaterialStockSummaryViewModel>();
+        CreateMap<MaterialCategorySummaryDto, MaterialCategorySummaryViewModel>();
+        
+        CreateMap<MaterialCreateViewModel, MaterialCreateDto>();
+        CreateMap<MaterialEditViewModel, MaterialUpdateDto>();
+        CreateMap<MaterialFilterViewModel, MaterialFilterDto>();
     }
 }

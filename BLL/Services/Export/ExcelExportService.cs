@@ -1,5 +1,6 @@
 using BLL.DTOs;
 using System.Text;
+using System.Reflection;
 
 namespace BLL.Services.Export;
 
@@ -396,5 +397,94 @@ public class ExcelExportService : IExcelExportService
         }
         
         html.AppendLine("</div>");
+    }
+
+    public async Task<byte[]> ExportAsync<T>(IEnumerable<T> data, string fileName) where T : class
+    {
+        return await Task.Run(() =>
+        {
+            var html = new StringBuilder();
+            
+            // HTML başlangıcı
+            html.AppendLine("<!DOCTYPE html>");
+            html.AppendLine("<html>");
+            html.AppendLine("<head>");
+            html.AppendLine("<meta charset='utf-8'>");
+            html.AppendLine($"<title>{fileName}</title>");
+            html.AppendLine("<style>");
+            html.AppendLine("body { font-family: Arial, sans-serif; margin: 20px; }");
+            html.AppendLine("table { border-collapse: collapse; width: 100%; margin: 10px 0; }");
+            html.AppendLine("th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }");
+            html.AppendLine("th { background-color: #4CAF50; color: white; font-weight: bold; }");
+            html.AppendLine(".inactive { color: #999; }");
+            html.AppendLine("</style>");
+            html.AppendLine("</head>");
+            html.AppendLine("<body>");
+            
+            // Başlık
+            html.AppendLine($"<h1>{fileName}</h1>");
+            html.AppendLine($"<p>Rapor Tarihi: {DateTime.Now:dd.MM.yyyy HH:mm}</p>");
+            html.AppendLine($"<p>Toplam Kayıt: {data.Count()}</p>");
+            
+            if (data.Any())
+            {
+                // Tablo başlangıcı
+                html.AppendLine("<table>");
+                
+                // Header'ları property'lerden oluştur
+                var properties = typeof(T).GetProperties()
+                    .Where(p => p.CanRead && p.PropertyType.IsPublic)
+                    .ToList();
+                
+                html.AppendLine("<tr>");
+                foreach (var prop in properties)
+                {
+                    // Display attribute varsa onu kullan, yoksa property adını kullan
+                    var displayName = prop.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+                        .Cast<System.ComponentModel.DataAnnotations.DisplayAttribute>()
+                        .FirstOrDefault()?.Name ?? prop.Name;
+                    html.AppendLine($"<th>{displayName}</th>");
+                }
+                html.AppendLine("</tr>");
+                
+                // Veri satırları
+                foreach (var item in data)
+                {
+                    html.AppendLine("<tr>");
+                    foreach (var prop in properties)
+                    {
+                        var value = prop.GetValue(item)?.ToString() ?? "";
+                        
+                        // Boolean değerleri Türkçe'ye çevir
+                        if (prop.PropertyType == typeof(bool) || prop.PropertyType == typeof(bool?))
+                        {
+                            if (bool.TryParse(value, out bool boolValue))
+                                value = boolValue ? "Evet" : "Hayır";
+                        }
+                        
+                        // DateTime değerleri formatla
+                        if (prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?))
+                        {
+                            if (DateTime.TryParse(value, out DateTime dateValue))
+                                value = dateValue.ToString("dd.MM.yyyy HH:mm");
+                        }
+                        
+                        html.AppendLine($"<td>{value}</td>");
+                    }
+                    html.AppendLine("</tr>");
+                }
+                
+                html.AppendLine("</table>");
+            }
+            else
+            {
+                html.AppendLine("<p>Gösterilecek veri bulunamadı.</p>");
+            }
+            
+            html.AppendLine("</body>");
+            html.AppendLine("</html>");
+            
+            return Encoding.UTF8.GetBytes(html.ToString());
+        });
     }
 }

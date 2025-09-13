@@ -33,5 +33,14 @@ public interface IExcelExportService
     /// <param name="searchResult">Arama sonuçları</param>
     /// <returns>Excel dosyası byte array</returns>
     Task<byte[]> ExportSearchResultsAsync(DepartmentSearchResultDto searchResult);
+    
+    /// <summary>
+    /// Generic list export - Herhangi bir listeyi Excel formatında export eder
+    /// </summary>
+    /// <typeparam name="T">List tipi</typeparam>
+    /// <param name="data">Export edilecek veri</param>
+    /// <param name="fileName">Dosya adı</param>
+    /// <returns>Excel dosyası byte array</returns>
+    Task<byte[]> ExportAsync<T>(IEnumerable<T> data, string fileName) where T : class;
 }
 

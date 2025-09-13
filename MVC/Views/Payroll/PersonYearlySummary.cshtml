@@ -1,0 +1,288 @@
+@model PersonYearlyPayrollSummaryViewModel
+
+@{
+    ViewData["Title"] = "Personel Yıllık Bordro Özeti";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-user-chart text-primary"></i>
+            Personel Yıllık Bordro Özeti
+        </h2>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Bordro Listesi
+            </a>
+            @if (User.IsInRole("Admin"))
+            {
+                <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel"></i> Excel'e Aktar
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter"></i> Personel ve Yıl Seçimi
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="PersonYearlySummary">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label">Personel</label>
+                        <select name="PersonId" class="form-select" required>
+                            <option value="">Personel Seçiniz</option>
+                            @if (ViewBag.PersonSelectList != null)
+                            {
+                                @foreach (var item in ViewBag.PersonSelectList as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)
+                                {
+                                    <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Yıl</label>
+                        <select name="Year" class="form-select" required>
+                            <option value="">Yıl Seçiniz</option>
+                            @for (int year = DateTime.Now.Year; year >= DateTime.Now.Year - 5; year--)
+                            {
+                                <option value="@year" selected="@(ViewBag.SelectedYear != null && ViewBag.SelectedYear.ToString() == year.ToString())">@year</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Departman</label>
+                        <select name="DepartmentId" class="form-select">
+                            <option value="">Tüm Departmanlar</option>
+                            @if (ViewBag.DepartmentSelectList != null)
+                            {
+                                @foreach (var item in ViewBag.DepartmentSelectList as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)
+                                {
+                                    <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Görüntüle
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model != null)
+    {
+        <!-- Personnel Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user"></i> Personel Bilgileri
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Ad Soyad:</strong> @Model.PersonName<br>
+                        <strong>Departman:</strong> @Model.DepartmentName<br>
+                        <strong>Pozisyon:</strong> @Model.PositionName
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Yıl:</strong> @Model.Year<br>
+                        <strong>Bordro Sayısı:</strong> @Model.TotalPayrolls ay<br>
+                        <strong>Ortalama Net Maaş:</strong> <span class="text-success">@Model.AverageNetSalary.ToString("C2")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Toplam Brüt</h6>
+                                <h4 class="mb-0">@Model.TotalGrossSalary.ToString("C0")</h4>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-money-bill-wave fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Toplam Kesinti</h6>
+                                <h4 class="mb-0">@Model.TotalDeductions.ToString("C0")</h4>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-minus-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Toplam Net</h6>
+                                <h4 class="mb-0">@Model.TotalNetSalary.ToString("C0")</h4>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-hand-holding-usd fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Ortalama Net</h6>
+                                <h4 class="mb-0">@Model.AverageNetSalary.ToString("C0")</h4>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-calculator fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Breakdown -->
+        @if (Model.MonthlyBreakdown?.Any() == true)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt"></i> Aylık Detay
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Ay</th>
+                                    <th>Temel Maaş</th>
+                                    <th>Brüt Maaş</th>
+                                    <th>Kesintiler</th>
+                                    <th>Net Maaş</th>
+                                    <th>Ödeme Tarihi</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var month in Model.MonthlyBreakdown.OrderBy(m => m.Month))
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@DateTime.Parse($"{Model.Year}-{month.Month:00}-01").ToString("MMMM", new System.Globalization.CultureInfo("tr-TR"))</strong>
+                                        </td>
+                                        <td>@month.BasicSalary.ToString("C2")</td>
+                                        <td><strong>@month.GrossSalary.ToString("C2")</strong></td>
+                                        <td class="text-warning">@month.Deductions.ToString("C2")</td>
+                                        <td class="text-success"><strong>@month.NetSalary.ToString("C2")</strong></td>
+                                        <td>
+                                            @if (month.PaymentDate.HasValue)
+                                            {
+                                                @month.PaymentDate.Value.ToString("dd.MM.yyyy")
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a asp-action="Details" asp-route-id="@month.PayrollId" class="btn btn-info btn-sm" title="Detay">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <th>TOPLAM</th>
+                                    <th>@Model.MonthlyBreakdown.Sum(m => m.BasicSalary).ToString("C2")</th>
+                                    <th><strong>@Model.TotalGrossSalary.ToString("C2")</strong></th>
+                                    <th class="text-warning"><strong>@Model.TotalDeductions.ToString("C2")</strong></th>
+                                    <th class="text-success"><strong>@Model.TotalNetSalary.ToString("C2")</strong></th>
+                                    <th colspan="2"></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle fa-2x mb-3"></i>
+            <h5>Personel ve yıl seçiniz</h5>
+            <p>Personel yıllık bordro özetini görüntülemek için yukarıdan personel ve yıl seçiniz.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function exportToExcel() {
+            const personId = document.querySelector('select[name="PersonId"]').value;
+            const year = document.querySelector('select[name="Year"]').value;
+            
+            if (!personId || !year) {
+                alert('Lütfen personel ve yıl seçiniz.');
+                return;
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("ExportPersonYearlySummary")';
+            
+            const personInput = document.createElement('input');
+            personInput.type = 'hidden';
+            personInput.name = 'PersonId';
+            personInput.value = personId;
+            form.appendChild(personInput);
+            
+            const yearInput = document.createElement('input');
+            yearInput.type = 'hidden';
+            yearInput.name = 'Year';
+            yearInput.value = year;
+            form.appendChild(yearInput);
+            
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '__RequestVerificationToken';
+            tokenInput.value = token;
+            form.appendChild(tokenInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+    </script>
+}

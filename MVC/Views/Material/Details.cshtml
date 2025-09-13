@@ -1,0 +1,343 @@
+@model MaterialDetailViewModel
+
+@{
+    ViewData["Title"] = "Malzeme Detayları";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-box text-primary"></i>
+            Malzeme Detayları
+        </h2>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Geri
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Düzenle
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash"></i> Sil
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Temel Bilgiler -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Temel Bilgiler
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">ID:</dt>
+                                <dd class="col-sm-8">@Model.Id</dd>
+                                
+                                <dt class="col-sm-4">Malzeme Adı:</dt>
+                                <dd class="col-sm-8"><strong>@Model.Name</strong></dd>
+                                
+                                <dt class="col-sm-4">Kodu:</dt>
+                                <dd class="col-sm-8">@Model.Code</dd>
+                                
+                                <dt class="col-sm-4">Kategori:</dt>
+                                <dd class="col-sm-8">
+                                    <span class="badge bg-info">@Model.Category</span>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">Organizasyon:</dt>
+                                <dd class="col-sm-8">
+                                    @if (!string.IsNullOrEmpty(Model.OrganizationName))
+                                    {
+                                        <a asp-controller="Organization" asp-action="Details" asp-route-id="@Model.OrganizationId">
+                                            @Model.OrganizationName
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Atanmamış</span>
+                                    }
+                                </dd>
+                                
+                                <dt class="col-sm-4">Birim:</dt>
+                                <dd class="col-sm-8">@Model.Unit</dd>
+                                
+                                <dt class="col-sm-4">Durum:</dt>
+                                <dd class="col-sm-8">
+                                    @if (Model.IsActive)
+                                    {
+                                        <span class="badge bg-success">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Pasif</span>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <dt>Açıklama:</dt>
+                                <dd>@Model.Description</dd>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Stok Bilgileri -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-warehouse"></i> Stok Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-6">Mevcut Stok:</dt>
+                                <dd class="col-sm-6">
+                                    <strong class="text-primary">@Model.StockQuantity @Model.Unit</strong>
+                                </dd>
+                                
+                                <dt class="col-sm-6">Minimum Stok:</dt>
+                                <dd class="col-sm-6">
+                                    <span class="text-warning">@Model.MinStockQuantity @Model.Unit</span>
+                                </dd>
+                                
+                                <dt class="col-sm-6">Maksimum Stok:</dt>
+                                <dd class="col-sm-6">
+                                    <span class="text-success">@Model.MaxStockQuantity @Model.Unit</span>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-6">Birim Fiyat:</dt>
+                                <dd class="col-sm-6">
+                                    <strong>@Model.UnitPrice.ToString("C")</strong>
+                                </dd>
+                                
+                                <dt class="col-sm-6">Toplam Değer:</dt>
+                                <dd class="col-sm-6">
+                                    <strong class="text-success">@Model.TotalValue.ToString("C")</strong>
+                                </dd>
+                                
+                                <dt class="col-sm-6">Stok Durumu:</dt>
+                                <dd class="col-sm-6">
+                                    @switch (Model.StockStatus)
+                                    {
+                                        case "Normal":
+                                            <span class="badge bg-success">Normal</span>
+                                            break;
+                                        case "Düşük":
+                                            <span class="badge bg-warning">Düşük Stok</span>
+                                            break;
+                                        case "Kritik":
+                                            <span class="badge bg-danger">Kritik Stok</span>
+                                            break;
+                                        case "Fazla":
+                                            <span class="badge bg-info">Fazla Stok</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@Model.StockStatus</span>
+                                            break;
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    <!-- Stok Durumu Progress Bar -->
+                    <div class="mt-3">
+                        <label class="form-label">Stok Seviyesi</label>
+                        @{
+                            var percentage = Model.MaxStockQuantity > 0 ? 
+                                Math.Round((double)Model.StockQuantity / Model.MaxStockQuantity * 100, 1) : 0;
+                            var progressClass = percentage < 25 ? "bg-danger" : 
+                                               percentage < 50 ? "bg-warning" : 
+                                               percentage < 90 ? "bg-success" : "bg-info";
+                        }
+                        <div class="progress">
+                            <div class="progress-bar @progressClass" role="progressbar" 
+                                 style="width: @percentage%" 
+                                 aria-valuenow="@Model.StockQuantity" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="@Model.MaxStockQuantity">
+                                @percentage%
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="text-muted">Min: @Model.MinStockQuantity</small>
+                            <small class="text-muted">Mevcut: @Model.StockQuantity</small>
+                            <small class="text-muted">Max: @Model.MaxStockQuantity</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Uyarılar -->
+            @if (Model.IsLowStock || Model.IsOverStock)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0 text-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Stok Uyarıları
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.IsLowStock)
+                        {
+                            <div class="alert alert-warning mb-2">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Düşük Stok Uyarısı:</strong> 
+                                Mevcut stok seviyesi minimum seviyenin altında!
+                            </div>
+                        }
+                        @if (Model.IsOverStock)
+                        {
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Fazla Stok Uyarısı:</strong> 
+                                Mevcut stok seviyesi maksimum seviyeyi aşmış!
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-4">
+            <!-- Hızlı İstatistikler -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> Hızlı Bilgiler
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-primary">@Model.StockQuantity</h4>
+                                <small class="text-muted">Mevcut Stok</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">@Model.TotalValue.ToString("C0")</h4>
+                            <small class="text-muted">Toplam Değer</small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="text-center">
+                        @if (Model.IsLowStock)
+                        {
+                            <div class="text-warning">
+                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                                <p class="mt-2 mb-0">Düşük Stok</p>
+                            </div>
+                        }
+                        else if (Model.IsOverStock)
+                        {
+                            <div class="text-info">
+                                <i class="fas fa-arrow-up fa-2x"></i>
+                                <p class="mt-2 mb-0">Fazla Stok</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-success">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                                <p class="mt-2 mb-0">Normal Stok</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategori Bilgileri -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-tags"></i> Kategori: @Model.Category
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <p class="mb-2"><strong>Malzeme Kodu:</strong> @Model.Code</p>
+                        <p class="mb-2"><strong>Ölçü Birimi:</strong> @Model.Unit</p>
+                        @if (!string.IsNullOrEmpty(Model.OrganizationName))
+                        {
+                            <p class="mb-0"><strong>Sorumlu Organizasyon:</strong> @Model.OrganizationName</p>
+                        }
+                    </small>
+                </div>
+            </div>
+
+            <!-- Sistem Bilgileri -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cog"></i> Sistem Bilgileri
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <dl class="row mb-0">
+                            <dt class="col-6">Oluşturulma:</dt>
+                            <dd class="col-6">@Model.CreatedAt.ToString("dd.MM.yyyy")</dd>
+                            
+                            @if (Model.UpdatedAt.HasValue)
+                            {
+                                <dt class="col-6">Güncelleme:</dt>
+                                <dd class="col-6">@Model.UpdatedAt.Value.ToString("dd.MM.yyyy")</dd>
+                            }
+                        </dl>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Malzemeyi Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bu malzemeyi silmek istediğinizden emin misiniz?</p>
+                <p><strong>@Model.Name</strong></p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Uyarı:</strong> Bu işlem geri alınamaz!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form asp-action="Delete" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger">Sil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

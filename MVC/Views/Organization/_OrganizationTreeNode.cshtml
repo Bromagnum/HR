@@ -1,0 +1,67 @@
+@model OrganizationTreeViewModel
+
+<div class="org-node @(Model.IsActive ? "" : "inactive")" 
+     data-name="@Model.Name" 
+     data-type="@Model.Type" 
+     data-active="@Model.IsActive.ToString().ToLower()"
+     data-code="@Model.Code">
+    <div class="org-info">
+        <div class="org-details">
+            <div class="d-flex align-items-center">
+                @if (Model.SubOrganizations?.Any() == true)
+                {
+                    <i id="toggle-@Model.Id" class="fas fa-minus-square org-toggle me-2" onclick="toggleNode(@Model.Id)"></i>
+                }
+                else
+                {
+                    <i class="fas fa-circle me-2" style="font-size: 8px; color: #dee2e6;"></i>
+                }
+                <strong>@Model.Name</strong>
+                <span class="badge bg-secondary ms-2">@Model.Type</span>
+                @if (Model.IsActive)
+                {
+                    <span class="badge bg-success ms-1">Aktif</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger ms-1">Pasif</span>
+                }
+            </div>
+            <div class="text-muted small mt-1">
+                Kod: @Model.Code | Seviye: @Model.Level
+                @if (!string.IsNullOrEmpty(Model.ManagerPersonName))
+                {
+                    <text> | Yönetici: @Model.ManagerPersonName</text>
+                }
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <br /><small>@Model.Description</small>
+                }
+            </div>
+        </div>
+        <div class="org-actions">
+            <button onclick="showDetails(@Model.Id)" class="btn btn-info btn-sm" title="Detayları Görüntüle">
+                <i class="fas fa-eye"></i>
+            </button>
+            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+            {
+                <button onclick="editOrganization(@Model.Id)" class="btn btn-warning btn-sm" title="Düzenle">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteOrganization(@Model.Id, '@Model.Name')" class="btn btn-danger btn-sm" title="Sil">
+                    <i class="fas fa-trash"></i>
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@if (Model.SubOrganizations?.Any() == true)
+{
+    <div id="children-@Model.Id" class="org-children">
+        @foreach (var subOrg in Model.SubOrganizations)
+        {
+            @await Html.PartialAsync("_OrganizationTreeNode", subOrg)
+        }
+    </div>
+}
