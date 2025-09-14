@@ -88,14 +88,8 @@ public class MaterialDetailViewModel
     [Display(Name = "Min. Stok Seviyesi")]
     public int MinStockLevel { get; set; }
     
-    [Display(Name = "Minimum Stok")]
-    public int MinStockQuantity { get; set; }
-    
     [Display(Name = "Max. Stok Seviyesi")]
     public int MaxStockLevel { get; set; }
-    
-    [Display(Name = "Maksimum Stok")]
-    public int MaxStockQuantity { get; set; }
     
     [Display(Name = "Toplam Değer")]
     [DisplayFormat(DataFormatString = "{0:C2}")]
@@ -211,16 +205,6 @@ public class MaterialCreateViewModel
     [Display(Name = "Son Kullanma Tarihi")]
     public DateTime? ExpirationDate { get; set; }
     
-    [Required(ErrorMessage = "Minimum stok alanı zorunludur")]
-    [Range(0, int.MaxValue, ErrorMessage = "Minimum stok 0 veya pozitif olmalıdır")]
-    [Display(Name = "Minimum Stok")]
-    public int MinStockQuantity { get; set; }
-    
-    [Required(ErrorMessage = "Maksimum stok alanı zorunludur")]
-    [Range(1, int.MaxValue, ErrorMessage = "Maksimum stok 1 veya pozitif olmalıdır")]
-    [Display(Name = "Maksimum Stok")]
-    public int MaxStockQuantity { get; set; }
-    
     [Display(Name = "Aktif")]
     public bool IsActive { get; set; } = true;
 }
@@ -292,6 +276,17 @@ public class MaterialEditViewModel
     
     [Display(Name = "Son Kullanma Tarihi")]
     public DateTime? ExpirationDate { get; set; }
+    
+    [Display(Name = "Aktif")]
+    public bool IsActive { get; set; }
+    
+    [Display(Name = "Oluşturma Tarihi")]
+    [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy HH:mm}")]
+    public DateTime CreatedAt { get; set; }
+    
+    [Display(Name = "Güncelleme Tarihi")]
+    [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy HH:mm}")]
+    public DateTime? UpdatedAt { get; set; }
 }
 
 public class MaterialFilterViewModel

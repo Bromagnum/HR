@@ -14,9 +14,11 @@ public class OrganizationRepository : Repository<Organization>, IOrganizationRep
     {
         return await _dbSet
             .Include(o => o.SubOrganizations)
+                .ThenInclude(so => so.SubOrganizations)
+                    .ThenInclude(sso => sso.SubOrganizations)
             .Include(o => o.ManagerPerson)
             .Include(o => o.Materials)
-            .Where(o => o.ParentOrganizationId == null && o.IsActive)
+            .Where(o => o.ParentOrganizationId == null)
             .ToListAsync();
     }
 

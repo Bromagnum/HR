@@ -116,16 +116,16 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label asp-for="MinStockQuantity" class="form-label">Minimum Stok *</label>
-                                    <input asp-for="MinStockQuantity" class="form-control" type="number" min="0" placeholder="0" />
-                                    <span asp-validation-for="MinStockQuantity" class="text-danger"></span>
+                                    <label asp-for="MinStockLevel" class="form-label">Minimum Stok *</label>
+                                    <input asp-for="MinStockLevel" class="form-control" type="number" min="0" placeholder="0" />
+                                    <span asp-validation-for="MinStockLevel" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label asp-for="MaxStockQuantity" class="form-label">Maksimum Stok *</label>
-                                    <input asp-for="MaxStockQuantity" class="form-control" type="number" min="0" placeholder="0" />
-                                    <span asp-validation-for="MaxStockQuantity" class="text-danger"></span>
+                                    <label asp-for="MaxStockLevel" class="form-label">Maksimum Stok *</label>
+                                    <input asp-for="MaxStockLevel" class="form-control" type="number" min="0" placeholder="0" />
+                                    <span asp-validation-for="MaxStockLevel" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
@@ -261,18 +261,18 @@
             });
 
             // Minimum stok kontrolü
-            $('#MinStockQuantity, #MaxStockQuantity').on('input', function() {
-                const minStock = parseFloat($('#MinStockQuantity').val()) || 0;
-                const maxStock = parseFloat($('#MaxStockQuantity').val()) || 0;
+            $('#MinStockLevel, #MaxStockLevel').on('input', function() {
+                const minStock = parseFloat($('#MinStockLevel').val()) || 0;
+                const maxStock = parseFloat($('#MaxStockLevel').val()) || 0;
                 
                 if (minStock > maxStock && maxStock > 0) {
-                    $('#MaxStockQuantity').addClass('is-invalid');
-                    if (!$('#MaxStockQuantity').next('.invalid-feedback').length) {
-                        $('#MaxStockQuantity').after('<div class="invalid-feedback">Maksimum stok minimum stoktan büyük olmalıdır.</div>');
+                    $('#MaxStockLevel').addClass('is-invalid');
+                    if (!$('#MaxStockLevel').next('.invalid-feedback').length) {
+                        $('#MaxStockLevel').after('<div class="invalid-feedback">Maksimum stok minimum stoktan büyük olmalıdır.</div>');
                     }
                 } else {
-                    $('#MaxStockQuantity').removeClass('is-invalid');
-                    $('#MaxStockQuantity').next('.invalid-feedback').remove();
+                    $('#MaxStockLevel').removeClass('is-invalid');
+                    $('#MaxStockLevel').next('.invalid-feedback').remove();
                 }
             });
 

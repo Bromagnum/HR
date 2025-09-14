@@ -134,7 +134,10 @@ public class ViewModelMappingProfile : Profile
         CreateMap<OrganizationListDto, OrganizationListViewModel>();
         CreateMap<OrganizationDetailDto, OrganizationDetailViewModel>();
         CreateMap<OrganizationDetailDto, OrganizationEditViewModel>();
-        CreateMap<OrganizationTreeDto, OrganizationTreeViewModel>();
+        CreateMap<OrganizationTreeDto, OrganizationTreeViewModel>()
+            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => "Organizasyon"))
+            .ForMember(dest => dest.Level, opt => opt.MapFrom(src => 1))
+            .ForMember(dest => dest.SubOrganizations, opt => opt.MapFrom(src => src.Children));
         
         CreateMap<OrganizationCreateViewModel, OrganizationCreateDto>();
         CreateMap<OrganizationEditViewModel, OrganizationUpdateDto>();

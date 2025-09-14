@@ -247,8 +247,17 @@ public class OrganizationController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        // Simple CSV export for now
-        TempData["Info"] = "Excel export özelliği geliştiriliyor. Şimdilik listede görüntülenen veriler bulunmaktadır.";
-        return RedirectToAction(nameof(Index));
+        try
+        {
+            var excelData = await _excelExportService.ExportAsync(result.Data, "Organizasyonlar");
+            
+            var fileName = $"Organizasyonlar_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            return File(excelData, "text/csv", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Excel export hatası: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

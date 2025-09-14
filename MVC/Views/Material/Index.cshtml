@@ -108,6 +108,8 @@
                                 <th>Birim</th>
                                 <th>Birim Fiyat</th>
                                 <th>Stok</th>
+                                <th>Min. Stok</th>
+                                <th>Max. Stok</th>
                                 <th>Stok Durumu</th>
                                 <th>Toplam Değer</th>
                                 <th>Organizasyon</th>
@@ -137,9 +139,12 @@
                                         <span class="badge @(item.IsLowStock ? "bg-danger" : "bg-success")">
                                             @item.StockQuantity
                                         </span>
-                                        <small class="text-muted">
-                                            (Min: @item.MinStockLevel, Max: @item.MaxStockLevel)
-                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">@item.MinStockLevel</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@item.MaxStockLevel</span>
                                     </td>
                                     <td>
                                         @if (item.IsLowStock)

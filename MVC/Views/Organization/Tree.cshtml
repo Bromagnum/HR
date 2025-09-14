@@ -25,9 +25,9 @@
             </button>
             @if (User.IsInRole("Admin"))
             {
-                <a asp-action="ExportToExcel" class="btn btn-primary">
+                <button type="button" class="btn btn-primary" onclick="exportToExcel()">
                     <i class="fas fa-file-excel"></i> Excel'e Aktar
-                </a>
+                </button>
             }
         </div>
     </div>
@@ -345,6 +345,23 @@
                 $('body').append(form);
                 form.submit();
             }
+        }
+        
+        function exportToExcel() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("ExportToExcel")';
+            
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '__RequestVerificationToken';
+            tokenInput.value = token;
+            form.appendChild(tokenInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
         }
     </script>
 }

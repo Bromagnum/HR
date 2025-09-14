@@ -403,54 +403,40 @@ public class ExcelExportService : IExcelExportService
     {
         return await Task.Run(() =>
         {
-            var html = new StringBuilder();
+            var csv = new StringBuilder();
             
-            // HTML başlangıcı
-            html.AppendLine("<!DOCTYPE html>");
-            html.AppendLine("<html>");
-            html.AppendLine("<head>");
-            html.AppendLine("<meta charset='utf-8'>");
-            html.AppendLine($"<title>{fileName}</title>");
-            html.AppendLine("<style>");
-            html.AppendLine("body { font-family: Arial, sans-serif; margin: 20px; }");
-            html.AppendLine("table { border-collapse: collapse; width: 100%; margin: 10px 0; }");
-            html.AppendLine("th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }");
-            html.AppendLine("th { background-color: #4CAF50; color: white; font-weight: bold; }");
-            html.AppendLine(".inactive { color: #999; }");
-            html.AppendLine("</style>");
-            html.AppendLine("</head>");
-            html.AppendLine("<body>");
+            // BOM for UTF-8 to ensure Turkish characters display correctly in Excel
+            csv.Append('\uFEFF');
             
-            // Başlık
-            html.AppendLine($"<h1>{fileName}</h1>");
-            html.AppendLine($"<p>Rapor Tarihi: {DateTime.Now:dd.MM.yyyy HH:mm}</p>");
-            html.AppendLine($"<p>Toplam Kayıt: {data.Count()}</p>");
+            // Başlık bilgileri
+            csv.AppendLine($"{fileName}");
+            csv.AppendLine($"Rapor Tarihi: {DateTime.Now:dd.MM.yyyy HH:mm}");
+            csv.AppendLine($"Toplam Kayıt: {data.Count()}");
+            csv.AppendLine(); // Boş satır
             
             if (data.Any())
             {
-                // Tablo başlangıcı
-                html.AppendLine("<table>");
-                
                 // Header'ları property'lerden oluştur
                 var properties = typeof(T).GetProperties()
                     .Where(p => p.CanRead && p.PropertyType.IsPublic)
                     .ToList();
                 
-                html.AppendLine("<tr>");
+                // CSV Header
+                var headers = new List<string>();
                 foreach (var prop in properties)
                 {
                     // Display attribute varsa onu kullan, yoksa property adını kullan
                     var displayName = prop.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
                         .Cast<System.ComponentModel.DataAnnotations.DisplayAttribute>()
                         .FirstOrDefault()?.Name ?? prop.Name;
-                    html.AppendLine($"<th>{displayName}</th>");
+                    headers.Add($"\"{displayName}\"");
                 }
-                html.AppendLine("</tr>");
+                csv.AppendLine(string.Join(",", headers));
                 
                 // Veri satırları
                 foreach (var item in data)
                 {
-                    html.AppendLine("<tr>");
+                    var values = new List<string>();
                     foreach (var prop in properties)
                     {
                         var value = prop.GetValue(item)?.ToString() ?? "";
@@ -469,22 +455,19 @@ public class ExcelExportService : IExcelExportService
                                 value = dateValue.ToString("dd.MM.yyyy HH:mm");
                         }
                         
-                        html.AppendLine($"<td>{value}</td>");
+                        // CSV için değeri quote'la ve escape et
+                        value = value.Replace("\"", "\"\""); // Double quotes'u escape et
+                        values.Add($"\"{value}\"");
                     }
-                    html.AppendLine("</tr>");
+                    csv.AppendLine(string.Join(",", values));
                 }
-                
-                html.AppendLine("</table>");
             }
             else
             {
-                html.AppendLine("<p>Gösterilecek veri bulunamadı.</p>");
+                csv.AppendLine("Gösterilecek veri bulunamadı.");
             }
             
-            html.AppendLine("</body>");
-            html.AppendLine("</html>");
-            
-            return Encoding.UTF8.GetBytes(html.ToString());
+            return Encoding.UTF8.GetBytes(csv.ToString());
         });
     }
 }

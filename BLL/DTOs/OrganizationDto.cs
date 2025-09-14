@@ -82,7 +82,10 @@ public class OrganizationTreeDto
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Code { get; set; } = string.Empty;
+    public string? Description { get; set; }
     public string? Manager { get; set; }
+    public string? ManagerPersonName { get; set; }
     public int MaterialsCount { get; set; }
+    public bool IsActive { get; set; }
     public List<OrganizationTreeDto> Children { get; set; } = new();
 }

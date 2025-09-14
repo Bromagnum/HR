@@ -1,6 +1,7 @@
 using AutoMapper;
 using BLL.DTOs;
 using BLL.Services;
+using BLL.Services.Export;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -20,6 +21,7 @@ public class PayrollController : Controller
     private readonly IPersonService _personService;
     private readonly IDepartmentService _departmentService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IExcelExportService _excelExportService;
     private readonly IMapper _mapper;
     private readonly ILogger<PayrollController> _logger;
 
@@ -28,6 +30,7 @@ public class PayrollController : Controller
         IPersonService personService,
         IDepartmentService departmentService,
         ICurrentUserService currentUserService,
+        IExcelExportService excelExportService,
         IMapper mapper,
         ILogger<PayrollController> logger)
     {
@@ -35,6 +38,7 @@ public class PayrollController : Controller
         _personService = personService;
         _departmentService = departmentService;
         _currentUserService = currentUserService;
+        _excelExportService = excelExportService;
         _mapper = mapper;
         _logger = logger;
     }
@@ -700,6 +704,74 @@ public class PayrollController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Düzenleme dropdown'ları yüklenirken hata oluştu");
+        }
+    }
+
+    #endregion
+
+    #region Export Actions
+
+    /// <summary>
+    /// Dönem bordro özetini Excel'e aktar
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> ExportPeriodSummary(int year, int month, int? departmentId)
+    {
+        try
+        {
+            var result = await _payrollService.GetPeriodSummaryAsync(year, month);
+            
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(PeriodSummary), new { year, month, departmentId });
+            }
+
+            var excelData = await _excelExportService.ExportAsync(new[] { result.Data }, $"Bordro_Dönem_Özeti_{year}_{month:D2}");
+            
+            var fileName = $"Bordro_Dönem_Özeti_{year}_{month:D2}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            return File(excelData, "text/csv", fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Dönem özeti Excel export hatası: {@Year}, {@Month}", year, month);
+            TempData["Error"] = $"Excel export hatası: {ex.Message}";
+            return RedirectToAction(nameof(PeriodSummary), new { year, month, departmentId });
+        }
+    }
+
+    /// <summary>
+    /// Personel yıllık bordro özetini Excel'e aktar
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> ExportPersonYearlySummary(int? personId, int year, int? departmentId)
+    {
+        try
+        {
+            if (!personId.HasValue)
+            {
+                TempData["Warning"] = "Lütfen bir personel seçin.";
+                return RedirectToAction(nameof(PersonYearlySummary), new { personId, year, departmentId });
+            }
+
+            var result = await _payrollService.GetPersonYearlySummaryAsync(personId.Value, year);
+            
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(PersonYearlySummary), new { personId, year, departmentId });
+            }
+
+            var excelData = await _excelExportService.ExportAsync(new[] { result.Data }, $"Personel_Yıllık_Bordro_Özeti_{year}");
+            
+            var fileName = $"Personel_Yıllık_Bordro_Özeti_{year}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            return File(excelData, "text/csv", fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Personel yıllık özet Excel export hatası: {@PersonId}, {@Year}", personId, year);
+            TempData["Error"] = $"Excel export hatası: {ex.Message}";
+            return RedirectToAction(nameof(PersonYearlySummary), new { personId, year, departmentId });
         }
     }
 

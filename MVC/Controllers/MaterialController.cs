@@ -245,9 +245,18 @@ public class MaterialController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        // Simple CSV export for now
-        TempData["Info"] = "Excel export özelliği geliştiriliyor. Şimdilik listede görüntülenen veriler bulunmaktadır.";
-        return RedirectToAction(nameof(Index));
+        try
+        {
+            var excelData = await _excelExportService.ExportAsync(result.Data, "Malzemeler");
+            
+            var fileName = $"Malzemeler_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            return File(excelData, "text/csv", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Excel export hatası: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     [HttpPost]
@@ -261,8 +270,17 @@ public class MaterialController : Controller
             return RedirectToAction(nameof(LowStock));
         }
 
-        // Simple CSV export for now
-        TempData["Info"] = "Excel export özelliği geliştiriliyor. Şimdilik listede görüntülenen veriler bulunmaktadır.";
-        return RedirectToAction(nameof(LowStock));
+        try
+        {
+            var excelData = await _excelExportService.ExportAsync(result.Data, "Düşük_Stok_Malzemeleri");
+            
+            var fileName = $"Düşük_Stok_Malzemeleri_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            return File(excelData, "text/csv", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Excel export hatası: {ex.Message}";
+            return RedirectToAction(nameof(LowStock));
+        }
     }
 }

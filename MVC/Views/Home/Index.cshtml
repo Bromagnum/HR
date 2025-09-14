@@ -2,11 +2,188 @@
     ViewData["Title"] = "Ana Sayfa";
 }
 
-<div class="text-center">
-    <h1 class="display-4">İnsan Kaynakları Yönetim Sistemi</h1>
-    <p class="lead">İKYS'ye hoş geldiniz. Bu sistem ile personel yönetimi işlemlerinizi kolayca gerçekleştirebilirsiniz.</p>
-    
-    <div class="row mt-5">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-2">İnsan Kaynakları Yönetim Sistemi</h1>
+            <p class="lead text-center mb-4">İKYS'ye hoş geldiniz. Bu sistem ile personel yönetimi işlemlerinizi kolayca gerçekleştirebilirsiniz.</p>
+        </div>
+    </div>
+
+    <!-- Debug Bilgisi (Geçici) -->
+    <div class="alert alert-info">
+        <strong>Debug:</strong> 
+        TotalEmployees: @ViewBag.TotalEmployees | 
+        TotalDepartments: @ViewBag.TotalDepartments | 
+        LastUpdated: @ViewBag.LastUpdated
+        @if(ViewBag.DashboardError != null)
+        {
+            <br/><span class="text-danger"><strong>Error:</strong> @ViewBag.DashboardError</span>
+        }
+    </div>
+
+    <!-- İstatistik Widget'ları -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@ViewBag.TotalEmployees</h4>
+                            <p class="card-text">Toplam Personel</p>
+                            <small>@ViewBag.ActiveEmployees aktif</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Person" asp-action="Index" class="text-white text-decoration-none">
+                        <small>Detayları Görüntüle <i class="fas fa-arrow-right"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@ViewBag.TotalDepartments</h4>
+                            <p class="card-text">Toplam Departman</p>
+                            <small>@ViewBag.ActiveDepartments aktif</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-building fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Department" asp-action="Index" class="text-white text-decoration-none">
+                        <small>Detayları Görüntüle <i class="fas fa-arrow-right"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@ViewBag.TotalPositions</h4>
+                            <p class="card-text">Toplam Pozisyon</p>
+                            <small>@ViewBag.OpenPositions açık pozisyon</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-briefcase fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Position" asp-action="Index" class="text-white text-decoration-none">
+                        <small>Detayları Görüntüle <i class="fas fa-arrow-right"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@ViewBag.TotalLeaveRequests</h4>
+                            <p class="card-text">İzin Talepleri</p>
+                            <small>@ViewBag.PendingLeaveRequests beklemede</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-alt fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Leave" asp-action="Index" class="text-white text-decoration-none">
+                        <small>Detayları Görüntüle <i class="fas fa-arrow-right"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İkinci sıra widget'ları -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@ViewBag.LowStockMaterials</h4>
+                            <p class="card-text">Düşük Stok</p>
+                            <small>@ViewBag.TotalMaterials toplam malzeme</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Material" asp-action="LowStock" class="text-white text-decoration-none">
+                        <small>Düşük Stok Raporu <i class="fas fa-arrow-right"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card bg-secondary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">₺@string.Format("{0:N0}", ViewBag.TotalMaterialValue ?? 0)</h4>
+                            <p class="card-text">Toplam Malzeme Değeri</p>
+                            <small>Stok değeri</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-boxes fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Material" asp-action="StockSummary" class="text-white text-decoration-none">
+                        <small>Stok Özeti <i class="fas fa-arrow-right"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-12 mb-3">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">₺@string.Format("{0:N0}", ViewBag.MonthlyPayrollTotal ?? 0)</h4>
+                            <p class="card-text">Bu Ay Bordro</p>
+                            <small>Ortalama: ₺@string.Format("{0:N0}", ViewBag.AverageEmployeeSalary ?? 0)</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-money-bill-wave fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Payroll" asp-action="Index" class="text-white text-decoration-none">
+                        <small>Bordro Yönetimi <i class="fas fa-arrow-right"></i></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modül Kartları (Mevcut) -->
+    <div class="row">
         <div class="col-md-3">
             <div class="card h-100">
                 <div class="card-body text-center">
@@ -123,8 +300,63 @@
             </div>
         </div>
     </div>
+
+    <!-- TMK Modülü -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card h-100 border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-sitemap fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title text-primary">TMK - Organizasyon</h5>
+                    <p class="card-text">Teşkilat yapısı, organizasyon şeması ve hiyerarşi</p>
+                    <div class="btn-group" role="group">
+                        <a asp-controller="Organization" asp-action="Index" class="btn btn-primary">Listesi</a>
+                        <a asp-controller="Organization" asp-action="Tree" class="btn btn-outline-primary">Org. Şeması</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card h-100 border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-boxes fa-3x text-success mb-3"></i>
+                    <h5 class="card-title text-success">TMK - Malzeme</h5>
+                    <p class="card-text">Malzeme yönetimi, stok takibi ve envanter</p>
+                    <div class="btn-group" role="group">
+                        <a asp-controller="Material" asp-action="Index" class="btn btn-success">Listesi</a>
+                        <a asp-controller="Material" asp-action="LowStock" class="btn btn-outline-success">Düşük Stok</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Son Güncelleme -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <small class="text-muted">
+                Son güncelleme: @ViewBag.LastUpdated
+            </small>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <style>
+        .opacity-75 {
+            opacity: 0.75;
+        }
+        .card-footer a:hover {
+            text-decoration: underline !important;
+        }
+        .card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
 }

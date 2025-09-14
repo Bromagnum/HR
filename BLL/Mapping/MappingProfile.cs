@@ -250,8 +250,9 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Materials, opt => opt.MapFrom(src => src.Materials.Where(m => m.IsActive)));
 
         CreateMap<Organization, OrganizationTreeDto>()
+            .ForMember(dest => dest.ManagerPersonName, opt => opt.MapFrom(src => src.ManagerPerson != null ? $"{src.ManagerPerson.FirstName} {src.ManagerPerson.LastName}" : ""))
             .ForMember(dest => dest.MaterialsCount, opt => opt.MapFrom(src => src.Materials.Count))
-            .ForMember(dest => dest.Children, opt => opt.MapFrom(src => src.SubOrganizations.Where(o => o.IsActive)));
+            .ForMember(dest => dest.Children, opt => opt.MapFrom(src => src.SubOrganizations));
 
         CreateMap<OrganizationCreateDto, Organization>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
