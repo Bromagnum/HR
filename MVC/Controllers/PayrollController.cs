@@ -727,7 +727,7 @@ public class PayrollController : Controller
                 return RedirectToAction(nameof(PeriodSummary), new { year, month, departmentId });
             }
 
-            var excelData = await _excelExportService.ExportAsync(new[] { result.Data }, $"Bordro_Dönem_Özeti_{year}_{month:D2}");
+            var excelData = await _excelExportService.ExportAsync(new[] { result.Data! }, $"Bordro_Dönem_Özeti_{year}_{month:D2}");
             
             var fileName = $"Bordro_Dönem_Özeti_{year}_{month:D2}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
             return File(excelData, "text/csv", fileName);
@@ -762,7 +762,7 @@ public class PayrollController : Controller
                 return RedirectToAction(nameof(PersonYearlySummary), new { personId, year, departmentId });
             }
 
-            var excelData = await _excelExportService.ExportAsync(new[] { result.Data }, $"Personel_Yıllık_Bordro_Özeti_{year}");
+            var excelData = await _excelExportService.ExportAsync(new[] { result.Data! }, $"Personel_Yıllık_Bordro_Özeti_{year}");
             
             var fileName = $"Personel_Yıllık_Bordro_Özeti_{year}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
             return File(excelData, "text/csv", fileName);

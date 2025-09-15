@@ -1,0 +1,164 @@
+@model JobApplicationCreateViewModel
+@using DAL.Entities
+@{
+    ViewData["Title"] = "Yeni Başvuru";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plus me-2"></i>Yeni Başvuru Oluştur
+                    </h3>
+                </div>
+
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <div class="card-body">
+                        <!-- Kişisel Bilgiler -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-user text-primary"></i> Kişisel Bilgiler
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label"></label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label"></label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" type="email" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label"></label>
+                                <input asp-for="PhoneNumber" class="form-control" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="PositionId" class="form-label"></label>
+                                <select asp-for="PositionId" class="form-select" asp-items="@Model.Positions">
+                                    <option value="">Pozisyon Seçiniz</option>
+                                </select>
+                                <span asp-validation-for="PositionId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="EducationLevel" class="form-label"></label>
+                                <select asp-for="EducationLevel" class="form-select">
+                                    <option value="">Seçiniz</option>
+                                    <option value="@EducationLevel.HighSchool">Lise</option>
+                                    <option value="@EducationLevel.AssociateDegree">Ön Lisans</option>
+                                    <option value="@EducationLevel.BachelorsDegree">Lisans</option>
+                                    <option value="@EducationLevel.MastersDegree">Yüksek Lisans</option>
+                                    <option value="@EducationLevel.Doctorate">Doktora</option>
+                                </select>
+                                <span asp-validation-for="EducationLevel" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- İş Deneyimi -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-briefcase text-info"></i> İş Deneyimi
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="ExperienceYears" class="form-label"></label>
+                                <input asp-for="ExperienceYears" class="form-control" type="number" min="0" max="50" />
+                                <span asp-validation-for="ExperienceYears" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ExpectedSalary" class="form-label"></label>
+                                <input asp-for="ExpectedSalary" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="ExpectedSalary" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="NoticePeriodWeeks" class="form-label"></label>
+                                <input asp-for="NoticePeriodWeeks" class="form-control" type="number" min="0" max="52" />
+                                <span asp-validation-for="NoticePeriodWeeks" class="text-danger"></span>
+                                <div class="form-text">İş değişikliği için gerekli ihbar süresi (hafta)</div>
+                            </div>
+                        </div>
+
+                        <!-- Ön Yazı -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-sticky-note text-secondary"></i> Ön Yazı
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label asp-for="CoverLetter" class="form-label"></label>
+                                <textarea asp-for="CoverLetter" class="form-control" rows="6" placeholder="Neden bu pozisyon için uygun olduğunuzu açıklayınız..."></textarea>
+                                <span asp-validation-for="CoverLetter" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Dosya Yükleme -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-paperclip text-dark"></i> Dökümanlar
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="CvFile" class="form-label"></label>
+                                <input asp-for="CvFile" class="form-control" type="file" accept=".pdf,.doc,.docx" />
+                                <span asp-validation-for="CvFile" class="text-danger"></span>
+                                <div class="form-text">Desteklenen formatlar: PDF, DOC, DOCX</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="AdditionalDocuments" class="form-label">Ek Dökümanlar</label>
+                                <input asp-for="AdditionalDocuments" class="form-control" type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                                <div class="form-text">Sertifika, referans mektubu vb. (Çoklu seçim yapabilirsiniz)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Başvuru Gönder
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

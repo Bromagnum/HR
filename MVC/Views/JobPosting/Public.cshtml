@@ -1,0 +1,263 @@
+@model List<PublicJobPostingListViewModel>
+@{
+    ViewData["Title"] = "Açık İş Pozisyonları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="jumbotron bg-primary text-white text-center py-5 mb-4 rounded">
+                <h1 class="display-4">
+                    <i class="fas fa-briefcase me-3"></i>Kariyer Fırsatları
+                </h1>
+                <p class="lead">Yeteneklerinizi gösterebileceğiniz pozisyonları keşfedin ve kariyer yolculuğunuza başlayın.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-search me-2"></i>İş Arama
+                    </h3>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="card-body">
+                    <form method="get" asp-action="Public">
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label for="SearchTerm" class="form-label">
+                                    <i class="fas fa-search"></i> Anahtar Kelime
+                                </label>
+                                <input type="text" name="SearchTerm" class="form-control" 
+                                       placeholder="Pozisyon, beceri, şirket..." value="@ViewBag.SearchTerm" />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="DepartmentId" class="form-label">
+                                    <i class="fas fa-building"></i> Departman
+                                </label>
+                                <select name="DepartmentId" class="form-select" asp-items="ViewBag.DepartmentSelectList">
+                                    <option value="">Tüm Departmanlar</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="EmploymentType" class="form-label">
+                                    <i class="fas fa-clock"></i> Çalışma Türü
+                                </label>
+                                <select name="EmploymentType" class="form-select" asp-items="ViewBag.EmploymentTypeSelectList">
+                                    <option value="">Tüm Türler</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search"></i> Ara
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="Location" class="form-label">
+                                    <i class="fas fa-map-marker-alt"></i> Konum
+                                </label>
+                                <input type="text" name="Location" class="form-control" 
+                                       placeholder="Şehir, ilçe..." value="@ViewBag.Location" />
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <a asp-action="Public" class="btn btn-outline-secondary">
+                                    <i class="fas fa-undo"></i> Filtreleri Temizle
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                    @if (Model.Any())
+                    {
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-list"></i> 
+                                    <strong>@Model.Count</strong> pozisyon bulundu
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            @foreach (var item in Model)
+                            {
+                                <div class="col-lg-6 col-xl-4 mb-4">
+                                    <div class="card h-100 job-card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <h5 class="card-title text-primary">@item.Title</h5>
+                                                @if (item.IsNew)
+                                                {
+                                                    <span class="badge bg-success">Yeni</span>
+                                                }
+                                                @if (item.IsUrgent)
+                                                {
+                                                    <span class="badge bg-danger ms-1">Acil</span>
+                                                }
+                                            </div>
+                                            
+                                            <div class="mb-2">
+                                                <i class="fas fa-building text-muted me-2"></i>
+                                                <span class="text-muted">@item.DepartmentName</span>
+                                            </div>
+                                            
+                                            <div class="mb-2">
+                                                <i class="fas fa-clock text-muted me-2"></i>
+                                                <span class="text-muted">@item.EmploymentTypeName</span>
+                                            </div>
+                                            
+                                            @if (!string.IsNullOrEmpty(item.Location))
+                                            {
+                                                <div class="mb-2">
+                                                    <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                                    <span class="text-muted">@item.Location</span>
+                                                </div>
+                                            }
+                                            
+                                            @if (!string.IsNullOrEmpty(item.SalaryRange))
+                                            {
+                                                <div class="mb-2">
+                                                    <i class="fas fa-money-bill-wave text-muted me-2"></i>
+                                                    <span class="text-muted">@item.SalaryRange</span>
+                                                </div>
+                                            }
+                                            
+                                            <p class="card-text">@item.ShortDescription</p>
+                                            
+                                            @if (item.TagList.Any())
+                                            {
+                                                <div class="mb-3">
+                                                    @foreach (var tag in item.TagList.Take(3))
+                                                    {
+                                                        <span class="badge bg-light text-dark me-1">#@tag</span>
+                                                    }
+                                                    @if (item.TagList.Count > 3)
+                                                    {
+                                                        <span class="badge bg-secondary">+@(item.TagList.Count - 3)</span>
+                                                    }
+                                                </div>
+                                            }
+                                            
+                                            <div class="row text-center">
+                                                <div class="col-6">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-calendar-alt"></i>
+                                                        @item.PublishDate.ToString("dd.MM.yyyy")
+                                                    </small>
+                                                </div>
+                                                <div class="col-6">
+                                                    @if (item.DaysRemaining > 0)
+                                                    {
+                                                        <small class="text-success">
+                                                            <i class="fas fa-hourglass-half"></i>
+                                                            @item.DaysRemaining gün kaldı
+                                                        </small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <small class="text-danger">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                            Son günler
+                                                        </small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card-footer bg-transparent">
+                                            <div class="d-grid gap-2">
+                                                <a asp-action="PublicDetails" asp-route-id="@item.Id" class="btn btn-primary">
+                                                    <i class="fas fa-eye"></i> Detayları Görüntüle
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Arama Kriterlerinize Uygun Pozisyon Bulunamadı</h4>
+                            <p class="text-muted">Arama kriterlerinizi değiştirerek tekrar deneyebilirsiniz.</p>
+                            <a asp-action="Public" class="btn btn-primary">
+                                <i class="fas fa-refresh"></i> Tüm Pozisyonları Görüntüle
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .jumbotron {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+        }
+        
+        .job-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #e9ecef;
+        }
+        
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .form-label i {
+            width: 16px;
+            text-align: center;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Smooth scroll for anchor links
+        $('a[href*="#"]').on('click', function(e) {
+            e.preventDefault();
+            $('html, body').animate({
+                scrollTop: $($(this).attr('href')).offset().top - 100
+            }, 500);
+        });
+
+        // Auto-submit form on filter change
+        $('.form-select').change(function() {
+            $(this).closest('form').submit();
+        });
+
+        // Enhanced search functionality
+        $('#SearchTerm').on('keypress', function(e) {
+            if (e.which === 13) {
+                $(this).closest('form').submit();
+            }
+        });
+    </script>
+}

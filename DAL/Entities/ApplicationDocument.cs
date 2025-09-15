@@ -18,7 +18,7 @@ public class ApplicationDocument : BaseEntity
 {
     [Required]
     public int JobApplicationId { get; set; }
-    // public virtual JobApplication JobApplication { get; set; } = null!; // Temporarily disabled
+    public virtual JobApplication JobApplication { get; set; } = null!;
     
     [Required]
     [StringLength(200)]

@@ -17,14 +17,18 @@ public interface IUnitOfWork : IDisposable
     IOrganizationRepository Organizations { get; }
     IMaterialRepository Materials { get; }
     
-    // CV and Job Application Repositories - Temporarily disabled
-    // ICandidateRepository Candidates { get; }
-    // IJobApplicationRepository JobApplications { get; }
-    // ICandidateEducationRepository CandidateEducations { get; }
-    // ICandidateExperienceRepository CandidateExperiences { get; }
-    // ICandidateSkillRepository CandidateSkills { get; }
-    // IInterviewNoteRepository InterviewNotes { get; }
-    // IApplicationDocumentRepository ApplicationDocuments { get; }
+    // CV and Job Application Repositories
+    IJobApplicationRepository JobApplications { get; }
+    IJobPostingRepository JobPostings { get; }
+    
+    // Job Definition and Skill Management Repositories
+    IJobDefinitionRepository JobDefinitions { get; }
+    IJobDefinitionQualificationRepository JobDefinitionQualifications { get; }
+    IQualificationMatchingResultRepository QualificationMatchingResults { get; }
+    ISkillTemplateRepository SkillTemplates { get; }
+    IPersonSkillRepository PersonSkills { get; }
+    IJobRequiredSkillRepository JobRequiredSkills { get; }
+    ISkillAssessmentRepository SkillAssessments { get; }
     
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();

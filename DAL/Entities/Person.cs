@@ -22,6 +22,8 @@ public class Person : BaseEntity
     public decimal? Salary { get; set; }
     public int? PositionId { get; set; }
     public int? DepartmentId { get; set; }
+    public int? ExperienceYears { get; set; }
+    public EducationLevel? EducationLevel { get; set; }
     
     // Kişisel Bilgiler
     public string? MaritalStatus { get; set; }

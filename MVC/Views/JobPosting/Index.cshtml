@@ -1,0 +1,243 @@
+@model List<JobPostingListViewModel>
+@{
+    ViewData["Title"] = "İş İlanları";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">
+                        <i class="fas fa-briefcase me-2"></i>İş İlanları
+                    </h3>
+                    <div class="card-tools">
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Yeni İlan
+                        </a>
+                        <a asp-action="Statistics" class="btn btn-info">
+                            <i class="fas fa-chart-bar"></i> İstatistikler
+                        </a>
+                        <a asp-action="Public" class="btn btn-success">
+                            <i class="fas fa-eye"></i> Açık İlanlar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="card-body">
+                    <form method="get" asp-action="Index">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label for="PositionId" class="form-label">Pozisyon</label>
+                                <select name="PositionId" class="form-select" asp-items="ViewBag.PositionSelectList">
+                                    <option value="">Tümü</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="DepartmentId" class="form-label">Departman</label>
+                                <select name="DepartmentId" class="form-select" asp-items="ViewBag.DepartmentSelectList">
+                                    <option value="">Tümü</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="Status" class="form-label">Durum</label>
+                                <select name="Status" class="form-select" asp-items="ViewBag.StatusSelectList">
+                                    <option value="">Tümü</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="EmploymentType" class="form-label">Çalışma Türü</label>
+                                <select name="EmploymentType" class="form-select" asp-items="ViewBag.EmploymentTypeSelectList">
+                                    <option value="">Tümü</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="SearchTerm" class="form-label">Arama</label>
+                                <input type="text" name="SearchTerm" class="form-control" placeholder="İlan başlığı, açıklama..." value="@ViewBag.SearchTerm" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="StartDate" class="form-label">Başlangıç Tarihi</label>
+                                <input type="date" name="StartDate" class="form-control" value="@ViewBag.SelectedStartDate" />
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-search"></i> Filtrele
+                                </button>
+                                <a asp-action="Index" class="btn btn-secondary me-2">
+                                    <i class="fas fa-undo"></i> Temizle
+                                </a>
+                                <button type="submit" formaction="@Url.Action("ExportToExcel")" formmethod="post" class="btn btn-success">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Başlık</th>
+                                        <th>Pozisyon</th>
+                                        <th>Departman</th>
+                                        <th>Çalışma Türü</th>
+                                        <th>Yayın Tarihi</th>
+                                        <th>Durum</th>
+                                        <th>Başvuru Sayısı</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@item.Title</strong>
+                                                @if (item.IsUrgent)
+                                                {
+                                                    <span class="badge bg-danger ms-1">Acil</span>
+                                                }
+                                                @if (item.IsFeatured)
+                                                {
+                                                    <span class="badge bg-warning ms-1">Öne Çıkan</span>
+                                                }
+                                            </td>
+                                            <td>@item.PositionName</td>
+                                            <td>@item.DepartmentName</td>
+                                            <td>@item.EmploymentTypeText</td>
+                                            <td>@item.PublishDate.ToString("dd.MM.yyyy")</td>
+                                            <td>
+                                                <span class="badge @item.StatusClass">@item.StatusText</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@item.ApplicationCount</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Detaylar">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="Düzenle">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    @if (item.StatusText == "Taslak")
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-success" onclick="publishPosting(@item.Id)" title="Yayınla">
+                                                            <i class="fas fa-play"></i>
+                                                        </button>
+                                                    }
+                                                    @if (item.StatusText == "Aktif")
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-warning" onclick="suspendPosting(@item.Id)" title="Durdur">
+                                                            <i class="fas fa-pause"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="closePosting(@item.Id)" title="Kapat">
+                                                            <i class="fas fa-stop"></i>
+                                                        </button>
+                                                    }
+                                                    <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(@item.Id)" title="Sil">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    Toplam <strong>@Model.Count</strong> iş ilanı bulundu.
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Henüz iş ilanı bulunmuyor</h5>
+                            <p class="text-muted">İlk iş ilanını oluşturmak için "Yeni İlan" butonunu kullanabilirsiniz.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">İş İlanını Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bu iş ilanını silmek istediğinizden emin misiniz?</p>
+                <p class="text-danger"><small>Bu işlem geri alınamaz.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Sil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id) {
+            $('#deleteForm').attr('action', '@Url.Action("Delete")/' + id);
+            $('#deleteModal').modal('show');
+        }
+
+        function publishPosting(id) {
+            if (confirm('Bu iş ilanını yayınlamak istediğinizden emin misiniz?')) {
+                submitAction('Publish', id);
+            }
+        }
+
+        function suspendPosting(id) {
+            if (confirm('Bu iş ilanını durdurmak istediğinizden emin misiniz?')) {
+                submitAction('Suspend', id);
+            }
+        }
+
+        function closePosting(id) {
+            if (confirm('Bu iş ilanını kapatmak istediğinizden emin misiniz?')) {
+                submitAction('Close', id);
+            }
+        }
+
+        function submitAction(action, id) {
+            var form = $('<form>', {
+                'method': 'post',
+                'action': '@Url.Action("")' + action + '/' + id
+            });
+            
+            form.append('@Html.AntiForgeryToken()');
+            $('body').append(form);
+            form.submit();
+        }
+
+        // Auto-submit form on filter change
+        $('.form-select').change(function() {
+            if ($(this).val() !== '') {
+                $(this).closest('form').submit();
+            }
+        });
+    </script>
+}

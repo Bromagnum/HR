@@ -1,0 +1,413 @@
+@model JobPostingDetailViewModel
+@{
+    ViewData["Title"] = $"İş İlanı - {Model.Title}";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">
+                        <i class="fas fa-briefcase me-2"></i>@Model.Title
+                    </h3>
+                    <div class="card-tools">
+                        <span class="badge @Model.StatusClass">@Model.StatusName</span>
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Düzenle
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Geri
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Sol Sütun: İlan Detayları -->
+                        <div class="col-md-8">
+                            <!-- Temel Bilgiler -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-info-circle"></i> Genel Bilgiler</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <table class="table table-borderless">
+                                                <tr>
+                                                    <td><strong>Pozisyon:</strong></td>
+                                                    <td>@Model.PositionName</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Departman:</strong></td>
+                                                    <td>@Model.DepartmentName</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Çalışma Şekli:</strong></td>
+                                                    <td>@Model.EmploymentTypeName</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Lokasyon:</strong></td>
+                                                    <td>@(Model.Location ?? "Belirtilmemiş")</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Uzaktan Çalışma:</strong></td>
+                                                    <td>
+                                                        @if (Model.IsRemoteWork)
+                                                        {
+                                                            <span class="badge bg-success">Evet</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-secondary">Hayır</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <table class="table table-borderless">
+                                                <tr>
+                                                    <td><strong>Açık Pozisyon:</strong></td>
+                                                    <td>@Model.OpenPositions</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Maaş Aralığı:</strong></td>
+                                                    <td>@Model.SalaryRange</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Deneyim:</strong></td>
+                                                    <td>
+                                                        @if (Model.MinExperience.HasValue || Model.MaxExperience.HasValue)
+                                                        {
+                                                            @($"{Model.MinExperience ?? 0}-{Model.MaxExperience ?? 50} yıl")
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Belirtilmemiş</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Eğitim:</strong></td>
+                                                    <td>@(Model.MinEducationName ?? "Belirtilmemiş")</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Görüntüleme:</strong></td>
+                                                    <td>@Model.ViewCount</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- İş Tanımı -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-file-alt"></i> İş Tanımı</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="content-section">
+                                        @Html.Raw(Model.Description.Replace("\n", "<br />"))
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gereksinimler ve Sorumluluklar -->
+                            @if (!string.IsNullOrEmpty(Model.Requirements) || !string.IsNullOrEmpty(Model.Responsibilities))
+                            {
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-tasks"></i> Gereksinimler ve Sorumluluklar</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        @if (!string.IsNullOrEmpty(Model.Requirements))
+                                        {
+                                            <div class="mb-3">
+                                                <h6 class="text-primary">Aranan Nitelikler:</h6>
+                                                <div class="content-section">
+                                                    @Html.Raw(Model.Requirements.Replace("\n", "<br />"))
+                                                </div>
+                                            </div>
+                                        }
+                                        
+                                        @if (!string.IsNullOrEmpty(Model.Responsibilities))
+                                        {
+                                            <div class="mb-3">
+                                                <h6 class="text-success">İş Sorumlulukları:</h6>
+                                                <div class="content-section">
+                                                    @Html.Raw(Model.Responsibilities.Replace("\n", "<br />"))
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Yan Haklar -->
+                            @if (!string.IsNullOrEmpty(Model.Benefits))
+                            {
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-gift"></i> Sağlanan Yan Haklar</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="content-section">
+                                            @Html.Raw(Model.Benefits.Replace("\n", "<br />"))
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Başvurular -->
+                            @if (Model.Applications.Any())
+                            {
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5><i class="fas fa-users"></i> Başvurular (@Model.ApplicationCount)</h5>
+                                        <div>
+                                            <span class="badge bg-warning">@Model.PendingApplicationsCount Bekleyen</span>
+                                            <span class="badge bg-success">@Model.ApprovedApplicationsCount Onaylanan</span>
+                                            <span class="badge bg-danger">@Model.RejectedApplicationsCount Reddedilen</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Başvuran</th>
+                                                        <th>E-posta</th>
+                                                        <th>Telefon</th>
+                                                        <th>Başvuru Tarihi</th>
+                                                        <th>Durum</th>
+                                                        <th>İşlemler</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var application in Model.Applications.Take(10))
+                                                    {
+                                                        <tr>
+                                                            <td>@application.FullName</td>
+                                                            <td>@application.Email</td>
+                                                            <td>@application.PhoneNumber</td>
+                                                            <td>@application.ApplicationDate.ToString("dd.MM.yyyy")</td>
+                                                            <td>
+                                                                <span class="badge @application.StatusClass">@application.StatusText</span>
+                                                            </td>
+                                                            <td>
+                                                                <a asp-controller="JobApplication" asp-action="Details" asp-route-id="@application.Id" class="btn btn-sm btn-info">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        @if (Model.Applications.Count > 10)
+                                        {
+                                            <div class="text-center mt-3">
+                                                <a asp-controller="JobApplication" asp-action="Index" asp-route-positionId="@Model.PositionId" class="btn btn-outline-primary">
+                                                    Tüm Başvuruları Görüntüle
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Sağ Sütun: Özet Bilgiler -->
+                        <div class="col-md-4">
+                            <!-- Durum ve Tarihler -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-calendar-alt"></i> Tarihler ve Durum</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless table-sm">
+                                        <tr>
+                                            <td><strong>Durum:</strong></td>
+                                            <td><span class="badge @Model.StatusClass">@Model.StatusName</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Yayın Tarihi:</strong></td>
+                                            <td>@Model.PublishDate.ToString("dd.MM.yyyy")</td>
+                                        </tr>
+                                        @if (Model.LastApplicationDate.HasValue)
+                                        {
+                                            <tr>
+                                                <td><strong>Son Başvuru:</strong></td>
+                                                <td>@Model.LastApplicationDate.Value.ToString("dd.MM.yyyy")</td>
+                                            </tr>
+                                        }
+                                        @if (Model.ExpiryDate.HasValue)
+                                        {
+                                            <tr>
+                                                <td><strong>Bitiş Tarihi:</strong></td>
+                                                <td>@Model.ExpiryDate.Value.ToString("dd.MM.yyyy")</td>
+                                            </tr>
+                                        }
+                                        @if (Model.DaysUntilExpiry > 0)
+                                        {
+                                            <tr>
+                                                <td><strong>Kalan Süre:</strong></td>
+                                                <td>
+                                                    @if (Model.DaysUntilExpiry <= 7)
+                                                    {
+                                                        <span class="text-danger">@Model.DaysUntilExpiry gün</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-success">@Model.DaysUntilExpiry gün</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- İstatistikler -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-bar"></i> İstatistikler</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <div class="stat-item">
+                                                <h4 class="text-primary">@Model.ViewCount</h4>
+                                                <small class="text-muted">Görüntüleme</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="stat-item">
+                                                <h4 class="text-success">@Model.ApplicationCount</h4>
+                                                <small class="text-muted">Başvuru</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Etiketler -->
+                            @if (Model.TagList.Any())
+                            {
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-tags"></i> Etiketler</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        @foreach (var tag in Model.TagList)
+                                        {
+                                            <span class="badge bg-secondary me-1 mb-1">#@tag</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- İletişim -->
+                            @if (!string.IsNullOrEmpty(Model.ContactInfo))
+                            {
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-address-card"></i> İletişim</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="content-section">
+                                            @Html.Raw(Model.ContactInfo.Replace("\n", "<br />"))
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- İlan Bilgileri -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-info"></i> İlan Bilgileri</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless table-sm">
+                                        <tr>
+                                            <td><strong>Oluşturan:</strong></td>
+                                            <td>@Model.CreatedByName</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Oluşturulma:</strong></td>
+                                            <td>@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                        </tr>
+                                        @if (Model.UpdatedAt.HasValue)
+                                        {
+                                            <tr>
+                                                <td><strong>Son Güncelleme:</strong></td>
+                                                <td>@Model.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")</td>
+                                            </tr>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.UpdatedByName))
+                                        {
+                                            <tr>
+                                                <td><strong>Güncelleyen:</strong></td>
+                                                <td>@Model.UpdatedByName</td>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <td><strong>URL:</strong></td>
+                                            <td>
+                                                <a href="@Url.Action("PublicDetails", new { id = Model.Id })" target="_blank" class="text-decoration-none">
+                                                    <small>@Model.Slug</small>
+                                                    <i class="fas fa-external-link-alt ms-1"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .content-section {
+            line-height: 1.6;
+        }
+        
+        .stat-item {
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        
+        .stat-item h4 {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .badge {
+            font-size: 0.8rem;
+        }
+        
+        .card-header h5 {
+            margin-bottom: 0;
+            font-size: 1.1rem;
+        }
+        
+        .table-borderless td {
+            border: none;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .table-borderless td:first-child {
+            width: 40%;
+            color: #6c757d;
+        }
+    </style>
+}

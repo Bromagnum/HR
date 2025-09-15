@@ -59,7 +59,7 @@
                             <option value="">Tüm Departmanlar</option>
                             @if (ViewBag.DepartmentSelectList != null)
                             {
-                                @foreach (var item in ViewBag.DepartmentSelectList as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)
+                                @foreach (var item in (ViewBag.DepartmentSelectList as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>) ?? new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>())
                                 {
                                     <option value="@item.Value" selected="@item.Selected">@item.Text</option>
                                 }

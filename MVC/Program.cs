@@ -33,6 +33,17 @@ builder.Services.AddScoped<IPayrollRepository, PayrollRepository>();
 // TMK Repositories
 builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
+builder.Services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
+builder.Services.AddScoped<IJobPostingRepository, JobPostingRepository>();
+
+// Job Definition and Skill Management Repositories
+builder.Services.AddScoped<IJobDefinitionRepository, JobDefinitionRepository>();
+builder.Services.AddScoped<IJobDefinitionQualificationRepository, JobDefinitionQualificationRepository>();
+builder.Services.AddScoped<IQualificationMatchingResultRepository, QualificationMatchingResultRepository>();
+builder.Services.AddScoped<ISkillTemplateRepository, SkillTemplateRepository>();
+builder.Services.AddScoped<IPersonSkillRepository, PersonSkillRepository>();
+builder.Services.AddScoped<IJobRequiredSkillRepository, JobRequiredSkillRepository>();
+builder.Services.AddScoped<ISkillAssessmentRepository, SkillAssessmentRepository>();
 
 // Services
 builder.Services.AddScoped<IPersonService, PersonService>();
@@ -49,6 +60,14 @@ builder.Services.AddScoped<IPayrollService, PayrollService>();
 // TMK Services
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IMaterialService, MaterialService>();
+
+// CV Services
+builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
+builder.Services.AddScoped<IJobPostingService, JobPostingService>();
+
+// Job Definition and Skill Management Services
+builder.Services.AddScoped<IJobDefinitionService, JobDefinitionService>();
+builder.Services.AddScoped<ISkillManagementService, SkillManagementService>();
 
 // Export Services
 builder.Services.AddScoped<IExcelExportService, ExcelExportService>();

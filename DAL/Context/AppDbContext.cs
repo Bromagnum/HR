@@ -32,14 +32,19 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<UserLoginLog> UserLoginLogs { get; set; }
     
-    // CV and Job Application Tables - Temporarily Disabled
-    // public DbSet<Candidate> Candidates { get; set; }
-    // public DbSet<JobApplication> JobApplications { get; set; }
-    // public DbSet<CandidateEducation> CandidateEducations { get; set; }
-    // public DbSet<CandidateExperience> CandidateExperiences { get; set; }
-    // public DbSet<CandidateSkill> CandidateSkills { get; set; }
-    // public DbSet<InterviewNote> InterviewNotes { get; set; }
-    // public DbSet<ApplicationDocument> ApplicationDocuments { get; set; }
+    // CV and Job Application Tables
+    public DbSet<JobApplication> JobApplications { get; set; }
+    public DbSet<JobPosting> JobPostings { get; set; }
+    public DbSet<ApplicationDocument> ApplicationDocuments { get; set; }
+    
+    // Job Definition and Skill Management Tables
+    public DbSet<JobDefinition> JobDefinitions { get; set; }
+    public DbSet<JobDefinitionQualification> JobDefinitionQualifications { get; set; }
+    public DbSet<QualificationMatchingResult> QualificationMatchingResults { get; set; }
+    public DbSet<SkillTemplate> SkillTemplates { get; set; }
+    public DbSet<PersonSkill> PersonSkills { get; set; }
+    public DbSet<JobRequiredSkill> JobRequiredSkills { get; set; }
+    public DbSet<SkillAssessment> SkillAssessments { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

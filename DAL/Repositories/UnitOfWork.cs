@@ -23,14 +23,18 @@ public class UnitOfWork : IUnitOfWork
     private IOrganizationRepository? _organizations;
     private IMaterialRepository? _materials;
     
-    // CV and Job Application Repositories - Temporarily disabled
-    // private ICandidateRepository? _candidates;
-    // private IJobApplicationRepository? _jobApplications;
-    // private ICandidateEducationRepository? _candidateEducations;
-    // private ICandidateExperienceRepository? _candidateExperiences;
-    // private ICandidateSkillRepository? _candidateSkills;
-    // private IInterviewNoteRepository? _interviewNotes;
-    // private IApplicationDocumentRepository? _applicationDocuments;
+    // CV and Job Application Repositories
+    private IJobApplicationRepository? _jobApplications;
+    private IJobPostingRepository? _jobPostings;
+    
+    // Job Definition and Skill Management Repositories
+    private IJobDefinitionRepository? _jobDefinitions;
+    private IJobDefinitionQualificationRepository? _jobDefinitionQualifications;
+    private IQualificationMatchingResultRepository? _qualificationMatchingResults;
+    private ISkillTemplateRepository? _skillTemplates;
+    private IPersonSkillRepository? _personSkills;
+    private IJobRequiredSkillRepository? _jobRequiredSkills;
+    private ISkillAssessmentRepository? _skillAssessments;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -74,27 +78,34 @@ public class UnitOfWork : IUnitOfWork
     public IMaterialRepository Materials =>
         _materials ??= new MaterialRepository(_context);
 
-    // CV and Job Application Repository Properties - Temporarily disabled
-    // public ICandidateRepository Candidates =>
-    //     _candidates ??= new CandidateRepository(_context);
+    // CV and Job Application Repository Properties
+    public IJobApplicationRepository JobApplications =>
+        _jobApplications ??= new JobApplicationRepository(_context);
 
-    // public IJobApplicationRepository JobApplications =>
-    //     _jobApplications ??= new JobApplicationRepository(_context);
+    public IJobPostingRepository JobPostings =>
+        _jobPostings ??= new JobPostingRepository(_context);
 
-    // public ICandidateEducationRepository CandidateEducations =>
-    //     _candidateEducations ??= new CandidateEducationRepository(_context);
+    // Job Definition and Skill Management Repository Properties
+    public IJobDefinitionRepository JobDefinitions =>
+        _jobDefinitions ??= new JobDefinitionRepository(_context);
 
-    // public ICandidateExperienceRepository CandidateExperiences =>
-    //     _candidateExperiences ??= new CandidateExperienceRepository(_context);
+    public IJobDefinitionQualificationRepository JobDefinitionQualifications =>
+        _jobDefinitionQualifications ??= new JobDefinitionQualificationRepository(_context);
 
-    // public ICandidateSkillRepository CandidateSkills =>
-    //     _candidateSkills ??= new CandidateSkillRepository(_context);
+    public IQualificationMatchingResultRepository QualificationMatchingResults =>
+        _qualificationMatchingResults ??= new QualificationMatchingResultRepository(_context);
 
-    // public IInterviewNoteRepository InterviewNotes =>
-    //     _interviewNotes ??= new InterviewNoteRepository(_context);
+    public ISkillTemplateRepository SkillTemplates =>
+        _skillTemplates ??= new SkillTemplateRepository(_context);
 
-    // public IApplicationDocumentRepository ApplicationDocuments =>
-    //     _applicationDocuments ??= new ApplicationDocumentRepository(_context);
+    public IPersonSkillRepository PersonSkills =>
+        _personSkills ??= new PersonSkillRepository(_context);
+
+    public IJobRequiredSkillRepository JobRequiredSkills =>
+        _jobRequiredSkills ??= new JobRequiredSkillRepository(_context);
+
+    public ISkillAssessmentRepository SkillAssessments =>
+        _skillAssessments ??= new SkillAssessmentRepository(_context);
 
     public async Task<int> SaveChangesAsync()
     {

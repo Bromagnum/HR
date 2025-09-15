@@ -1,0 +1,288 @@
+@model JobPostingCreateViewModel
+@using DAL.Entities
+@{
+    ViewData["Title"] = "Yeni İş İlanı";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plus me-2"></i>Yeni İş İlanı Oluştur
+                    </h3>
+                </div>
+
+                <form asp-action="Create" method="post">
+                    <div class="card-body">
+                        <!-- Temel Bilgiler -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle text-primary"></i> Temel Bilgiler
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label asp-for="Title" class="form-label"></label>
+                                <input asp-for="Title" class="form-control" />
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Slug" class="form-label"></label>
+                                <input asp-for="Slug" class="form-control" placeholder="otomatik-olarak-olusturulacak" />
+                                <span asp-validation-for="Slug" class="text-danger"></span>
+                                <div class="form-text">Boş bırakılırsa otomatik oluşturulur</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="PositionId" class="form-label"></label>
+                                <select asp-for="PositionId" class="form-select" asp-items="@Model.Positions">
+                                    <option value="">Pozisyon Seçiniz</option>
+                                </select>
+                                <span asp-validation-for="PositionId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="DepartmentId" class="form-label"></label>
+                                <select asp-for="DepartmentId" class="form-select" asp-items="@Model.Departments">
+                                    <option value="">Departman Seçiniz</option>
+                                </select>
+                                <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label"></label>
+                                <textarea asp-for="Description" class="form-control" rows="8" placeholder="İş tanımını detaylı olarak açıklayınız..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Gereksinimler ve Sorumluluklar -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-tasks text-info"></i> Gereksinimler ve Sorumluluklar
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Requirements" class="form-label"></label>
+                                <textarea asp-for="Requirements" class="form-control" rows="6" placeholder="Aranan nitelikleri belirtiniz..."></textarea>
+                                <span asp-validation-for="Requirements" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Responsibilities" class="form-label"></label>
+                                <textarea asp-for="Responsibilities" class="form-control" rows="6" placeholder="İş sorumluluklarını belirtiniz..."></textarea>
+                                <span asp-validation-for="Responsibilities" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label asp-for="Benefits" class="form-label"></label>
+                                <textarea asp-for="Benefits" class="form-control" rows="4" placeholder="Sağlanan yan hakları belirtiniz..."></textarea>
+                                <span asp-validation-for="Benefits" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Koşullar -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-cogs text-warning"></i> İş Koşulları
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="EmploymentType" class="form-label"></label>
+                                <select asp-for="EmploymentType" class="form-select" asp-items="@Model.EmploymentTypes">
+                                    <option value="">Çalışma Şekli Seçiniz</option>
+                                </select>
+                                <span asp-validation-for="EmploymentType" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Location" class="form-label"></label>
+                                <input asp-for="Location" class="form-control" placeholder="İstanbul, Ankara, vb." />
+                                <span asp-validation-for="Location" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input asp-for="IsRemoteWork" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsRemoteWork" class="form-check-label"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Deneyim ve Eğitim -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-graduation-cap text-success"></i> Deneyim ve Eğitim
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="MinExperience" class="form-label"></label>
+                                <input asp-for="MinExperience" class="form-control" type="number" min="0" max="50" />
+                                <span asp-validation-for="MinExperience" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="MaxExperience" class="form-label"></label>
+                                <input asp-for="MaxExperience" class="form-control" type="number" min="0" max="50" />
+                                <span asp-validation-for="MaxExperience" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="MinEducation" class="form-label"></label>
+                                <select asp-for="MinEducation" class="form-select" asp-items="@Model.EducationLevels">
+                                    <option value="">Minimum Eğitim Seviyesi</option>
+                                </select>
+                                <span asp-validation-for="MinEducation" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Maaş -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-money-bill-wave text-danger"></i> Maaş Bilgileri
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="MinSalary" class="form-label"></label>
+                                <input asp-for="MinSalary" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="MinSalary" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="MaxSalary" class="form-label"></label>
+                                <input asp-for="MaxSalary" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="MaxSalary" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Tarihler ve Diğer -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-calendar text-secondary"></i> Tarihler ve Diğer Bilgiler
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="LastApplicationDate" class="form-label"></label>
+                                <input asp-for="LastApplicationDate" class="form-control" type="date" />
+                                <span asp-validation-for="LastApplicationDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ExpiryDate" class="form-label"></label>
+                                <input asp-for="ExpiryDate" class="form-control" type="date" />
+                                <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="OpenPositions" class="form-label"></label>
+                                <input asp-for="OpenPositions" class="form-control" type="number" min="1" max="100" />
+                                <span asp-validation-for="OpenPositions" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Status" class="form-label"></label>
+                                <select asp-for="Status" class="form-select" asp-items="@Model.StatusOptions">
+                                </select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="ContactInfo" class="form-label"></label>
+                                <textarea asp-for="ContactInfo" class="form-control" rows="3" placeholder="İletişim bilgileri..."></textarea>
+                                <span asp-validation-for="ContactInfo" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Tags" class="form-label"></label>
+                                <input asp-for="Tags" class="form-control" placeholder="etiket1, etiket2, etiket3" />
+                                <span asp-validation-for="Tags" class="text-danger"></span>
+                                <div class="form-text">Etiketleri virgülle ayırarak yazınız</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> İlanı Kaydet
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Auto-generate slug from title
+        $('#Title').on('input', function() {
+            var title = $(this).val();
+            var slug = title.toLowerCase()
+                .replace(/ç/g, 'c')
+                .replace(/ğ/g, 'g')
+                .replace(/ı/g, 'i')
+                .replace(/ö/g, 'o')
+                .replace(/ş/g, 's')
+                .replace(/ü/g, 'u')
+                .replace(/[^a-z0-9]/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+            $('#Slug').val(slug);
+        });
+
+        // Validation for experience and salary ranges
+        $('#MinExperience, #MaxExperience').on('input', function() {
+            var min = parseInt($('#MinExperience').val()) || 0;
+            var max = parseInt($('#MaxExperience').val()) || 0;
+            
+            if (max > 0 && min > max) {
+                $('#MaxExperience').val(min);
+            }
+        });
+
+        $('#MinSalary, #MaxSalary').on('input', function() {
+            var min = parseInt($('#MinSalary').val()) || 0;
+            var max = parseInt($('#MaxSalary').val()) || 0;
+            
+            if (max > 0 && min > max) {
+                $('#MaxSalary').val(min);
+            }
+        });
+    </script>
+}

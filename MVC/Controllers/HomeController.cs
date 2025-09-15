@@ -83,7 +83,7 @@ public class HomeController : Controller
             {
                 var positions = positionsResult.Data?.ToList() ?? new List<PositionListDto>();
                 ViewBag.TotalPositions = positions.Count;
-                ViewBag.OpenPositions = positions.Count(p => p.IsActive && p.MaxPositions > 0);
+                ViewBag.OpenPositions = positions.Count(p => p.IsActive && p.IsAvailable);
             }
 
             // İzin istatistikleri
@@ -115,12 +115,129 @@ public class HomeController : Controller
                 ViewBag.AverageEmployeeSalary = payrollSummaryResult.Data.AverageNetSalary;
             }
 
+            // Chart data hazırla
+            await LoadChartData();
+            
             ViewBag.LastUpdated = DateTime.Now;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Dashboard istatistikleri yüklenirken hata oluştu");
-            ViewBag.DashboardError = ex.Message;
+            // Silent fail - dashboard will show default values
+            
+            // Chart data default değerler
+            ViewBag.ChartDepartmentLabels = "[]";
+            ViewBag.ChartDepartmentData = "[]";
+            ViewBag.ChartLeaveStatusLabels = "[]";
+            ViewBag.ChartLeaveStatusData = "[]";
+            ViewBag.ChartHiringTrendLabels = "[]";
+            ViewBag.ChartHiringTrendData = "[]";
+            ViewBag.ChartStockStatusLabels = "[]";
+            ViewBag.ChartStockStatusData = "[]";
+        }
+    }
+
+    private async Task LoadChartData()
+    {
+        try
+        {
+            // 1. Departman bazında personel dağılımı
+            var personsResult = await _personService.GetAllAsync();
+            var departmentsResult = await _departmentService.GetAllAsync();
+
+            if (personsResult.IsSuccess && departmentsResult.IsSuccess)
+            {
+                var persons = personsResult.Data?.ToList() ?? new List<PersonListDto>();
+                var departments = departmentsResult.Data?.ToList() ?? new List<DepartmentListDto>();
+
+                var departmentStats = departments
+                    .Where(d => d.IsActive)
+                    .Select(d => new
+                    {
+                        Name = d.Name,
+                        Count = persons.Count(p => p.DepartmentId == d.Id && p.IsActive)
+                    })
+                    .Where(d => d.Count > 0)
+                    .ToList();
+
+                ViewBag.ChartDepartmentLabels = System.Text.Json.JsonSerializer.Serialize(departmentStats.Select(d => d.Name));
+                ViewBag.ChartDepartmentData = System.Text.Json.JsonSerializer.Serialize(departmentStats.Select(d => d.Count));
+            }
+
+            // 2. İzin talebi durumları
+            var leavesResult = await _leaveService.GetAllAsync();
+            if (leavesResult.IsSuccess)
+            {
+                var leaves = leavesResult.Data?.ToList() ?? new List<LeaveListDto>();
+                var leaveStats = new[]
+                {
+                    new { Label = "Beklemede", Count = leaves.Count(l => l.Status == DAL.Entities.LeaveStatus.Pending) },
+                    new { Label = "Onaylandı", Count = leaves.Count(l => l.Status == DAL.Entities.LeaveStatus.Approved) },
+                    new { Label = "Reddedildi", Count = leaves.Count(l => l.Status == DAL.Entities.LeaveStatus.Rejected) },
+                    new { Label = "İptal", Count = leaves.Count(l => l.Status == DAL.Entities.LeaveStatus.Cancelled) }
+                }.Where(l => l.Count > 0).ToList();
+
+                ViewBag.ChartLeaveStatusLabels = System.Text.Json.JsonSerializer.Serialize(leaveStats.Select(l => l.Label));
+                ViewBag.ChartLeaveStatusData = System.Text.Json.JsonSerializer.Serialize(leaveStats.Select(l => l.Count));
+            }
+
+            // 3. Son 6 ay işe alım trendi
+            if (personsResult.IsSuccess)
+            {
+                var persons = personsResult.Data?.ToList() ?? new List<PersonListDto>();
+                var hiringTrend = new List<object>();
+                
+                for (int i = 5; i >= 0; i--)
+                {
+                    var targetMonth = DateTime.Now.AddMonths(-i);
+                    var monthStart = new DateTime(targetMonth.Year, targetMonth.Month, 1);
+                    var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+                    
+                    var hiringCount = persons.Count(p => 
+                        p.HireDate.HasValue && 
+                        p.HireDate.Value >= monthStart && 
+                        p.HireDate.Value <= monthEnd);
+                    
+                    hiringTrend.Add(new
+                    {
+                        Month = targetMonth.ToString("MMM yyyy"),
+                        Count = hiringCount
+                    });
+                }
+
+                ViewBag.ChartHiringTrendLabels = System.Text.Json.JsonSerializer.Serialize(hiringTrend.Select(h => ((dynamic)h).Month));
+                ViewBag.ChartHiringTrendData = System.Text.Json.JsonSerializer.Serialize(hiringTrend.Select(h => ((dynamic)h).Count));
+            }
+
+            // 4. Stok durumu
+            var materialStatsResult = await _materialService.GetStockSummaryAsync();
+            if (materialStatsResult.Success && materialStatsResult.Data != null)
+            {
+                var normalStockCount = materialStatsResult.Data.TotalMaterials - materialStatsResult.Data.LowStockCount - materialStatsResult.Data.OverStockCount;
+                var stockStats = new[]
+                {
+                    new { Label = "Normal Stok", Count = normalStockCount },
+                    new { Label = "Düşük Stok", Count = materialStatsResult.Data.LowStockCount },
+                    new { Label = "Fazla Stok", Count = materialStatsResult.Data.OverStockCount }
+                }.Where(s => s.Count > 0).ToList();
+
+                ViewBag.ChartStockStatusLabels = System.Text.Json.JsonSerializer.Serialize(stockStats.Select(s => s.Label));
+                ViewBag.ChartStockStatusData = System.Text.Json.JsonSerializer.Serialize(stockStats.Select(s => s.Count));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Chart verileri yüklenirken hata oluştu");
+            
+            // Default empty values
+            ViewBag.ChartDepartmentLabels = "[]";
+            ViewBag.ChartDepartmentData = "[]";
+            ViewBag.ChartLeaveStatusLabels = "[]";
+            ViewBag.ChartLeaveStatusData = "[]";
+            ViewBag.ChartHiringTrendLabels = "[]";
+            ViewBag.ChartHiringTrendData = "[]";
+            ViewBag.ChartStockStatusLabels = "[]";
+            ViewBag.ChartStockStatusData = "[]";
         }
     }
 

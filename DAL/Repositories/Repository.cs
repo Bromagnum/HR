@@ -40,6 +40,11 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         await _dbSet.AddAsync(entity);
     }
 
+    public virtual void Add(TEntity entity)
+    {
+        _dbSet.Add(entity);
+    }
+
     public virtual void Update(TEntity entity)
     {
         _dbSet.Update(entity);

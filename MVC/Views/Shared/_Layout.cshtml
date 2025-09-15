@@ -242,6 +242,36 @@
                                     </ul>
                                 </li>
                                 
+                                <!-- İş Tanımı ve Nitelik Yönetimi -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-tasks"></i> İş Tanımı
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><h6 class="dropdown-header">İş Tanımları</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="JobDefinition" asp-action="Index">
+                                            <i class="fas fa-list"></i> Tüm İş Tanımları
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="JobDefinition" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni İş Tanımı
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="JobDefinition" asp-action="Summary">
+                                            <i class="fas fa-chart-bar"></i> Özet Rapor
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Beceri Yönetimi</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="SkillManagement" asp-action="SkillTemplates">
+                                            <i class="fas fa-cogs"></i> Beceri Şablonları
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="SkillManagement" asp-action="PersonSkills">
+                                            <i class="fas fa-user-cog"></i> Personel Becerileri
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="SkillManagement" asp-action="Analytics">
+                                            <i class="fas fa-chart-line"></i> Beceri Analitikleri
+                                        </a></li>
+                                    </ul>
+                                </li>
+
                                 <!-- Çalışma Saati Yönetimi - Admin: All Records -->
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
@@ -563,6 +593,8 @@
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     <!-- SheetJS for Excel export functionality -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Chart.js for dashboard charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -10,17 +10,6 @@
         </div>
     </div>
 
-    <!-- Debug Bilgisi (Geçici) -->
-    <div class="alert alert-info">
-        <strong>Debug:</strong> 
-        TotalEmployees: @ViewBag.TotalEmployees | 
-        TotalDepartments: @ViewBag.TotalDepartments | 
-        LastUpdated: @ViewBag.LastUpdated
-        @if(ViewBag.DashboardError != null)
-        {
-            <br/><span class="text-danger"><strong>Error:</strong> @ViewBag.DashboardError</span>
-        }
-    </div>
 
     <!-- İstatistik Widget'ları -->
     <div class="row mb-4">
@@ -108,6 +97,71 @@
                     <a asp-controller="Leave" asp-action="Index" class="text-white text-decoration-none">
                         <small>Detayları Görüntüle <i class="fas fa-arrow-right"></i></small>
                     </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js Grafikleri -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Departman Bazında Personel Dağılımı
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="departmentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>İzin Talebi Durumları
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="leaveStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Son 6 Ay İşe Alım Trendi
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 350px;">
+                        <canvas id="hiringTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-doughnut me-2"></i>Stok Durumu
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 350px;">
+                        <canvas id="stockStatusChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -344,6 +398,190 @@
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        // Chart.js konfigürasyonu ve oluşturma
+        $(document).ready(function() {
+            // Chart.js defaults
+            Chart.defaults.font.family = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+            Chart.defaults.color = '#333';
+            
+            // 1. Departman Pie Chart
+            const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+            const departmentLabels = @Html.Raw(ViewBag.ChartDepartmentLabels ?? "[]");
+            const departmentData = @Html.Raw(ViewBag.ChartDepartmentData ?? "[]");
+            
+            new Chart(departmentCtx, {
+                type: 'pie',
+                data: {
+                    labels: departmentLabels,
+                    datasets: [{
+                        data: departmentData,
+                        backgroundColor: [
+                            '#007bff', '#28a745', '#ffc107', '#dc3545', 
+                            '#6f42c1', '#fd7e14', '#20c997', '#6c757d'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                    return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 2. İzin Durumu Bar Chart
+            const leaveCtx = document.getElementById('leaveStatusChart').getContext('2d');
+            const leaveLabels = @Html.Raw(ViewBag.ChartLeaveStatusLabels ?? "[]");
+            const leaveData = @Html.Raw(ViewBag.ChartLeaveStatusData ?? "[]");
+            
+            new Chart(leaveCtx, {
+                type: 'bar',
+                data: {
+                    labels: leaveLabels,
+                    datasets: [{
+                        label: 'İzin Talep Sayısı',
+                        data: leaveData,
+                        backgroundColor: ['#ffc107', '#28a745', '#dc3545', '#6c757d'],
+                        borderColor: ['#e0a800', '#1e7e34', '#c82333', '#545b62'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed.y + ' talep';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 3. İşe Alım Trendi Line Chart
+            const hiringCtx = document.getElementById('hiringTrendChart').getContext('2d');
+            const hiringLabels = @Html.Raw(ViewBag.ChartHiringTrendLabels ?? "[]");
+            const hiringData = @Html.Raw(ViewBag.ChartHiringTrendData ?? "[]");
+            
+            new Chart(hiringCtx, {
+                type: 'line',
+                data: {
+                    labels: hiringLabels,
+                    datasets: [{
+                        label: 'İşe Alım Sayısı',
+                        data: hiringData,
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#007bff',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'İşe Alım: ' + context.parsed.y + ' kişi';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 4. Stok Durumu Doughnut Chart
+            const stockCtx = document.getElementById('stockStatusChart').getContext('2d');
+            const stockLabels = @Html.Raw(ViewBag.ChartStockStatusLabels ?? "[]");
+            const stockData = @Html.Raw(ViewBag.ChartStockStatusData ?? "[]");
+            
+            new Chart(stockCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: stockLabels,
+                    datasets: [{
+                        data: stockData,
+                        backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#6c757d'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                    return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
     <style>
         .opacity-75 {
             opacity: 0.75;
@@ -357,6 +595,17 @@
         .card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Chart container styles */
+        .card-header {
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .card-header h5 {
+            font-weight: 600;
+        }
+        canvas {
+            max-height: 100% !important;
         }
     </style>
 }
