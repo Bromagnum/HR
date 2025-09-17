@@ -400,17 +400,38 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <script>
         // Chart.js konfigürasyonu ve oluşturma
-        $(document).ready(function() {
+        function initializeCharts() {
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js is not loaded! Charts will not be displayed.');
+                // Show fallback message in chart containers
+                document.querySelectorAll('[id$="Chart"]').forEach(function(container) {
+                    container.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #6c757d; text-align: center;"><div><i class="fas fa-chart-bar fa-3x mb-3"></i><br>Grafik yüklenemedi<br><small>Chart.js kütüphanesi bulunamadı</small></div></div>';
+                });
+                return;
+            }
+            
+            console.log('Chart.js loaded successfully, version:', Chart.version);
+            
             // Chart.js defaults
             Chart.defaults.font.family = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
             Chart.defaults.color = '#333';
             
             // 1. Departman Pie Chart
-            const departmentCtx = document.getElementById('departmentChart').getContext('2d');
-            const departmentLabels = @Html.Raw(ViewBag.ChartDepartmentLabels ?? "[]");
-            const departmentData = @Html.Raw(ViewBag.ChartDepartmentData ?? "[]");
-            
-            new Chart(departmentCtx, {
+            try {
+                const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+                const departmentLabels = @Html.Raw(ViewBag.ChartDepartmentLabels ?? "[]");
+                const departmentData = @Html.Raw(ViewBag.ChartDepartmentData ?? "[]");
+                
+                console.log('Department chart data:', { labels: departmentLabels, data: departmentData });
+                
+                // Check if we have data
+                if (!departmentLabels || !departmentData || departmentLabels.length === 0 || departmentData.length === 0) {
+                    document.getElementById('departmentChart').parentNode.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #6c757d; text-align: center;"><div><i class="fas fa-chart-pie fa-3x mb-3"></i><br>Veri bulunamadı<br><small>Henüz departman verisi yok</small></div></div>';
+                    throw new Error('No department data available');
+                }
+                
+                new Chart(departmentCtx, {
                 type: 'pie',
                 data: {
                     labels: departmentLabels,
@@ -446,14 +467,20 @@
                         }
                     }
                 }
-            });
+                });
+            } catch (error) {
+                console.error('Error creating department chart:', error);
+            }
             
             // 2. İzin Durumu Bar Chart
-            const leaveCtx = document.getElementById('leaveStatusChart').getContext('2d');
-            const leaveLabels = @Html.Raw(ViewBag.ChartLeaveStatusLabels ?? "[]");
-            const leaveData = @Html.Raw(ViewBag.ChartLeaveStatusData ?? "[]");
-            
-            new Chart(leaveCtx, {
+            try {
+                const leaveCtx = document.getElementById('leaveStatusChart').getContext('2d');
+                const leaveLabels = @Html.Raw(ViewBag.ChartLeaveStatusLabels ?? "[]");
+                const leaveData = @Html.Raw(ViewBag.ChartLeaveStatusData ?? "[]");
+                
+                console.log('Leave status chart data:', { labels: leaveLabels, data: leaveData });
+                
+                new Chart(leaveCtx, {
                 type: 'bar',
                 data: {
                     labels: leaveLabels,
@@ -489,14 +516,20 @@
                         }
                     }
                 }
-            });
+                });
+            } catch (error) {
+                console.error('Error creating leave status chart:', error);
+            }
             
             // 3. İşe Alım Trendi Line Chart
-            const hiringCtx = document.getElementById('hiringTrendChart').getContext('2d');
-            const hiringLabels = @Html.Raw(ViewBag.ChartHiringTrendLabels ?? "[]");
-            const hiringData = @Html.Raw(ViewBag.ChartHiringTrendData ?? "[]");
-            
-            new Chart(hiringCtx, {
+            try {
+                const hiringCtx = document.getElementById('hiringTrendChart').getContext('2d');
+                const hiringLabels = @Html.Raw(ViewBag.ChartHiringTrendLabels ?? "[]");
+                const hiringData = @Html.Raw(ViewBag.ChartHiringTrendData ?? "[]");
+                
+                console.log('Hiring trend chart data:', { labels: hiringLabels, data: hiringData });
+                
+                new Chart(hiringCtx, {
                 type: 'line',
                 data: {
                     labels: hiringLabels,
@@ -538,14 +571,20 @@
                         }
                     }
                 }
-            });
+                });
+            } catch (error) {
+                console.error('Error creating hiring trend chart:', error);
+            }
             
             // 4. Stok Durumu Doughnut Chart
-            const stockCtx = document.getElementById('stockStatusChart').getContext('2d');
-            const stockLabels = @Html.Raw(ViewBag.ChartStockStatusLabels ?? "[]");
-            const stockData = @Html.Raw(ViewBag.ChartStockStatusData ?? "[]");
-            
-            new Chart(stockCtx, {
+            try {
+                const stockCtx = document.getElementById('stockStatusChart').getContext('2d');
+                const stockLabels = @Html.Raw(ViewBag.ChartStockStatusLabels ?? "[]");
+                const stockData = @Html.Raw(ViewBag.ChartStockStatusData ?? "[]");
+                
+                console.log('Stock status chart data:', { labels: stockLabels, data: stockData });
+                
+                new Chart(stockCtx, {
                 type: 'doughnut',
                 data: {
                     labels: stockLabels,
@@ -579,8 +618,115 @@
                         }
                     }
                 }
-            });
+                });
+            } catch (error) {
+                console.error('Error creating stock status chart:', error);
+            }
+        }
+        
+        // Initialize charts when DOM is ready
+        $(document).ready(function() {
+            // Wait a bit for Chart.js to load if it's coming from backup CDN
+            setTimeout(function() {
+                initializeCharts();
+            }, 100);
         });
+        
+        // Also try to initialize if Chart.js loads later
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Chart !== 'undefined') {
+                setTimeout(function() {
+                    initializeCharts();
+                }, 200);
+            } else {
+                // Show static fallback if Chart.js never loads
+                setTimeout(function() {
+                    showStaticFallback();
+                }, 2000);
+            }
+        });
+        
+        // Static fallback function
+        function showStaticFallback() {
+            if (typeof Chart === 'undefined') {
+                console.log('Showing static fallback for charts');
+                
+                // Get chart data from ViewBag
+                const departmentLabels = @Html.Raw(ViewBag.ChartDepartmentLabels ?? "[]");
+                const departmentData = @Html.Raw(ViewBag.ChartDepartmentData ?? "[]");
+                
+                // Create simple text-based chart for department data
+                const departmentChart = document.getElementById('departmentChart');
+                if (departmentChart && departmentLabels.length > 0) {
+                    let html = '<div style="padding: 20px; text-align: center;"><h6 style="margin-bottom: 15px; color: #495057;">Departman Dağılımı</h6>';
+                    for (let i = 0; i < departmentLabels.length; i++) {
+                        const percentage = departmentData.length > 0 ? Math.round((departmentData[i] / departmentData.reduce((a,b) => a+b, 0)) * 100) : 0;
+                        html += '<div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; display: flex; justify-content: space-between;">';
+                        html += '<span style="font-weight: 500;">' + departmentLabels[i] + '</span>';
+                        html += '<span style="color: #007bff; font-weight: bold;">' + departmentData[i] + ' (' + percentage + '%)</span>';
+                        html += '</div>';
+                    }
+                    html += '</div>';
+                    departmentChart.parentNode.innerHTML = html;
+                }
+                
+                // Enhanced fallback for other charts with data
+                // Leave Status Chart
+                const leaveLabels = @Html.Raw(ViewBag.ChartLeaveStatusLabels ?? "[]");
+                const leaveData = @Html.Raw(ViewBag.ChartLeaveStatusData ?? "[]");
+                const leaveChart = document.getElementById('leaveStatusChart');
+                if (leaveChart && leaveLabels.length > 0) {
+                    let html = '<div style="padding: 20px; text-align: center;"><h6 style="margin-bottom: 15px; color: #495057;">İzin Durumları</h6>';
+                    for (let i = 0; i < leaveLabels.length; i++) {
+                        html += '<div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; display: flex; justify-content: space-between;">';
+                        html += '<span style="font-weight: 500;">' + leaveLabels[i] + '</span>';
+                        html += '<span style="color: #28a745; font-weight: bold;">' + leaveData[i] + ' talep</span>';
+                        html += '</div>';
+                    }
+                    html += '</div>';
+                    leaveChart.parentNode.innerHTML = html;
+                } else if (leaveChart) {
+                    leaveChart.parentNode.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #6c757d; text-align: center;"><div><i class="fas fa-chart-bar fa-3x mb-3"></i><br>İzin verisi bulunamadı<br><small>Henüz izin talebi yok</small></div></div>';
+                }
+                
+                // Hiring Trend Chart
+                const hiringLabels = @Html.Raw(ViewBag.ChartHiringTrendLabels ?? "[]");
+                const hiringData = @Html.Raw(ViewBag.ChartHiringTrendData ?? "[]");
+                const hiringChart = document.getElementById('hiringTrendChart');
+                if (hiringChart && hiringLabels.length > 0) {
+                    let html = '<div style="padding: 20px; text-align: center;"><h6 style="margin-bottom: 15px; color: #495057;">İşe Alım Trendi</h6>';
+                    for (let i = 0; i < hiringLabels.length; i++) {
+                        html += '<div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; display: flex; justify-content: space-between;">';
+                        html += '<span style="font-weight: 500;">' + hiringLabels[i] + '</span>';
+                        html += '<span style="color: #17a2b8; font-weight: bold;">' + hiringData[i] + ' kişi</span>';
+                        html += '</div>';
+                    }
+                    html += '</div>';
+                    hiringChart.parentNode.innerHTML = html;
+                } else if (hiringChart) {
+                    hiringChart.parentNode.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #6c757d; text-align: center;"><div><i class="fas fa-chart-line fa-3x mb-3"></i><br>İşe alım verisi bulunamadı<br><small>Veri hazırlanıyor</small></div></div>';
+                }
+                
+                // Stock Status Chart
+                const stockLabels = @Html.Raw(ViewBag.ChartStockStatusLabels ?? "[]");
+                const stockData = @Html.Raw(ViewBag.ChartStockStatusData ?? "[]");
+                const stockChart = document.getElementById('stockStatusChart');
+                if (stockChart && stockLabels.length > 0) {
+                    let html = '<div style="padding: 20px; text-align: center;"><h6 style="margin-bottom: 15px; color: #495057;">Stok Durumu</h6>';
+                    for (let i = 0; i < stockLabels.length; i++) {
+                        const color = stockLabels[i].includes('Düşük') ? '#dc3545' : (stockLabels[i].includes('Fazla') ? '#ffc107' : '#28a745');
+                        html += '<div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; display: flex; justify-content: space-between;">';
+                        html += '<span style="font-weight: 500;">' + stockLabels[i] + '</span>';
+                        html += '<span style="color: ' + color + '; font-weight: bold;">' + stockData[i] + ' ürün</span>';
+                        html += '</div>';
+                    }
+                    html += '</div>';
+                    stockChart.parentNode.innerHTML = html;
+                } else if (stockChart) {
+                    stockChart.parentNode.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #6c757d; text-align: center;"><div><i class="fas fa-chart-doughnut fa-3x mb-3"></i><br>Stok verisi bulunamadı<br><small>Malzeme servisi kontrol ediliyor</small></div></div>';
+                }
+            }
+        }
     </script>
     <style>
         .opacity-75 {

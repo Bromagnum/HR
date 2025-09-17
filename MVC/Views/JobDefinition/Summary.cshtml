@@ -1,0 +1,337 @@
+@model MVC.Models.JobDefinitionSummaryViewModel
+
+@{
+    ViewData["Title"] = "İş Tanımı Özeti";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <div class="btn-group">
+        <a asp-action="Index" class="btn btn-primary">
+            <i class="fas fa-list"></i> İş Tanımları
+        </a>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fas fa-plus"></i> Yeni İş Tanımı
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <!-- Summary Cards -->
+    <div class="col-md-3 mb-4">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Toplam İş Tanımı</h6>
+                        <h3 class="mb-0">@Model.TotalDefinitions</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-briefcase fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Onaylanmış</h6>
+                        <h3 class="mb-0">@Model.ApprovedDefinitions</h3>
+                        <small>%@Model.ApprovalRate</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-warning text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Onay Bekleyen</h6>
+                        <h3 class="mb-0">@Model.PendingApprovalDefinitions</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Eşleşmesi Olan</h6>
+                        <h3 class="mb-0">@Model.DefinitionsWithMatches</h3>
+                        <small>%@Model.MatchingCompletionRate</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-check fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Department Distribution -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-building"></i> Departman Dağılımı
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.DefinitionsByDepartment.Any())
+                {
+                    <div class="chart-container">
+                        <canvas id="departmentChart" width="400" height="300"></canvas>
+                    </div>
+                    <div class="mt-3">
+                        @foreach (var dept in Model.DefinitionsByDepartment.OrderByDescending(x => x.Value))
+                        {
+                            <div class="d-flex justify-content-between py-1">
+                                <span>@dept.Key</span>
+                                <span class="badge bg-primary">@dept.Value</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-chart-pie fa-3x mb-3"></i>
+                        <p>Henüz departman verisi bulunmuyor.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Position Distribution -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-user-tie"></i> Pozisyon Dağılımı
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.DefinitionsByPosition.Any())
+                {
+                    <div class="chart-container">
+                        <canvas id="positionChart" width="400" height="300"></canvas>
+                    </div>
+                    <div class="mt-3" style="max-height: 300px; overflow-y: auto;">
+                        @foreach (var pos in Model.DefinitionsByPosition.OrderByDescending(x => x.Value))
+                        {
+                            <div class="d-flex justify-content-between py-1">
+                                <span>@pos.Key</span>
+                                <span class="badge bg-info">@pos.Value</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                        <p>Henüz pozisyon verisi bulunmuyor.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Statistics Overview -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-line"></i> İstatistik Özeti
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Onay Durumu</h6>
+                        <div class="progress mb-3" style="height: 25px;">
+                            @{
+                                var approvedPercent = Model.ApprovalRate;
+                                var pendingPercent = 100 - approvedPercent;
+                            }
+                            <div class="progress-bar bg-success" role="progressbar" style="width: @(approvedPercent)%">
+                                @Model.ApprovedDefinitions Onaylı
+                            </div>
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: @(pendingPercent)%">
+                                @Model.PendingApprovalDefinitions Beklemede
+                            </div>
+                        </div>
+                        
+                        <h6 class="text-muted">Eşleşme Durumu</h6>
+                        <div class="progress mb-3" style="height: 25px;">
+                            @{
+                                var matchedPercent = Model.MatchingCompletionRate;
+                                var unmatchedPercent = 100 - matchedPercent;
+                            }
+                            <div class="progress-bar bg-info" role="progressbar" style="width: @(matchedPercent)%">
+                                @Model.DefinitionsWithMatches Eşleşmeli
+                            </div>
+                            <div class="progress-bar bg-secondary" role="progressbar" style="width: @(unmatchedPercent)%">
+                                @(Model.TotalDefinitions - Model.DefinitionsWithMatches) Eşleşmesiz
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="row text-center">
+                            <div class="col-6 border-end">
+                                <h4 class="text-success">@Model.ApprovalRate%</h4>
+                                <small class="text-muted">Onay Oranı</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-info">@Model.MatchingCompletionRate%</h4>
+                                <small class="text-muted">Eşleşme Oranı</small>
+                            </div>
+                        </div>
+                        
+                        @if (Model.TotalDefinitions > 0)
+                        {
+                            <div class="mt-3 p-3 bg-light rounded">
+                                <small class="text-muted">
+                                    <strong>İyileştirme Önerileri:</strong><br>
+                                    @if (Model.ApprovalRate < 80)
+                                    {
+                                        <span class="text-warning">• Bekleyen onayları hızlandırın</span><br>
+                                    }
+                                    @if (Model.MatchingCompletionRate < 50)
+                                    {
+                                        <span class="text-info">• Personel eşleştirmelerini tamamlayın</span><br>
+                                    }
+                                    @if (Model.ApprovalRate >= 80 && Model.MatchingCompletionRate >= 80)
+                                    {
+                                        <span class="text-success">• Mükemmel performans! 🎉</span>
+                                    }
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Department Chart
+            @if (Model.DefinitionsByDepartment.Any())
+            {
+                <text>
+                var departmentCtx = document.getElementById('departmentChart').getContext('2d');
+                var departmentChart = new Chart(departmentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [@Html.Raw(string.Join(",", Model.DefinitionsByDepartment.Keys.Select(k => $"'{k}'")))],
+                        datasets: [{
+                            data: [@string.Join(",", Model.DefinitionsByDepartment.Values)],
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', 
+                                '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+                </text>
+            }
+
+            // Position Chart
+            @if (Model.DefinitionsByPosition.Any())
+            {
+                <text>
+                var positionCtx = document.getElementById('positionChart').getContext('2d');
+                var positionChart = new Chart(positionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [@Html.Raw(string.Join(",", Model.DefinitionsByPosition.Keys.Take(10).Select(k => $"'{k}'")))],
+                        datasets: [{
+                            label: 'İş Tanımı Sayısı',
+                            data: [@string.Join(",", Model.DefinitionsByPosition.Values.Take(10))],
+                            backgroundColor: '#36A2EB',
+                            borderColor: '#1E88E5',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+                </text>
+            }
+        });
+    </script>
+}

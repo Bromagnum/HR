@@ -1,0 +1,314 @@
+@model MVC.Models.SkillAnalyticsViewModel
+
+@{
+    ViewData["Title"] = "Beceri Analizi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <div class="btn-group">
+        <a asp-action="SkillTemplates" class="btn btn-primary">
+            <i class="fas fa-list"></i> Beceri Şablonları
+        </a>
+        <a asp-action="PersonSkills" class="btn btn-info">
+            <i class="fas fa-users"></i> Personel Becerileri
+        </a>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <!-- Summary Cards -->
+    <div class="col-md-3 mb-4">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Toplam Beceri Şablonu</h6>
+                        <h3 class="mb-0">@Model.TotalSkillTemplates</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-cogs fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Personel Beceri Kayıtları</h6>
+                        <h3 class="mb-0">@Model.TotalPersonSkills</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-graduate fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Aktif Kategoriler</h6>
+                        <h3 class="mb-0">@Model.ActiveSkillCategories</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-tags fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-warning text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Beceri Açığı</h6>
+                        <h3 class="mb-0">@Model.SkillGaps.Count</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Skills by Category Chart -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-pie"></i> Kategoriye Göre Beceri Dağılımı
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.SkillsByCategory.Any())
+                {
+                    <canvas id="categoryChart" width="400" height="300"></canvas>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-chart-pie fa-3x mb-3"></i>
+                        <p>Henüz kategori verisi bulunmuyor.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills by Type Chart -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-bar"></i> Türe Göre Beceri Dağılımı
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.SkillsByType.Any())
+                {
+                    <canvas id="typeChart" width="400" height="300"></canvas>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                        <p>Henüz tür verisi bulunmuyor.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.TopSkills.Any())
+{
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-trophy"></i> En Popüler Beceriler
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Beceri</th>
+                                    <th>Kategori</th>
+                                    <th>Kişi Sayısı</th>
+                                    <th>Ortalama Seviye</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var skill in Model.TopSkills.Take(10))
+                                {
+                                    <tr>
+                                        <td><strong>@skill.SkillName</strong></td>
+                                        <td><span class="badge bg-secondary">@skill.Category</span></td>
+                                        <td>@skill.PersonCount</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                                    <div class="progress-bar bg-success" 
+                                                         style="width: @((skill.AverageLevel / 10) * 100)%"></div>
+                                                </div>
+                                                <span>@skill.AverageLevel.ToString("F1")</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.SkillGaps.Any())
+{
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-exclamation-triangle text-warning"></i> Beceri Açıkları
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Beceri</th>
+                                    <th>Kategori</th>
+                                    <th>İhtiyaç</th>
+                                    <th>Mevcut</th>
+                                    <th>Açık</th>
+                                    <th>Durumu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var gap in Model.SkillGaps.OrderByDescending(g => g.GapCount).Take(10))
+                                {
+                                    <tr>
+                                        <td><strong>@gap.SkillName</strong></td>
+                                        <td><span class="badge bg-secondary">@gap.Category</span></td>
+                                        <td>@gap.RequiredCount</td>
+                                        <td>@gap.AvailableCount</td>
+                                        <td class="text-danger"><strong>@gap.GapCount</strong></td>
+                                        <td>
+                                            @if (gap.GapCount > 5)
+                                            {
+                                                <span class="badge bg-danger">Kritik</span>
+                                            }
+                                            else if (gap.GapCount > 2)
+                                            {
+                                                <span class="badge bg-warning">Orta</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-info">Düşük</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Category Chart
+            @if (Model.SkillsByCategory.Any())
+            {
+                <text>
+                var categoryCtx = document.getElementById('categoryChart').getContext('2d');
+                var categoryChart = new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [@Html.Raw(string.Join(",", Model.SkillsByCategory.Keys.Select(k => $"'{k}'")))],
+                        datasets: [{
+                            data: [@string.Join(",", Model.SkillsByCategory.Values)],
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', 
+                                '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+                </text>
+            }
+
+            // Type Chart
+            @if (Model.SkillsByType.Any())
+            {
+                <text>
+                var typeCtx = document.getElementById('typeChart').getContext('2d');
+                var typeChart = new Chart(typeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [@Html.Raw(string.Join(",", Model.SkillsByType.Keys.Select(k => $"'{k}'")))],
+                        datasets: [{
+                            label: 'Beceri Sayısı',
+                            data: [@string.Join(",", Model.SkillsByType.Values)],
+                            backgroundColor: '#36A2EB',
+                            borderColor: '#1E88E5',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+                </text>
+            }
+        });
+    </script>
+}

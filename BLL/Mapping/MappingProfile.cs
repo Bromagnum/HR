@@ -482,6 +482,8 @@ public class MappingProfile : Profile
         // Person Skill Mappings
         CreateMap<PersonSkill, PersonSkillDto>()
             .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => src.Person != null ? $"{src.Person.FirstName} {src.Person.LastName}" : ""))
+            .ForMember(dest => dest.PersonEmail, opt => opt.MapFrom(src => src.Person != null ? src.Person.Email : ""))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person != null && src.Person.Department != null ? src.Person.Department.Name : ""))
             .ForMember(dest => dest.SkillName, opt => opt.MapFrom(src => src.SkillTemplate != null ? src.SkillTemplate.Name : ""))
             .ForMember(dest => dest.SkillCategory, opt => opt.MapFrom(src => src.SkillTemplate != null ? src.SkillTemplate.Category : ""))
             .ForMember(dest => dest.SkillType, opt => opt.MapFrom(src => src.SkillTemplate != null ? src.SkillTemplate.Type : SkillType.Technical))

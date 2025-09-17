@@ -15,14 +15,16 @@ public class DepartmentController : Controller
     private readonly IDepartmentService _departmentService;
     private readonly IPersonService _personService;
     private readonly IExcelExportService _excelExportService;
+    private readonly IPdfExportService _pdfExportService;
     private readonly IMapper _mapper;
 
     public DepartmentController(IDepartmentService departmentService, IPersonService personService, 
-                              IExcelExportService excelExportService, IMapper mapper)
+                              IExcelExportService excelExportService, IPdfExportService pdfExportService, IMapper mapper)
     {
         _departmentService = departmentService;
         _personService = personService;
         _excelExportService = excelExportService;
+        _pdfExportService = pdfExportService;
         _mapper = mapper;
     }
 
@@ -542,5 +544,56 @@ public class DepartmentController : Controller
         };
         
         return await ExportSearchResults(filter);
+    }
+
+    // PDF Export Actions
+    [HttpGet]
+    public async Task<IActionResult> ExportDepartmentListPdf()
+    {
+        try
+        {
+            var result = await _departmentService.GetAllAsync();
+            
+            if (!result.Success)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            var pdfBytes = await _pdfExportService.ExportDepartmentListAsync(result.Data ?? new List<DepartmentListDto>());
+            var fileName = $"DepartmanListesi_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"PDF export error: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExportOrganizationChartPdf()
+    {
+        try
+        {
+            var result = await _departmentService.GetAllAsync();
+            
+            if (!result.Success)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            var pdfBytes = await _pdfExportService.ExportOrganizationChartAsync(result.Data ?? new List<DepartmentListDto>());
+            var fileName = $"OrganizasyonSemasi_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"PDF export error: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

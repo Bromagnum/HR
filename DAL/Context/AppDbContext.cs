@@ -692,6 +692,507 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
                 LastPurchaseDate = DateTime.Now.AddDays(-18),
                 CreatedAt = DateTime.Now,
                 IsActive = true
+            },
+            // Low Stock Items for Chart Visualization
+            new Material
+            {
+                Id = 9,
+                Name = "Yazıcı Mürekkep",
+                Description = "Siyah mürekkep kartuşu",
+                Code = "OF003",
+                Category = "Ofis Malzemeleri",
+                Unit = "Adet",
+                UnitPrice = 85.00m,
+                StockQuantity = 2, // Low stock
+                MinStockLevel = 5,
+                MaxStockLevel = 20,
+                Supplier = "Teknoloji Ltd.",
+                Location = "Depo-A-05",
+                OrganizationId = 3,
+                IsConsumable = true,
+                LastPurchaseDate = DateTime.Now.AddDays(-45),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            new Material
+            {
+                Id = 10,
+                Name = "Fotokopi Kağıdı",
+                Description = "A3 fotokopi kağıdı",
+                Code = "OF004",
+                Category = "Ofis Malzemeleri",
+                Unit = "Paket",
+                UnitPrice = 35.00m,
+                StockQuantity = 1, // Low stock
+                MinStockLevel = 3,
+                MaxStockLevel = 15,
+                Supplier = "Kağıt A.Ş.",
+                Location = "Depo-A-06",
+                OrganizationId = 2,
+                IsConsumable = true,
+                LastPurchaseDate = DateTime.Now.AddDays(-60),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            // Over Stock Items for Chart Visualization
+            new Material
+            {
+                Id = 11,
+                Name = "Zımba Teli",
+                Description = "Standart zımba teli",
+                Code = "KR003",
+                Category = "Kırtasiye",
+                Unit = "Kutu",
+                UnitPrice = 4.50m,
+                StockQuantity = 45, // Over stock
+                MinStockLevel = 10,
+                MaxStockLevel = 30,
+                Supplier = "Kırtasiye Ltd.",
+                Location = "Depo-A-07",
+                OrganizationId = 2,
+                IsConsumable = true,
+                LastPurchaseDate = DateTime.Now.AddDays(-7),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            },
+            new Material
+            {
+                Id = 12,
+                Name = "Bantlı Kalem",
+                Description = "Fosforlu işaretleme kalemi",
+                Code = "KR004",
+                Category = "Kırtasiye",
+                Unit = "Adet",
+                UnitPrice = 6.25m,
+                StockQuantity = 95, // Over stock
+                MinStockLevel = 20,
+                MaxStockLevel = 60,
+                Supplier = "Kırtasiye Ltd.",
+                Location = "Depo-A-08",
+                OrganizationId = 2,
+                IsConsumable = true,
+                LastPurchaseDate = DateTime.Now.AddDays(-3),
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            }
+        );
+
+        // Seed Skill Templates
+        modelBuilder.Entity<SkillTemplate>().HasData(
+            new SkillTemplate
+            {
+                Id = 1,
+                Name = "C# Programlama",
+                Category = "Programlama",
+                Description = ".NET Framework ve .NET Core kullanarak C# ile uygulama geliştirme becerisi",
+                Type = SkillType.Technical,
+                MaxLevel = 5,
+                LevelDescriptions = "1:Temel | 2:Başlangıç | 3:Orta | 4:İleri | 5:Uzman",
+                IsVerifiable = true,
+                VerificationMethod = "Proje bazlı değerlendirme",
+                RequiresCertification = false,
+                Keywords = "C#, .NET, OOP, SOLID",
+                RelatedSkills = "ASP.NET, Entity Framework",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new SkillTemplate
+            {
+                Id = 2,
+                Name = "ASP.NET Core",
+                Category = "Web Geliştirme",
+                Description = "ASP.NET Core kullanarak web uygulamaları ve API geliştirme",
+                Type = SkillType.Technical,
+                MaxLevel = 5,
+                LevelDescriptions = "1:Temel | 2:Başlangıç | 3:Orta | 4:İleri | 5:Uzman",
+                IsVerifiable = true,
+                VerificationMethod = "Proje ve kod incelemesi",
+                RequiresCertification = false,
+                Keywords = "ASP.NET Core, MVC, Web API, Razor",
+                RelatedSkills = "C#, JavaScript, HTML, CSS",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new SkillTemplate
+            {
+                Id = 3,
+                Name = "SQL Server",
+                Category = "Veritabanı",
+                Description = "Microsoft SQL Server ile veritabanı tasarımı ve yönetimi",
+                Type = SkillType.Technical,
+                MaxLevel = 5,
+                LevelDescriptions = "1:Temel | 2:Başlangıç | 3:Orta | 4:İleri | 5:Uzman",
+                IsVerifiable = true,
+                VerificationMethod = "SQL sorguları ve performans testleri",
+                RequiresCertification = true,
+                Keywords = "SQL, T-SQL, Stored Procedures, Indexing",
+                RelatedSkills = "Entity Framework, Database Design",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new SkillTemplate
+            {
+                Id = 4,
+                Name = "JavaScript",
+                Category = "Frontend Geliştirme",
+                Description = "JavaScript ve ES6+ özellikleri ile frontend geliştirme",
+                Type = SkillType.Technical,
+                MaxLevel = 5,
+                LevelDescriptions = "1:Temel | 2:Başlangıç | 3:Orta | 4:İleri | 5:Uzman",
+                IsVerifiable = true,
+                VerificationMethod = "Kod incelemesi ve proje değerlendirmesi",
+                RequiresCertification = false,
+                Keywords = "JavaScript, ES6, DOM, Async/Await",
+                RelatedSkills = "HTML, CSS, React, Vue.js",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new SkillTemplate
+            {
+                Id = 5,
+                Name = "Proje Yönetimi",
+                Category = "Yönetim",
+                Description = "Proje planlama, takip ve yönetim becerileri",
+                Type = SkillType.Soft,
+                MaxLevel = 5,
+                LevelDescriptions = "1:Temel | 2:Başlangıç | 3:Orta | 4:İleri | 5:Uzman",
+                IsVerifiable = true,
+                VerificationMethod = "Proje başarı oranları ve takım geri bildirimleri",
+                RequiresCertification = true,
+                Keywords = "PMP, Agile, Scrum, Kanban",
+                RelatedSkills = "Liderlik, İletişim, Risk Yönetimi",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new SkillTemplate
+            {
+                Id = 6,
+                Name = "İngilizce",
+                Category = "Dil",
+                Description = "İngilizce dil yeterliliği - konuşma, okuma, yazma",
+                Type = SkillType.Language,
+                MaxLevel = 5,
+                LevelDescriptions = "1:Başlangıç | 2:Temel | 3:Orta | 4:İleri | 5:İleri Düzey",
+                IsVerifiable = true,
+                VerificationMethod = "TOEFL, IELTS veya kurumsal dil sınavı",
+                RequiresCertification = true,
+                Keywords = "English, TOEFL, IELTS, Business English",
+                RelatedSkills = "İletişim, Sunum",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new SkillTemplate
+            {
+                Id = 7,
+                Name = "İletişim",
+                Category = "Kişisel Gelişim",
+                Description = "Etkili iletişim kurma ve sürdürme becerileri",
+                Type = SkillType.Soft,
+                MaxLevel = 5,
+                LevelDescriptions = "1:Temel | 2:Gelişen | 3:Yeterli | 4:İyi | 5:Mükemmel",
+                IsVerifiable = true,
+                VerificationMethod = "360 derece değerlendirme",
+                RequiresCertification = false,
+                Keywords = "Communication, Interpersonal, Presentation",
+                RelatedSkills = "Liderlik, Takım Çalışması",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new SkillTemplate
+            {
+                Id = 8,
+                Name = "Azure Cloud",
+                Category = "Cloud Computing",
+                Description = "Microsoft Azure platformu ile cloud çözümleri geliştirme",
+                Type = SkillType.Technical,
+                MaxLevel = 5,
+                LevelDescriptions = "1:Fundamentals | 2:Associate | 3:Expert | 4:Architect | 5:Master",
+                IsVerifiable = true,
+                VerificationMethod = "Microsoft Azure sertifikaları",
+                RequiresCertification = true,
+                Keywords = "Azure, Cloud, DevOps, Containers",
+                RelatedSkills = "C#, PowerShell, Kubernetes",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            }
+        );
+
+        // Seed Person Skills
+        modelBuilder.Entity<PersonSkill>().HasData(
+            // Ahmet Yılmaz (ID: 1) - Yazılım Geliştirici
+            new PersonSkill
+            {
+                Id = 1,
+                PersonId = 1,
+                SkillTemplateId = 1, // C# Programlama
+                Level = 4,
+                ExperienceYears = 5,
+                IsCertified = false,
+                IsSelfAssessed = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 2,
+                PersonId = 1,
+                SkillTemplateId = 2, // ASP.NET Core
+                Level = 4,
+                ExperienceYears = 4,
+                IsCertified = false,
+                IsSelfAssessed = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 3,
+                PersonId = 1,
+                SkillTemplateId = 3, // SQL Server
+                Level = 3,
+                ExperienceYears = 3,
+                IsCertified = true,
+                CertificationDate = DateTime.Now.AddMonths(-6),
+                CertificationExpiry = DateTime.Now.AddYears(2),
+                CertificationAuthority = "Microsoft",
+                IsSelfAssessed = false,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 4,
+                PersonId = 1,
+                SkillTemplateId = 6, // İngilizce
+                Level = 3,
+                ExperienceYears = 8,
+                IsCertified = true,
+                CertificationDate = DateTime.Now.AddYears(-1),
+                CertificationAuthority = "ETS",
+                IsSelfAssessed = false,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            
+            // Fatma Kaya (ID: 2) - İK Uzmanı
+            new PersonSkill
+            {
+                Id = 5,
+                PersonId = 2,
+                SkillTemplateId = 5, // Proje Yönetimi
+                Level = 3,
+                ExperienceYears = 4,
+                IsCertified = false,
+                IsSelfAssessed = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 6,
+                PersonId = 2,
+                SkillTemplateId = 7, // İletişim
+                Level = 4,
+                ExperienceYears = 6,
+                IsCertified = false,
+                IsSelfAssessed = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 7,
+                PersonId = 2,
+                SkillTemplateId = 6, // İngilizce
+                Level = 4,
+                ExperienceYears = 10,
+                IsCertified = true,
+                CertificationDate = DateTime.Now.AddMonths(-8),
+                CertificationAuthority = "Cambridge",
+                IsSelfAssessed = false,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+
+            // Ali Demir (ID: 3) - Muhasebe Uzmanı
+            new PersonSkill
+            {
+                Id = 8,
+                PersonId = 3,
+                SkillTemplateId = 7, // İletişim
+                Level = 3,
+                ExperienceYears = 2,
+                IsCertified = false,
+                IsSelfAssessed = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 9,
+                PersonId = 3,
+                SkillTemplateId = 6, // İngilizce
+                Level = 2,
+                ExperienceYears = 5,
+                IsCertified = false,
+                IsSelfAssessed = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+
+            // Elif Özkan (ID: 4) - Senior Developer
+            new PersonSkill
+            {
+                Id = 10,
+                PersonId = 4,
+                SkillTemplateId = 1, // C# Programlama
+                Level = 5,
+                ExperienceYears = 8,
+                IsCertified = false,
+                IsSelfAssessed = false,
+                IsEndorsed = true,
+                EndorsedById = 1,
+                EndorsedAt = DateTime.Now.AddDays(-15),
+                EndorsementNotes = "Mükemmel C# becerileri, takım liderliği yapabilir",
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 11,
+                PersonId = 4,
+                SkillTemplateId = 2, // ASP.NET Core
+                Level = 5,
+                ExperienceYears = 6,
+                IsCertified = false,
+                IsSelfAssessed = false,
+                IsEndorsed = true,
+                EndorsedById = 1,
+                EndorsedAt = DateTime.Now.AddDays(-15),
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 12,
+                PersonId = 4,
+                SkillTemplateId = 4, // JavaScript
+                Level = 4,
+                ExperienceYears = 5,
+                IsCertified = false,
+                IsSelfAssessed = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 13,
+                PersonId = 4,
+                SkillTemplateId = 8, // Azure Cloud
+                Level = 3,
+                ExperienceYears = 2,
+                IsCertified = true,
+                CertificationDate = DateTime.Now.AddMonths(-3),
+                CertificationExpiry = DateTime.Now.AddYears(3),
+                CertificationAuthority = "Microsoft",
+                IsSelfAssessed = false,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+
+            // Mehmet Çelik (ID: 5) - Stajyer
+            new PersonSkill
+            {
+                Id = 14,
+                PersonId = 5,
+                SkillTemplateId = 1, // C# Programlama
+                Level = 2,
+                ExperienceYears = 1,
+                IsCertified = false,
+                IsSelfAssessed = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 15,
+                PersonId = 5,
+                SkillTemplateId = 4, // JavaScript
+                Level = 2,
+                ExperienceYears = 1,
+                IsCertified = false,
+                IsSelfAssessed = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            },
+            new PersonSkill
+            {
+                Id = 16,
+                PersonId = 5,
+                SkillTemplateId = 6, // İngilizce
+                Level = 3,
+                ExperienceYears = 4,
+                IsCertified = false,
+                IsSelfAssessed = true,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            }
+        );
+
+        // Seed Skill Assessments
+        modelBuilder.Entity<SkillAssessment>().HasData(
+            new SkillAssessment
+            {
+                Id = 1,
+                PersonSkillId = 1, // Ahmet - C#
+                Type = AssessmentType.PeerAssessment,
+                AssessedLevel = 4,
+                Score = 8,
+                Feedback = "Çok iyi kod kalitesi, best practices'i takip ediyor. Devam etsin, liderlik becerileri geliştirebilir.",
+                AssessmentDate = DateTime.Now.AddDays(-10),
+                AssessorId = 4, // Elif Özkan
+                IsValid = true,
+                ValidUntil = DateTime.Now.AddMonths(6),
+                CreatedAt = DateTime.Now.AddDays(-10),
+                UpdatedAt = DateTime.Now.AddDays(-10)
+            },
+            new SkillAssessment
+            {
+                Id = 2,
+                PersonSkillId = 10, // Elif - C#
+                Type = AssessmentType.ExternalAssessment,
+                AssessedLevel = 5,
+                Score = 10,
+                Feedback = "Uzman seviyede, kompleks problemleri çözebiliyor. Takım mentorluk görevlerini üstlenebilir.",
+                AssessmentDate = DateTime.Now.AddDays(-5),
+                AssessorId = 1, // Ahmet Yılmaz
+                IsValid = true,
+                ValidUntil = DateTime.Now.AddMonths(12),
+                CreatedAt = DateTime.Now.AddDays(-5),
+                UpdatedAt = DateTime.Now.AddDays(-5)
+            },
+            new SkillAssessment
+            {
+                Id = 3,
+                PersonSkillId = 6, // Fatma - İletişim
+                Type = AssessmentType.SelfAssessment,
+                AssessedLevel = 4,
+                Score = 8,
+                Feedback = "Takım içi iletişimde çok başarılı. Sunum becerileri geliştirilebilir.",
+                AssessmentDate = DateTime.Now.AddDays(-20),
+                AssessorId = 2, // Fatma Kaya (self)
+                IsValid = true,
+                ValidUntil = DateTime.Now.AddMonths(3),
+                CreatedAt = DateTime.Now.AddDays(-20),
+                UpdatedAt = DateTime.Now.AddDays(-20)
             }
         );
     }

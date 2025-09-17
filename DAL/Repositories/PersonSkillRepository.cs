@@ -10,10 +10,21 @@ public class PersonSkillRepository : Repository<PersonSkill>, IPersonSkillReposi
     {
     }
 
+    public override async Task<IEnumerable<PersonSkill>> GetAllAsync()
+    {
+        return await _context.PersonSkills
+            .Include(ps => ps.Person)
+                .ThenInclude(p => p.Department)
+            .Include(ps => ps.SkillTemplate)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<PersonSkill>> GetByPersonIdAsync(int personId)
     {
         return await _context.PersonSkills
             .Where(ps => ps.PersonId == personId)
+            .Include(ps => ps.Person)
+                .ThenInclude(p => p.Department)
             .Include(ps => ps.SkillTemplate)
             .ToListAsync();
     }

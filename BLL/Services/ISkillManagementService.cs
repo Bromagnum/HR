@@ -43,6 +43,7 @@ public interface ISkillManagementService
     Task<Result<bool>> RenewCertificationAsync(int personSkillId, DateTime newExpiryDate);
 
     // Statistics and Reporting
+    Task<Result<SkillAnalyticsDto>> GetSkillAnalyticsAsync();
     Task<Result<SkillSummaryDto>> GetSkillSummaryAsync();
     Task<Result<IEnumerable<SkillCategorySummaryDto>>> GetSkillCategorySummaryAsync();
     Task<Result<IEnumerable<SkillTypeSummaryDto>>> GetSkillTypeSummaryAsync();

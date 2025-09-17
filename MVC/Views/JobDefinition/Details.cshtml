@@ -1,0 +1,355 @@
+@model MVC.Models.JobDefinitionDetailViewModel
+
+@{
+    ViewData["Title"] = $"İş Tanımı - {Model.Title}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@Model.Title</h1>
+    <div class="btn-group">
+        @if (!Model.IsApproved)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Düzenle
+            </a>
+        }
+        <a asp-action="CalculateMatches" asp-route-id="@Model.Id" class="btn btn-info">
+            <i class="fas fa-calculator"></i> Eşleşme Hesapla
+        </a>
+        <a asp-action="TopMatches" asp-route-id="@Model.Id" class="btn btn-success">
+            <i class="fas fa-star"></i> En İyi Eşleşmeler
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Geri Dön
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["Warning"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Basic Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle"></i> Temel Bilgiler
+                    <span class="badge @Model.StatusClass float-end">@Model.StatusText</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Pozisyon:</strong> @Model.PositionName</p>
+                        <p><strong>Departman:</strong> @Model.DepartmentName</p>
+                        <p><strong>Versiyon:</strong> @Model.Version</p>
+                        <p><strong>İstihdam Türü:</strong> @Model.EmploymentTypeText</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Oluşturma Tarihi:</strong> @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                        <p><strong>Güncelleme Tarihi:</strong> @Model.UpdatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                        @if (Model.IsApproved)
+                        {
+                            <p><strong>Onaylayan:</strong> @Model.ApprovedByName</p>
+                            <p><strong>Onay Tarihi:</strong> @Model.ApprovedAt?.ToString("dd.MM.yyyy HH:mm")</p>
+                        }
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <strong>Açıklama:</strong>
+                    <p class="text-muted">@Model.Description</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requirements -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title"><i class="fas fa-graduation-cap"></i> Gereksinimler</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Deneyim</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Minimum:</strong> @Model.MinRequiredExperience yıl</li>
+                            @if (Model.PreferredExperience.HasValue)
+                            {
+                                <li><strong>Tercih Edilen:</strong> @Model.PreferredExperience yıl</li>
+                            }
+                        </ul>
+
+                        <h6>Eğitim</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Minimum:</strong> @Model.EducationLevelText</li>
+                            @if (Model.PreferredEducationLevel.HasValue)
+                            {
+                                <li><strong>Tercih Edilen:</strong> @Model.PreferredEducationLevel.ToString()</li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        @if (!string.IsNullOrEmpty(Model.RequiredLanguages))
+                        {
+                            <h6>Gerekli Diller</h6>
+                            <p>@Model.RequiredLanguages</p>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.PreferredLanguages))
+                        {
+                            <h6>Tercih Edilen Diller</h6>
+                            <p>@Model.PreferredLanguages</p>
+                        }
+
+                        <h6>Ek Gereksinimler</h6>
+                        <ul class="list-unstyled">
+                            @if (Model.RequiresDriverLicense)
+                            {
+                                <li><i class="fas fa-check text-success"></i> Ehliyet gerekli</li>
+                            }
+                            @if (Model.IsRemoteWorkAllowed)
+                            {
+                                <li><i class="fas fa-check text-success"></i> Uzaktan çalışma imkanı</li>
+                            }
+                            @if (Model.TravelRequirement.HasValue && Model.TravelRequirement > 0)
+                            {
+                                <li><i class="fas fa-plane text-info"></i> Seyahat gereksinimi: %@Model.TravelRequirement</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.RequiredCertifications))
+                {
+                    <div class="mt-3">
+                        <h6>Gerekli Sertifikalar</h6>
+                        <p>@Model.RequiredCertifications</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.PreferredCertifications))
+                {
+                    <div class="mt-3">
+                        <h6>Tercih Edilen Sertifikalar</h6>
+                        <p>@Model.PreferredCertifications</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Matching Results -->
+        @if (Model.MatchingResults.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-user-check"></i> Eşleşme Sonuçları 
+                        <span class="badge bg-info">@Model.MatchingResults.Count</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Personel</th>
+                                    <th>Genel Eşleşme</th>
+                                    <th>Deneyim</th>
+                                    <th>Eğitim</th>
+                                    <th>Durum</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var match in Model.MatchingResults.OrderByDescending(m => m.OverallMatchPercentage).Take(10))
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@match.PersonName</strong><br>
+                                            <small class="text-muted">@match.PersonEmail</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress me-2" style="width: 60px; height: 20px;">
+                                                    <div class="progress-bar @(match.OverallMatchPercentage >= 80 ? "bg-success" : match.OverallMatchPercentage >= 50 ? "bg-warning" : "bg-danger")" 
+                                                         style="width: @(match.OverallMatchPercentage)%"></div>
+                                                </div>
+                                                <span class="@match.MatchClass">@match.MatchPercentageText</span>
+                                            </div>
+                                        </td>
+                                        <td>%@match.ExperienceMatch.ToString("F1")</td>
+                                        <td>%@match.EducationMatch.ToString("F1")</td>
+                                        <td><span class="badge @match.StatusClass">@match.StatusText</span></td>
+                                        <td>
+                                            <a href="/Person/Details/@match.PersonId" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    @if (Model.MatchingResults.Count > 10)
+                    {
+                        <div class="text-center mt-3">
+                            <a asp-action="TopMatches" asp-route-id="@Model.Id" class="btn btn-primary">
+                                Tüm Sonuçları Gör (@Model.MatchingResults.Count)
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-4">
+        <!-- Job Details Sidebar -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title"><i class="fas fa-money-bill-wave"></i> Maaş ve Yan Haklar</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.MinSalary.HasValue || Model.MaxSalary.HasValue)
+                {
+                    <p><strong>Maaş Aralığı:</strong></p>
+                    <p class="text-success">
+                        @if (Model.MinSalary.HasValue && Model.MaxSalary.HasValue)
+                        {
+                            <span>@Model.MinSalary.Value.ToString("C") - @Model.MaxSalary.Value.ToString("C")</span>
+                        }
+                        else if (Model.MinSalary.HasValue)
+                        {
+                            <span>@Model.MinSalary.Value.ToString("C") +</span>
+                        }
+                        else
+                        {
+                            <span>@Model.MaxSalary.Value.ToString("C")'e kadar</span>
+                        }
+                    </p>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Benefits))
+                {
+                    <p><strong>Yan Haklar:</strong></p>
+                    <p>@Model.Benefits</p>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.WorkingHours))
+                {
+                    <p><strong>Çalışma Saatleri:</strong></p>
+                    <p>@Model.WorkingHours</p>
+                }
+            </div>
+        </div>
+
+        <!-- Organization -->
+        @if (!string.IsNullOrEmpty(Model.TeamStructure) || !string.IsNullOrEmpty(Model.ReportingStructure))
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-users"></i> Organizasyon</h5>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.TeamStructure))
+                    {
+                        <p><strong>Takım Yapısı:</strong></p>
+                        <p>@Model.TeamStructure</p>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.ReportingStructure))
+                    {
+                        <p><strong>Raporlama:</strong></p>
+                        <p>@Model.ReportingStructure</p>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Performance & Career -->
+        @if (!string.IsNullOrEmpty(Model.KeyPerformanceIndicators) || !string.IsNullOrEmpty(Model.CareerDevelopmentPath))
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-chart-line"></i> Performans ve Kariyer</h5>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.KeyPerformanceIndicators))
+                    {
+                        <p><strong>KPI'lar:</strong></p>
+                        <p>@Model.KeyPerformanceIndicators</p>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.CareerDevelopmentPath))
+                    {
+                        <p><strong>Kariyer Gelişimi:</strong></p>
+                        <p>@Model.CareerDevelopmentPath</p>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Export Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title"><i class="fas fa-download"></i> Export İşlemleri</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="ExportDefinition" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-outline-primary btn-sm mb-2 w-100">
+                        <i class="fas fa-file-word"></i> İş Tanımını Export Et
+                    </button>
+                </form>
+
+                @if (Model.MatchingResults.Any())
+                {
+                    <form asp-action="ExportMatchingResults" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                            <i class="fas fa-file-excel"></i> Eşleşme Sonuçlarını Export Et
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Notes))
+{
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-sticky-note"></i> Notlar</h5>
+                </div>
+                <div class="card-body">
+                    <p>@Model.Notes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}

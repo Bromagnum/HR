@@ -1,0 +1,117 @@
+@model IEnumerable<MVC.Models.PersonSkillListViewModel>
+
+@{
+    ViewData["Title"] = "Personel Becerileri";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <div class="btn-group">
+        <a asp-action="Analytics" class="btn btn-info">
+            <i class="fas fa-chart-bar"></i> Analiz
+        </a>
+        <a asp-action="SkillTemplates" class="btn btn-secondary">
+            <i class="fas fa-cogs"></i> Şablonlar
+        </a>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Personel</th>
+                            <th>Departman</th>
+                            <th>Beceri</th>
+                            <th>Kategori</th>
+                            <th>Seviye</th>
+                            <th>Deneyim</th>
+                            <th>Sertifika</th>
+                            <th>Son Değerlendirme</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@item.PersonName</strong>
+                                    <br><small class="text-muted">@item.PersonEmail</small>
+                                </td>
+                                <td>@item.DepartmentName</td>
+                                <td><strong>@item.SkillName</strong></td>
+                                <td><span class="badge bg-secondary">@item.SkillCategory</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress me-2" style="width: 60px; height: 20px;">
+                                            <div class="progress-bar @(item.Level >= 8 ? "bg-success" : item.Level >= 5 ? "bg-warning" : "bg-info")" 
+                                                 style="width: @((item.Level / 10.0) * 100)%"></div>
+                                        </div>
+                                        <span class="@(item.Level >= 8 ? "text-success" : item.Level >= 5 ? "text-warning" : "text-info")">
+                                            @item.Level/10
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">@item.LevelText</small>
+                                </td>
+                                <td>
+                                    @if (item.YearsOfExperience.HasValue)
+                                    {
+                                        <span>@item.YearsOfExperience yıl</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.HasCertification)
+                                    {
+                                        <i class="fas fa-certificate text-success" title="Sertifikalı"></i>
+                                        @if (!string.IsNullOrEmpty(item.CertificationDetails))
+                                        {
+                                            <br><small class="text-muted">@item.CertificationDetails</small>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.LastAssessmentDate.HasValue)
+                                    {
+                                        <span>@item.LastAssessmentDate.Value.ToString("dd.MM.yyyy")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Henüz yok</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-user-graduate fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">Henüz personel beceri kaydı bulunmuyor</h4>
+                <p class="text-muted">Personel beceri değerlendirmeleri henüz yapılmamış.</p>
+            </div>
+        }
+    </div>
+</div>

@@ -141,6 +141,8 @@ public class HomeController : Controller
     {
         try
         {
+            _logger.LogInformation("Starting chart data loading...");
+            
             // 1. Departman bazında personel dağılımı
             var personsResult = await _personService.GetAllAsync();
             var departmentsResult = await _departmentService.GetAllAsync();
@@ -162,6 +164,15 @@ public class HomeController : Controller
 
                 ViewBag.ChartDepartmentLabels = System.Text.Json.JsonSerializer.Serialize(departmentStats.Select(d => d.Name));
                 ViewBag.ChartDepartmentData = System.Text.Json.JsonSerializer.Serialize(departmentStats.Select(d => d.Count));
+                
+                _logger.LogInformation("Department chart data loaded: {Count} departments", departmentStats.Count);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to load department/person data. Persons: {PersonSuccess}, Departments: {DeptSuccess}", 
+                    personsResult.IsSuccess, departmentsResult.IsSuccess);
+                ViewBag.ChartDepartmentLabels = "[]";
+                ViewBag.ChartDepartmentData = "[]";
             }
 
             // 2. İzin talebi durumları
@@ -175,10 +186,19 @@ public class HomeController : Controller
                     new { Label = "Onaylandı", Count = leaves.Count(l => l.Status == DAL.Entities.LeaveStatus.Approved) },
                     new { Label = "Reddedildi", Count = leaves.Count(l => l.Status == DAL.Entities.LeaveStatus.Rejected) },
                     new { Label = "İptal", Count = leaves.Count(l => l.Status == DAL.Entities.LeaveStatus.Cancelled) }
-                }.Where(l => l.Count > 0).ToList();
+                }.ToList(); // Remove the filter to show even zero counts
 
                 ViewBag.ChartLeaveStatusLabels = System.Text.Json.JsonSerializer.Serialize(leaveStats.Select(l => l.Label));
                 ViewBag.ChartLeaveStatusData = System.Text.Json.JsonSerializer.Serialize(leaveStats.Select(l => l.Count));
+                
+                _logger.LogInformation("Leave status chart data loaded: {TotalLeaves} leaves, {StatsCount} status types", 
+                    leaves.Count, leaveStats.Count);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to load leave data: {ErrorMessage}", leavesResult.Message);
+                ViewBag.ChartLeaveStatusLabels = "[]";
+                ViewBag.ChartLeaveStatusData = "[]";
             }
 
             // 3. Son 6 ay işe alım trendi
@@ -207,6 +227,15 @@ public class HomeController : Controller
 
                 ViewBag.ChartHiringTrendLabels = System.Text.Json.JsonSerializer.Serialize(hiringTrend.Select(h => ((dynamic)h).Month));
                 ViewBag.ChartHiringTrendData = System.Text.Json.JsonSerializer.Serialize(hiringTrend.Select(h => ((dynamic)h).Count));
+                
+                _logger.LogInformation("Hiring trend chart data loaded: {TotalPersons} persons, {MonthsCount} months", 
+                    persons.Count, hiringTrend.Count);
+            }
+            else
+            {
+                _logger.LogWarning("Cannot load hiring trend - person data not available");
+                ViewBag.ChartHiringTrendLabels = "[]";
+                ViewBag.ChartHiringTrendData = "[]";
             }
 
             // 4. Stok durumu
@@ -219,10 +248,21 @@ public class HomeController : Controller
                     new { Label = "Normal Stok", Count = normalStockCount },
                     new { Label = "Düşük Stok", Count = materialStatsResult.Data.LowStockCount },
                     new { Label = "Fazla Stok", Count = materialStatsResult.Data.OverStockCount }
-                }.Where(s => s.Count > 0).ToList();
+                }.ToList(); // Show even zero counts
 
                 ViewBag.ChartStockStatusLabels = System.Text.Json.JsonSerializer.Serialize(stockStats.Select(s => s.Label));
                 ViewBag.ChartStockStatusData = System.Text.Json.JsonSerializer.Serialize(stockStats.Select(s => s.Count));
+                
+                _logger.LogInformation("Stock status chart data loaded: Total={TotalMaterials}, Normal={Normal}, Low={Low}, Over={Over}", 
+                    materialStatsResult.Data.TotalMaterials, normalStockCount, 
+                    materialStatsResult.Data.LowStockCount, materialStatsResult.Data.OverStockCount);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to load material stock data: Success={Success}, Error={Error}", 
+                    materialStatsResult.Success, materialStatsResult.Message);
+                ViewBag.ChartStockStatusLabels = "[]";
+                ViewBag.ChartStockStatusData = "[]";
             }
         }
         catch (Exception ex)

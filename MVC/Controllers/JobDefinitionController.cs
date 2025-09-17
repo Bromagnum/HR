@@ -483,22 +483,43 @@ public class JobDefinitionController : Controller
 
     private async Task LoadSkillSelectListsAsync()
     {
-        var skillTemplatesResult = await _skillManagementService.GetAllSkillTemplatesAsync();
-        
-        ViewBag.SkillTemplateSelectList = skillTemplatesResult.IsSuccess
-            ? new SelectList(skillTemplatesResult.Data, "Id", "Name")
-            : new SelectList(Enumerable.Empty<SelectListItem>());
+        try
+        {
+            var skillTemplatesResult = await _skillManagementService.GetAllSkillTemplatesAsync();
+            
+            ViewBag.SkillTemplateSelectList = skillTemplatesResult.IsSuccess && skillTemplatesResult.Data != null
+                ? new SelectList(skillTemplatesResult.Data, "Id", "Name")
+                : new SelectList(Enumerable.Empty<SelectListItem>());
 
-        // Add qualification importance select list
-        ViewBag.QualificationImportanceSelectList = new SelectList(
-            Enum.GetValues<DAL.Entities.QualificationImportance>()
-                .Select(e => new { Value = (int)e, Text = e.ToString() }),
-            "Value", "Text");
+            // Add qualification importance select list
+            ViewBag.QualificationImportanceSelectList = new SelectList(
+                Enum.GetValues<DAL.Entities.QualificationImportance>()
+                    .Select(e => new { Value = (int)e, Text = e.ToString() }),
+                "Value", "Text");
 
-        // Add skill categories
-        var categoriesResult = await _skillManagementService.GetSkillCategoriesAsync();
-        ViewBag.SkillCategorySelectList = categoriesResult.IsSuccess
-            ? new SelectList(categoriesResult.Data)
-            : new SelectList(Enumerable.Empty<string>());
+            // Add skill categories
+            try
+            {
+                var categoriesResult = await _skillManagementService.GetSkillCategoriesAsync();
+                ViewBag.SkillCategorySelectList = categoriesResult.IsSuccess && categoriesResult.Data != null
+                    ? new SelectList(categoriesResult.Data)
+                    : new SelectList(Enumerable.Empty<string>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not load skill categories, using empty list");
+                ViewBag.SkillCategorySelectList = new SelectList(Enumerable.Empty<string>());
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not load skill templates, using empty lists");
+            ViewBag.SkillTemplateSelectList = new SelectList(Enumerable.Empty<SelectListItem>());
+            ViewBag.QualificationImportanceSelectList = new SelectList(
+                Enum.GetValues<DAL.Entities.QualificationImportance>()
+                    .Select(e => new { Value = (int)e, Text = e.ToString() }),
+                "Value", "Text");
+            ViewBag.SkillCategorySelectList = new SelectList(Enumerable.Empty<string>());
+        }
     }
 }

@@ -1,5 +1,6 @@
 using AutoMapper;
 using BLL.Services;
+using BLL.Services.Export;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
@@ -16,6 +17,7 @@ public class LeaveController : Controller
     private readonly IPersonService _personService;
     private readonly IDepartmentService _departmentService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IPdfExportService _pdfExportService;
     private readonly IMapper _mapper;
 
     public LeaveController(
@@ -24,6 +26,7 @@ public class LeaveController : Controller
         IPersonService personService,
         IDepartmentService departmentService,
         ICurrentUserService currentUserService,
+        IPdfExportService pdfExportService,
         IMapper mapper)
     {
         _leaveService = leaveService;
@@ -31,6 +34,7 @@ public class LeaveController : Controller
         _personService = personService;
         _departmentService = departmentService;
         _currentUserService = currentUserService;
+        _pdfExportService = pdfExportService;
         _mapper = mapper;
     }
 

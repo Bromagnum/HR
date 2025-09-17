@@ -71,6 +71,7 @@ builder.Services.AddScoped<ISkillManagementService, SkillManagementService>();
 
 // Export Services
 builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
+builder.Services.AddScoped<IPdfExportService, PdfExportService>();
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -172,6 +173,13 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Ensure seed data is applied
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.EnsureCreated();
+}
 
 app.Run();
 

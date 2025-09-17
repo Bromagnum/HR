@@ -578,10 +578,10 @@ public class JobDefinitionService : IJobDefinitionService
             if (position == null)
                 errors.Add("Belirtilen pozisyon bulunamadı.");
 
-            // Check title uniqueness for the position
+            // Check title uniqueness for the position (only for approved definitions)
             var existingDefinitions = await _unitOfWork.JobDefinitions.GetByPositionIdAsync(dto.PositionId);
-            if (existingDefinitions.Any(x => x.Title.Equals(dto.Title, StringComparison.OrdinalIgnoreCase)))
-                errors.Add("Bu pozisyon için aynı başlıkta bir iş tanımı zaten mevcut.");
+            if (existingDefinitions.Any(x => x.Title.Equals(dto.Title, StringComparison.OrdinalIgnoreCase) && x.IsApproved))
+                errors.Add("Bu pozisyon için aynı başlıkta onaylanmış bir iş tanımı zaten mevcut. Lütfen farklı bir başlık kullanın veya mevcut tanımı düzenleyin.");
 
             // Validate experience requirements
             if (dto.PreferredExperience.HasValue && dto.PreferredExperience.Value < dto.MinRequiredExperience)
@@ -747,9 +747,41 @@ public class JobDefinitionService : IJobDefinitionService
         throw new NotImplementedException();
     }
 
-    public Task<Result<JobDefinitionSummaryDto>> GetSummaryAsync()
+    public async Task<Result<JobDefinitionSummaryDto>> GetSummaryAsync()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var jobDefinitions = await _unitOfWork.JobDefinitions.GetAllAsync();
+            var positions = await _unitOfWork.Positions.GetAllAsync();
+            var departments = await _unitOfWork.Departments.GetAllAsync();
+            
+            var summary = new JobDefinitionSummaryDto
+            {
+                TotalDefinitions = jobDefinitions.Count(),
+                ApprovedDefinitions = jobDefinitions.Count(jd => jd.IsApproved),
+                PendingApprovalDefinitions = jobDefinitions.Count(jd => !jd.IsApproved),
+                DefinitionsWithMatches = 0, // This would require matching results data
+                
+                // Department distribution
+                DefinitionsByDepartment = departments.ToDictionary(
+                    d => d.Name, 
+                    d => jobDefinitions.Count(jd => jd.Position != null && jd.Position.DepartmentId == d.Id)
+                ),
+                
+                // Position distribution
+                DefinitionsByPosition = positions.ToDictionary(
+                    p => p.Name, 
+                    p => jobDefinitions.Count(jd => jd.PositionId == p.Id)
+                )
+            };
+
+            return Result<JobDefinitionSummaryDto>.Ok(summary);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating job definition summary");
+            return Result<JobDefinitionSummaryDto>.Fail("Özet bilgiler alınırken hata oluştu.");
+        }
     }
 
     public Task<Result<DepartmentJobDefinitionSummaryDto>> GetDepartmentSummaryAsync(int departmentId)

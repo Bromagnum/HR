@@ -8,6 +8,8 @@ public class PersonSkillDto
     public int Id { get; set; }
     public int PersonId { get; set; }
     public string PersonName { get; set; } = string.Empty;
+    public string PersonEmail { get; set; } = string.Empty;
+    public string DepartmentName { get; set; } = string.Empty;
     public int SkillTemplateId { get; set; }
     public string SkillName { get; set; } = string.Empty;
     public string SkillCategory { get; set; } = string.Empty;
@@ -279,3 +281,4 @@ public class SkillTypeSummaryDto
     public int CertifiedCount { get; set; }
     public decimal AverageLevel { get; set; }
 }
+

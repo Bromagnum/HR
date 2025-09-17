@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - İKYS</title>
-    <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
@@ -109,6 +108,25 @@
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" asp-controller="Position" asp-action="Create">
                                             <i class="fas fa-plus"></i> Yeni Pozisyon Ekle
+                                        </a></li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- İş Tanımı Yönetimi - Admin: Full CRUD -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-clipboard-list"></i> İş Tanımı
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="JobDefinition" asp-action="Index">
+                                            <i class="fas fa-list"></i> İş Tanımları
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="JobDefinition" asp-action="Summary">
+                                            <i class="fas fa-chart-bar"></i> Özet Rapor
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="JobDefinition" asp-action="Create">
+                                            <i class="fas fa-plus"></i> Yeni İş Tanımı
                                         </a></li>
                                     </ul>
                                 </li>
@@ -594,7 +612,7 @@
     <!-- SheetJS for Excel export functionality -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Chart.js for dashboard charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

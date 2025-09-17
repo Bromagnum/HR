@@ -1,4 +1,5 @@
 using BLL.Services;
+using BLL.Services.Export;
 using BLL.DTOs;
 using BLL.Utilities;
 using Microsoft.AspNetCore.Mvc;
@@ -15,14 +16,16 @@ public class PersonController : Controller
     private readonly IPersonService _personService;
     private readonly IDepartmentService _departmentService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IPdfExportService _pdfExportService;
     private readonly IMapper _mapper;
 
     public PersonController(IPersonService personService, IDepartmentService departmentService, 
-        ICurrentUserService currentUserService, IMapper mapper)
+        ICurrentUserService currentUserService, IPdfExportService pdfExportService, IMapper mapper)
     {
         _personService = personService;
         _departmentService = departmentService;
         _currentUserService = currentUserService;
+        _pdfExportService = pdfExportService;
         _mapper = mapper;
     }
 
@@ -308,6 +311,59 @@ public class PersonController : Controller
         else
         {
             ViewBag.Departments = new SelectList(Enumerable.Empty<SelectListItem>());
+        }
+    }
+
+    // PDF Export Actions
+    [HttpGet]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> ExportPersonnelListPdf()
+    {
+        try
+        {
+            var result = await _personService.GetAllAsync();
+            
+            if (!result.Success)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            var pdfBytes = await _pdfExportService.ExportPersonnelListAsync(result.Data ?? new List<PersonListDto>());
+            var fileName = $"PersonelListesi_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"PDF export error: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> ExportPersonnelDetailPdf(int id)
+    {
+        try
+        {
+            var result = await _personService.GetByIdAsync(id);
+            
+            if (!result.Success)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            var pdfBytes = await _pdfExportService.ExportPersonnelDetailAsync(id, result.Data!);
+            var fileName = $"PersonelDetay_{result.Data!.FirstName}_{result.Data.LastName}_{DateTime.Now:yyyyMMdd}.pdf";
+            
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"PDF export error: {ex.Message}";
+            return RedirectToAction(nameof(Details), new { id });
         }
     }
 }

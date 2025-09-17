@@ -1,0 +1,297 @@
+@model MVC.Models.JobDefinitionCreateViewModel
+
+@{
+    ViewData["Title"] = "Yeni İş Tanımı";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+@if (ViewData.ModelState.ErrorCount > 0)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <h6><i class="fas fa-exclamation-triangle"></i> Lütfen aşağıdaki hataları düzeltin:</h6>
+        <ul class="mb-0">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form asp-action="Create" method="post" id="jobDefinitionForm">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-info-circle"></i> Temel Bilgiler</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label asp-for="Title" class="form-label">İş Tanımı Başlığı</label>
+                            <input asp-for="Title" class="form-control" placeholder="Örn: Senior Software Developer" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PositionId" class="form-label">Pozisyon</label>
+                            <select asp-for="PositionId" class="form-select" asp-items="ViewBag.PositionSelectList">
+                                <option value="">Pozisyon Seçiniz</option>
+                            </select>
+                            <span asp-validation-for="PositionId" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EmploymentType" class="form-label">İstihdam Türü</label>
+                            <select asp-for="EmploymentType" class="form-select" asp-items="ViewBag.EmploymentTypeSelectList">
+                                <option value="">İstihdam Türü Seçiniz</option>
+                            </select>
+                            <span asp-validation-for="EmploymentType" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            <label asp-for="Description" class="form-label">Açıklama</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="İş tanımının detaylı açıklaması..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-graduation-cap"></i> Deneyim ve Eğitim Gereksinimleri</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MinRequiredExperience" class="form-label">Minimum Deneyim (Yıl)</label>
+                            <input asp-for="MinRequiredExperience" type="number" min="0" max="50" class="form-control" />
+                            <span asp-validation-for="MinRequiredExperience" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PreferredExperience" class="form-label">Tercih Edilen Deneyim (Yıl)</label>
+                            <input asp-for="PreferredExperience" type="number" min="0" max="50" class="form-control" />
+                            <span asp-validation-for="PreferredExperience" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MinEducationLevel" class="form-label">Minimum Eğitim Seviyesi</label>
+                            <select asp-for="MinEducationLevel" class="form-select" asp-items="ViewBag.EducationLevelSelectList">
+                                <option value="">Eğitim Seviyesi Seçiniz</option>
+                            </select>
+                            <span asp-validation-for="MinEducationLevel" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PreferredEducationLevel" class="form-label">Tercih Edilen Eğitim Seviyesi</label>
+                            <select asp-for="PreferredEducationLevel" class="form-select" asp-items="ViewBag.EducationLevelSelectList">
+                                <option value="">Seçiniz (Opsiyonel)</option>
+                            </select>
+                            <span asp-validation-for="PreferredEducationLevel" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-certificate"></i> Sertifikalar ve Diller</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="RequiredCertifications" class="form-label">Gerekli Sertifikalar</label>
+                            <textarea asp-for="RequiredCertifications" class="form-control" rows="3" placeholder="Örn: PMP, Scrum Master"></textarea>
+                            <span asp-validation-for="RequiredCertifications" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PreferredCertifications" class="form-label">Tercih Edilen Sertifikalar</label>
+                            <textarea asp-for="PreferredCertifications" class="form-control" rows="3" placeholder="İsteğe bağlı sertifikalar"></textarea>
+                            <span asp-validation-for="PreferredCertifications" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="RequiredLanguages" class="form-label">Gerekli Diller</label>
+                            <textarea asp-for="RequiredLanguages" class="form-control" rows="2" placeholder="Örn: İngilizce (İleri), Almanca (Orta)"></textarea>
+                            <span asp-validation-for="RequiredLanguages" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PreferredLanguages" class="form-label">Tercih Edilen Diller</label>
+                            <textarea asp-for="PreferredLanguages" class="form-control" rows="2" placeholder="İsteğe bağlı dil becerileri"></textarea>
+                            <span asp-validation-for="PreferredLanguages" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-briefcase"></i> Çalışma Koşulları</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="WorkingHours" class="form-label">Çalışma Saatleri</label>
+                            <input asp-for="WorkingHours" class="form-control" placeholder="Örn: 09:00-18:00, Esnek" />
+                            <span asp-validation-for="WorkingHours" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TravelRequirement" class="form-label">Seyahat Gereksinimi (%)</label>
+                            <input asp-for="TravelRequirement" type="number" min="0" max="100" class="form-control" />
+                            <span asp-validation-for="TravelRequirement" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input asp-for="RequiresDriverLicense" class="form-check-input" />
+                                <label asp-for="RequiresDriverLicense" class="form-check-label">
+                                    Ehliyet Gerekli
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsRemoteWorkAllowed" class="form-check-input" />
+                                <label asp-for="IsRemoteWorkAllowed" class="form-check-label">
+                                    Uzaktan Çalışma İmkanı
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-money-bill-wave"></i> Maaş ve Yan Haklar</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="MinSalary" class="form-label">Minimum Maaş (₺)</label>
+                        <input asp-for="MinSalary" type="number" step="0.01" min="0" class="form-control" />
+                        <span asp-validation-for="MinSalary" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="MaxSalary" class="form-label">Maksimum Maaş (₺)</label>
+                        <input asp-for="MaxSalary" type="number" step="0.01" min="0" class="form-control" />
+                        <span asp-validation-for="MaxSalary" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Benefits" class="form-label">Yan Haklar</label>
+                        <textarea asp-for="Benefits" class="form-control" rows="4" placeholder="Sağlık sigortası, yemek kartı, vs."></textarea>
+                        <span asp-validation-for="Benefits" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-users"></i> Organizasyon</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="TeamStructure" class="form-label">Takım Yapısı</label>
+                        <textarea asp-for="TeamStructure" class="form-control" rows="3" placeholder="Takım büyüklüğü ve yapısı"></textarea>
+                        <span asp-validation-for="TeamStructure" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="ReportingStructure" class="form-label">Raporlama Yapısı</label>
+                        <textarea asp-for="ReportingStructure" class="form-control" rows="3" placeholder="Kime rapor verecek, kimler rapor verecek"></textarea>
+                        <span asp-validation-for="ReportingStructure" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-chart-line"></i> Performans ve Kariyer</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="KeyPerformanceIndicators" class="form-label">KPI'lar</label>
+                        <textarea asp-for="KeyPerformanceIndicators" class="form-control" rows="3" placeholder="Anahtar performans göstergeleri"></textarea>
+                        <span asp-validation-for="KeyPerformanceIndicators" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="CareerDevelopmentPath" class="form-label">Kariyer Gelişim Yolu</label>
+                        <textarea asp-for="CareerDevelopmentPath" class="form-control" rows="3" placeholder="Bu pozisyondaki kariyer imkanları"></textarea>
+                        <span asp-validation-for="CareerDevelopmentPath" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label">Notlar</label>
+                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Ek bilgiler ve notlar"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> İptal
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> İş Tanımını Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        // Form validation and UX improvements
+        $(document).ready(function() {
+            // Auto-resize textareas
+            $('textarea').on('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+            
+            // Salary validation
+            $('#MinSalary, #MaxSalary').on('change', function() {
+                var minSalary = parseFloat($('#MinSalary').val()) || 0;
+                var maxSalary = parseFloat($('#MaxSalary').val()) || 0;
+                
+                if (maxSalary > 0 && minSalary > 0 && maxSalary < minSalary) {
+                    alert('Maksimum maaş minimum maaştan küçük olamaz!');
+                    $('#MaxSalary').focus();
+                }
+            });
+            
+            // Experience validation
+            $('#MinRequiredExperience, #PreferredExperience').on('change', function() {
+                var minExp = parseInt($('#MinRequiredExperience').val()) || 0;
+                var prefExp = parseInt($('#PreferredExperience').val()) || 0;
+                
+                if (prefExp > 0 && prefExp < minExp) {
+                    alert('Tercih edilen deneyim minimum deneyimden az olamaz!');
+                    $('#PreferredExperience').focus();
+                }
+            });
+        });
+    </script>
+}

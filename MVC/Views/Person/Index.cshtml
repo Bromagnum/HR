@@ -6,9 +6,14 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>@ViewData["Title"]</h1>
-    <a asp-action="Create" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Yeni Personel
-    </a>
+    <div class="btn-group">
+        <a asp-action="ExportPersonnelListPdf" class="btn btn-danger">
+            <i class="fas fa-file-pdf"></i> PDF Export
+        </a>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Yeni Personel
+        </a>
+    </div>
 </div>
 
 @if (TempData["Success"] != null)

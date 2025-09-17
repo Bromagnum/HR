@@ -1,0 +1,346 @@
+@model MVC.Models.SkillTemplateDetailViewModel
+@{
+    ViewData["Title"] = "Beceri Şablonu Detayları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <i class="fas fa-cogs"></i> @Model.Name
+                </h4>
+                <div class="float-end">
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge bg-success">Aktif</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Pasif</span>
+                    }
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Kategori:</strong> @Model.Category
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Tür:</strong> @Model.TypeText
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Maksimum Seviye:</strong> @Model.MaxLevel
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Sertifikasyon Gerekli:</strong> 
+                        @if (Model.RequiresCertification)
+                        {
+                            <span class="text-success"><i class="fas fa-check"></i> Evet</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted"><i class="fas fa-times"></i> Hayır</span>
+                        }
+                    </div>
+                </div>
+                
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <div class="mb-3">
+                        <strong>Açıklama:</strong>
+                        <p class="mt-2">@Model.Description</p>
+                    </div>
+                }
+                
+                @if (!string.IsNullOrWhiteSpace(Model.CertificationBody))
+                {
+                    <div class="mb-3">
+                        <strong>Sertifika Kurumu:</strong> @Model.CertificationBody
+                    </div>
+                }
+                
+                @if (!string.IsNullOrWhiteSpace(Model.AssessmentCriteria))
+                {
+                    <div class="mb-3">
+                        <strong>Değerlendirme Kriterleri:</strong>
+                        <p class="mt-2">@Model.AssessmentCriteria</p>
+                    </div>
+                }
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Oluşturma Tarihi:</strong> @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Güncelleme Tarihi:</strong> @Model.UpdatedAt.ToString("dd.MM.yyyy HH:mm")
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a asp-action="SkillTemplates" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Geri Dön
+                    </a>
+                    <a asp-action="EditSkillTemplate" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Düzenle
+                    </a>
+                    @if (Model.IsActive)
+                    {
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#deactivateModal">
+                            <i class="fas fa-pause"></i> Pasifleştir
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#activateModal">
+                            <i class="fas fa-play"></i> Aktifleştir
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- İstatistikler -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-bar"></i> İstatistikler
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-12 mb-3">
+                        <div class="border-bottom pb-2">
+                            <h3 class="text-primary mb-0">@Model.TotalPersons</h3>
+                            <small class="text-muted">Toplam Kişi Sayısı</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-info mb-0">@Model.AverageLevel.ToString("F1")</h4>
+                        <small class="text-muted">Ortalama Seviye</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success mb-0">@Model.ExpertCount</h4>
+                        <small class="text-muted">Uzman (4+ Seviye)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Seviye Dağılımı -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-layer-group"></i> Seviye Dağılımı
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Başlangıç (1-2)</span>
+                        <span>@Model.BeginnerCount</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-warning" 
+                             style="width: @(Model.TotalPersons > 0 ? (Model.BeginnerCount * 100.0 / Model.TotalPersons).ToString("F0") : "0")%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Orta (3)</span>
+                        <span>@((Model.TotalPersons - Model.BeginnerCount - Model.ExpertCount))</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-info" 
+                             style="width: @(Model.TotalPersons > 0 ? ((Model.TotalPersons - Model.BeginnerCount - Model.ExpertCount) * 100.0 / Model.TotalPersons).ToString("F0") : "0")%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Uzman (4+)</span>
+                        <span>@Model.ExpertCount</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-success" 
+                             style="width: @(Model.TotalPersons > 0 ? (Model.ExpertCount * 100.0 / Model.TotalPersons).ToString("F0") : "0")%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.PersonSkills.Any())
+{
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-users"></i> Bu Beceriye Sahip Personeller
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Personel</th>
+                                    <th>E-posta</th>
+                                    <th>Departman</th>
+                                    <th>Seviye</th>
+                                    <th>Deneyim (Yıl)</th>
+                                    <th>Sertifika</th>
+                                    <th>Son Değerlendirme</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var skill in Model.PersonSkills)
+                                {
+                                    <tr>
+                                        <td>@skill.PersonName</td>
+                                        <td>@skill.PersonEmail</td>
+                                        <td>@skill.DepartmentName</td>
+                                        <td>
+                                            <span class="badge bg-@(skill.Level >= 4 ? "success" : skill.Level >= 3 ? "info" : "warning")">
+                                                @skill.Level / @Model.MaxLevel
+                                            </span>
+                                        </td>
+                                        <td>@(skill.YearsOfExperience?.ToString() ?? "Belirtilmemiş")</td>
+                                        <td>
+                                            @if (skill.HasCertification)
+                                            {
+                                                <span class="badge bg-success"><i class="fas fa-certificate"></i> Var</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Yok</span>
+                                            }
+                                        </td>
+                                        <td>@(skill.LastAssessmentDate?.ToString("dd.MM.yyyy") ?? "Değerlendirilmemiş")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.RequiredByJobs.Any())
+{
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-briefcase"></i> Bu Beceriyi Gerektiren İş Tanımları
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>İş Tanımı</th>
+                                    <th>Önem Derecesi</th>
+                                    <th>Min. Seviye</th>
+                                    <th>Tercih Edilen Seviye</th>
+                                    <th>Min. Deneyim</th>
+                                    <th>Sertifikasyon</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var job in Model.RequiredByJobs)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a asp-controller="JobDefinition" asp-action="Details" asp-route-id="@job.JobDefinitionId">
+                                                @job.JobDefinitionTitle
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-@(job.ImportanceText == "Critical" ? "danger" : job.ImportanceText == "Important" ? "warning" : "info")">
+                                                @job.ImportanceText
+                                            </span>
+                                        </td>
+                                        <td>@job.MinLevel</td>
+                                        <td>@(job.PreferredLevel?.ToString() ?? "-")</td>
+                                        <td>@(job.MinExperienceYears?.ToString() ?? "-") yıl</td>
+                                        <td>
+                                            @if (job.RequiresCertification)
+                                            {
+                                                <span class="badge bg-warning">Gerekli</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">İsteğe Bağlı</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Activation/Deactivation Modals -->
+@if (Model.IsActive)
+{
+    <div class="modal fade" id="deactivateModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Beceri Şablonunu Pasifleştir</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bu beceri şablonunu pasifleştirmek istediğinizden emin misiniz?</p>
+                    <p class="text-warning"><strong>Uyarı:</strong> Pasifleştirilen şablonlar yeni iş tanımlarında kullanılamaz.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <form asp-action="DeactivateSkillTemplate" asp-route-id="@Model.Id" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-warning">Pasifleştir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="modal fade" id="activateModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Beceri Şablonunu Aktifleştir</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bu beceri şablonunu aktifleştirmek istediğinizden emin misiniz?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <form asp-action="ActivateSkillTemplate" asp-route-id="@Model.Id" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-success">Aktifleştir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -628,7 +628,16 @@ public class SkillManagementService : ISkillManagementService
     {
         try
         {
-            var entities = await _unitOfWork.PersonSkills.GetByPersonIdAsync(filter.PersonId);
+            // Get all person skills or filter by specific person
+            IEnumerable<PersonSkill> entities;
+            if (filter.PersonId > 0)
+            {
+                entities = await _unitOfWork.PersonSkills.GetByPersonIdAsync(filter.PersonId);
+            }
+            else
+            {
+                entities = await _unitOfWork.PersonSkills.GetAllAsync();
+            }
 
             // Apply filters
             if (filter.SkillType.HasValue)
@@ -651,6 +660,9 @@ public class SkillManagementService : ISkillManagementService
 
             if (filter.MinExperienceYears.HasValue)
                 entities = entities.Where(ps => ps.ExperienceYears >= filter.MinExperienceYears.Value);
+
+            if (filter.MaxExperienceYears.HasValue)
+                entities = entities.Where(ps => ps.ExperienceYears <= filter.MaxExperienceYears.Value);
 
             var dtos = _mapper.Map<IEnumerable<PersonSkillDto>>(entities);
             return Result<IEnumerable<PersonSkillDto>>.Ok(dtos);
@@ -1082,4 +1094,5 @@ public class SkillManagementService : ISkillManagementService
             return Result<byte[]>.Fail("Beceri şablonları dışa aktarılırken hata oluştu.");
         }
     }
+
 }
