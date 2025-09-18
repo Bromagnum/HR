@@ -119,6 +119,8 @@ public class JobDefinitionRepository : Repository<JobDefinition>, IJobDefinition
             .Include(x => x.Position)
                 .ThenInclude(x => x.Department)
             .Include(x => x.RequiredQualifications)
+            .Include(x => x.JobRequiredSkills)
+                .ThenInclude(x => x.SkillTemplate)
             .Include(x => x.MatchingResults)
                 .ThenInclude(x => x.Person)
             .Include(x => x.ApprovedBy)

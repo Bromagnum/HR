@@ -16,6 +16,7 @@ public class PersonSkillRepository : Repository<PersonSkill>, IPersonSkillReposi
             .Include(ps => ps.Person)
                 .ThenInclude(p => p.Department)
             .Include(ps => ps.SkillTemplate)
+            .Include(ps => ps.SkillAssessments)
             .ToListAsync();
     }
 
@@ -26,6 +27,7 @@ public class PersonSkillRepository : Repository<PersonSkill>, IPersonSkillReposi
             .Include(ps => ps.Person)
                 .ThenInclude(p => p.Department)
             .Include(ps => ps.SkillTemplate)
+            .Include(ps => ps.SkillAssessments)
             .ToListAsync();
     }
 

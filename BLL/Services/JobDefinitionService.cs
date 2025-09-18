@@ -667,29 +667,110 @@ public class JobDefinitionService : IJobDefinitionService
     }
 
     // Implement remaining interface methods with similar patterns...
-    public Task<Result<JobDefinitionDetailDto>> GetByPositionAndVersionAsync(int positionId, string version)
+    public async Task<Result<JobDefinitionDetailDto>> GetByPositionAndVersionAsync(int positionId, string version)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var entity = await _unitOfWork.JobDefinitions.GetByPositionIdAndVersionAsync(positionId, version);
+            if (entity == null)
+                return Result<JobDefinitionDetailDto>.Fail("İş tanımı bulunamadı.");
+
+            var dto = _mapper.Map<JobDefinitionDetailDto>(entity);
+            return Result<JobDefinitionDetailDto>.Ok(dto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting job definition by position: {PositionId} and version: {Version}", positionId, version);
+            return Result<JobDefinitionDetailDto>.Fail("İş tanımı alınırken hata oluştu.");
+        }
     }
 
-    public Task<Result<bool>> RejectAsync(int id, string reason)
+    public async Task<Result<bool>> RejectAsync(int id, string reason)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var entity = await _unitOfWork.JobDefinitions.GetByIdAsync(id);
+            if (entity == null)
+                return Result<bool>.Fail("İş tanımı bulunamadı.");
+
+            if (entity.IsApproved)
+                return Result<bool>.Fail("Onaylanmış iş tanımı reddedilemez.");
+
+            // For now, we'll delete the rejected definition
+            // In a more complex system, we might keep it with a "Rejected" status
+            _unitOfWork.JobDefinitions.Remove(entity);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Job definition {Id} rejected. Reason: {Reason}", id, reason);
+            return Result<bool>.Ok(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error rejecting job definition: {Id}", id);
+            return Result<bool>.Fail("İş tanımı reddedilirken hata oluştu.");
+        }
     }
 
-    public Task<Result<JobDefinitionDetailDto>> CreateNewVersionAsync(int baseId, JobDefinitionUpdateDto dto)
+    public async Task<Result<JobDefinitionDetailDto>> CreateNewVersionAsync(int baseId, JobDefinitionUpdateDto dto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var baseEntity = await _unitOfWork.JobDefinitions.GetWithDetailsAsync(baseId);
+            if (baseEntity == null)
+                return Result<JobDefinitionDetailDto>.Fail("Temel iş tanımı bulunamadı.");
+
+            // Get next version for the position
+            var nextVersion = await _unitOfWork.JobDefinitions.GetNextVersionAsync(baseEntity.PositionId);
+
+            // Create new entity based on the update DTO
+            var newEntity = _mapper.Map<JobDefinition>(dto);
+            newEntity.Id = 0; // Ensure it's a new entity
+            newEntity.PositionId = baseEntity.PositionId;
+            newEntity.Version = nextVersion;
+            newEntity.PreviousVersionId = baseId;
+            newEntity.IsApproved = false;
+            newEntity.CreatedAt = DateTime.Now;
+            newEntity.UpdatedAt = DateTime.Now;
+
+            _unitOfWork.JobDefinitions.Add(newEntity);
+            await _unitOfWork.SaveChangesAsync();
+
+            var result = await GetByIdAsync(newEntity.Id);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating new version of job definition: {BaseId}", baseId);
+            return Result<JobDefinitionDetailDto>.Fail("Yeni versiyon oluşturulurken hata oluştu.");
+        }
     }
 
-    public Task<Result<string>> GetNextVersionAsync(int positionId)
+    public async Task<Result<string>> GetNextVersionAsync(int positionId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var version = await _unitOfWork.JobDefinitions.GetNextVersionAsync(positionId);
+            return Result<string>.Ok(version);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting next version for position: {PositionId}", positionId);
+            return Result<string>.Fail("Versiyon alınırken hata oluştu.");
+        }
     }
 
-    public Task<Result<bool>> HasApprovedVersionAsync(int positionId)
+    public async Task<Result<bool>> HasApprovedVersionAsync(int positionId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var hasApproved = await _unitOfWork.JobDefinitions.HasApprovedVersionAsync(positionId);
+            return Result<bool>.Ok(hasApproved);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking approved version for position: {PositionId}", positionId);
+            return Result<bool>.Fail("Onaylı versiyon kontrolü yapılırken hata oluştu.");
+        }
     }
 
     public Task<Result<IEnumerable<JobDefinitionQualificationDto>>> GetQualificationsAsync(int jobDefinitionId)

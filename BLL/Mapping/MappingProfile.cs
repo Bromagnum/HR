@@ -431,7 +431,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.PositionName, opt => opt.MapFrom(src => src.Position != null ? src.Position.Name : ""))
             .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Position != null && src.Position.Department != null ? src.Position.Department.Name : ""))
             .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => src.ApprovedBy != null ? $"{src.ApprovedBy.FirstName} {src.ApprovedBy.LastName}" : null))
-            .ForMember(dest => dest.RequiredQualifications, opt => opt.MapFrom(src => src.RequiredQualifications));
+            .ForMember(dest => dest.RequiredQualifications, opt => opt.MapFrom(src => src.RequiredQualifications))
+            .ForMember(dest => dest.RequiredSkills, opt => opt.MapFrom(src => src.JobRequiredSkills));
 
         CreateMap<JobDefinitionCreateDto, JobDefinition>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -439,7 +440,13 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsApproved, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.Position, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.PreviousVersion, opt => opt.Ignore())
+            .ForMember(dest => dest.RequiredQualifications, opt => opt.Ignore())
+            .ForMember(dest => dest.JobRequiredSkills, opt => opt.Ignore())
+            .ForMember(dest => dest.MatchingResults, opt => opt.Ignore());
 
         CreateMap<JobDefinitionUpdateDto, JobDefinition>()
             .ForMember(dest => dest.Version, opt => opt.Ignore())
@@ -456,6 +463,29 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+
+        // Job Required Skill Mappings
+        CreateMap<JobRequiredSkill, JobRequiredSkillDto>()
+            .ForMember(dest => dest.SkillName, opt => opt.MapFrom(src => src.SkillTemplate != null ? src.SkillTemplate.Name : ""))
+            .ForMember(dest => dest.SkillCategory, opt => opt.MapFrom(src => src.SkillTemplate != null ? src.SkillTemplate.Category : ""))
+            .ForMember(dest => dest.SkillType, opt => opt.MapFrom(src => src.SkillTemplate != null ? src.SkillTemplate.Type : SkillType.Technical))
+            .ForMember(dest => dest.ImportanceText, opt => opt.MapFrom(src => src.Importance.ToString()))
+            .ForMember(dest => dest.PreferredLevel, opt => opt.MapFrom(src => src.PreferredLevel))
+            .ForMember(dest => dest.MinExperienceYears, opt => opt.MapFrom(src => src.MinExperienceYears))
+            .ForMember(dest => dest.PreferredCertifications, opt => opt.MapFrom(src => src.SpecificRequirements))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.AssessmentCriteria));
+
+        CreateMap<JobRequiredSkillCreateDto, JobRequiredSkill>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.JobDefinitionId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.SpecificRequirements, opt => opt.MapFrom(src => src.PreferredCertifications))
+            .ForMember(dest => dest.AssessmentCriteria, opt => opt.MapFrom(src => src.Description))
+            .ForMember(dest => dest.PreferredExperienceYears, opt => opt.Ignore())
+            .ForMember(dest => dest.JobDefinition, opt => opt.Ignore())
+            .ForMember(dest => dest.SkillTemplate, opt => opt.Ignore());
 
         // Qualification Matching Result Mappings
         CreateMap<QualificationMatchingResult, QualificationMatchingResultDto>()
@@ -479,6 +509,15 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
 
+        CreateMap<SkillTemplateUpdateDto, SkillTemplate>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UsageCount, opt => opt.Ignore())
+            .ForMember(dest => dest.LastUsedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.PersonSkills, opt => opt.Ignore())
+            .ForMember(dest => dest.JobRequiredSkills, opt => opt.Ignore());
+
         // Person Skill Mappings
         CreateMap<PersonSkill, PersonSkillDto>()
             .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => src.Person != null ? $"{src.Person.FirstName} {src.Person.LastName}" : ""))
@@ -490,7 +529,11 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.LevelText, opt => opt.MapFrom(src => $"Seviye {src.Level}"))
             .ForMember(dest => dest.TotalExperience, opt => opt.MapFrom(src => src.TotalExperience))
             .ForMember(dest => dest.IsCertificationExpired, opt => opt.MapFrom(src => src.IsCertificationExpired))
-            .ForMember(dest => dest.IsCertificationExpiringSoon, opt => opt.MapFrom(src => src.IsCertificationExpiringSoon));
+            .ForMember(dest => dest.IsCertificationExpiringSoon, opt => opt.MapFrom(src => src.IsCertificationExpiringSoon))
+            .ForMember(dest => dest.LastAssessmentDate, opt => opt.MapFrom(src => 
+                src.SkillAssessments != null && src.SkillAssessments.Any() ? 
+                src.SkillAssessments.OrderByDescending(a => a.AssessmentDate).First().AssessmentDate : 
+                (DateTime?)null));
 
         CreateMap<PersonSkillCreateDto, PersonSkill>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())

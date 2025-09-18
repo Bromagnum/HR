@@ -29,18 +29,20 @@ public class SkillManagementController : Controller
     {
         try
         {
-            // Simple analytics using existing methods
-            var templatesResult = await _skillManagementService.GetAllSkillTemplatesAsync();
-            var categoriesResult = await _skillManagementService.GetSkillCategoriesAsync();
+            // Use the comprehensive analytics service method
+            var analyticsResult = await _skillManagementService.GetSkillAnalyticsAsync();
             
-            var viewModel = new SkillAnalyticsViewModel
+            if (analyticsResult.IsSuccess && analyticsResult.Data != null)
             {
-                TotalSkillTemplates = templatesResult.IsSuccess ? templatesResult.Data?.Count() ?? 0 : 0,
-                TotalPersonSkills = 0, // Would need to implement this
-                ActiveSkillCategories = categoriesResult.IsSuccess ? categoriesResult.Data?.Count() ?? 0 : 0
-            };
-            
-            return View(viewModel);
+                var viewModel = _mapper.Map<SkillAnalyticsViewModel>(analyticsResult.Data);
+                return View(viewModel);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to get skill analytics: {Message}", analyticsResult.Message);
+                TempData["Warning"] = analyticsResult.Message ?? "Beceri analizi yüklenirken bir sorun oluştu.";
+                return View(new SkillAnalyticsViewModel());
+            }
         }
         catch (Exception ex)
         {
@@ -167,6 +169,63 @@ public class SkillManagementController : Controller
         {
             _logger.LogError(ex, "Error creating skill template");
             ModelState.AddModelError("", "Beceri şablonu oluşturulurken hata oluştu.");
+            return View(model);
+        }
+    }
+
+    // GET: SkillManagement/SkillTemplates/Edit/5
+    public async Task<IActionResult> EditSkillTemplate(int id)
+    {
+        try
+        {
+            var result = await _skillManagementService.GetSkillTemplateByIdAsync(id);
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(SkillTemplates));
+            }
+
+            var viewModel = _mapper.Map<SkillTemplateEditViewModel>(result.Data);
+            return View(viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading skill template edit view for id: {Id}", id);
+            TempData["Error"] = "Beceri şablonu düzenleme sayfası yüklenirken hata oluştu.";
+            return RedirectToAction(nameof(SkillTemplates));
+        }
+    }
+
+    // POST: SkillManagement/SkillTemplates/Edit/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditSkillTemplate(SkillTemplateEditViewModel model)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var dto = _mapper.Map<SkillTemplateUpdateDto>(model);
+            var result = await _skillManagementService.UpdateSkillTemplateAsync(dto);
+
+            if (result.IsSuccess)
+            {
+                TempData["Success"] = "Beceri şablonu başarıyla güncellendi.";
+                return RedirectToAction(nameof(SkillTemplateDetails), new { id = model.Id });
+            }
+            else
+            {
+                ModelState.AddModelError("", result.Message);
+                return View(model);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating skill template");
+            ModelState.AddModelError("", "Beceri şablonu güncellenirken hata oluştu.");
             return View(model);
         }
     }

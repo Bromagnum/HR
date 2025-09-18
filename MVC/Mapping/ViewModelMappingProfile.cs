@@ -251,10 +251,14 @@ public class ViewModelMappingProfile : Profile
         CreateMap<JobDefinitionSummaryDto, JobDefinitionSummaryViewModel>();
 
         // Skill Management ViewModels - Added for SkillManagement module
-        CreateMap<SkillAnalyticsDto, SkillAnalyticsViewModel>();
+        CreateMap<SkillAnalyticsDto, SkillAnalyticsViewModel>()
+            .ForMember(dest => dest.SkillsByCategory, opt => opt.MapFrom(src => src.TopSkillCategories))
+            .ForMember(dest => dest.ActiveSkillCategories, opt => opt.MapFrom(src => src.TopSkillCategories.Count));
         CreateMap<SkillTemplateListDto, SkillTemplateListViewModel>();
         CreateMap<SkillTemplateDetailDto, SkillTemplateDetailViewModel>();
+        CreateMap<SkillTemplateDetailDto, SkillTemplateEditViewModel>();
         CreateMap<SkillTemplateCreateViewModel, SkillTemplateCreateDto>();
+        CreateMap<SkillTemplateEditViewModel, SkillTemplateUpdateDto>();
         CreateMap<SkillTemplateFilterViewModel, SkillTemplateFilterDto>();
         CreateMap<PersonSkillDto, PersonSkillListViewModel>()
             .ForMember(dest => dest.YearsOfExperience, opt => opt.MapFrom(src => src.ExperienceYears))

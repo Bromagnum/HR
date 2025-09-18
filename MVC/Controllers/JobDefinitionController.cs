@@ -94,6 +94,10 @@ public class JobDefinitionController : Controller
 
     public async Task<IActionResult> Create()
     {
+        // Clear any previous error messages
+        TempData.Remove("Error");
+        TempData.Remove("Warning");
+        
         try
         {
             await LoadSelectListsAsync();
@@ -103,7 +107,7 @@ public class JobDefinitionController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading create view");
-            TempData["Error"] = "Sayfa yüklenirken hata oluştu.";
+            TempData["Error"] = "İş tanımı alınırken hata oluştu.";
             return RedirectToAction(nameof(Index));
         }
     }
@@ -435,6 +439,11 @@ public class JobDefinitionController : Controller
 
     public async Task<IActionResult> Summary()
     {
+        // Clear any previous messages to prevent duplicate displays
+        TempData.Remove("Success");
+        TempData.Remove("Error");
+        TempData.Remove("Warning");
+        
         try
         {
             var result = await _jobDefinitionService.GetSummaryAsync();

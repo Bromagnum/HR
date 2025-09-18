@@ -70,6 +70,7 @@ public class SkillTemplateUpdateDto
     public bool RequiresCertification { get; set; }
     public string? Keywords { get; set; }
     public string? RelatedSkills { get; set; }
+    public bool IsActive { get; set; } = true;
 }
 
 public class SkillTemplateFilterDto

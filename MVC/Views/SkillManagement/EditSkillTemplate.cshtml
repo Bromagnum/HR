@@ -1,0 +1,171 @@
+@model MVC.Models.SkillTemplateEditViewModel
+@{
+    ViewData["Title"] = "Beceri Şablonunu Düzenle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <i class="fas fa-edit"></i> Beceri Şablonunu Düzenle
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="EditSkillTemplate" method="post">
+                    <input asp-for="Id" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Name" class="control-label">Beceri Adı</label>
+                                <input asp-for="Name" class="form-control" placeholder="Örn: JavaScript, Project Management" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Category" class="control-label">Kategori</label>
+                                <input asp-for="Category" class="form-control" placeholder="Örn: Programlama, Yönetim" />
+                                <span asp-validation-for="Category" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Type" class="control-label">Beceri Türü</label>
+                                <select asp-for="Type" class="form-control">
+                                    <option value="">Seçiniz...</option>
+                                    <option value="Technical">Teknik</option>
+                                    <option value="Soft">Yumuşak Beceri</option>
+                                    <option value="Language">Dil</option>
+                                    <option value="Certification">Sertifikasyon</option>
+                                </select>
+                                <span asp-validation-for="Type" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="MaxLevel" class="control-label">Maksimum Seviye</label>
+                                <select asp-for="MaxLevel" class="form-control">
+                                    <option value="3">1-3 (Başlangıç-Orta-İleri)</option>
+                                    <option value="5">1-5 (Ayrıntılı)</option>
+                                    <option value="10">1-10 (Çok Ayrıntılı)</option>
+                                </select>
+                                <span asp-validation-for="MaxLevel" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="Description" class="control-label">Açıklama</label>
+                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Bu becerinin detaylı açıklaması..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check mb-3">
+                                <input asp-for="RequiresCertification" class="form-check-input" type="checkbox" />
+                                <label asp-for="RequiresCertification" class="form-check-label">
+                                    Sertifikasyon Gerektirir
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mb-3">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label">
+                                    Aktif
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3" id="certificationBody" style="display: none;">
+                        <label asp-for="CertificationBody" class="control-label">Sertifika Kurumu</label>
+                        <input asp-for="CertificationBody" class="form-control" placeholder="Örn: Microsoft, Oracle, Google" />
+                        <span asp-validation-for="CertificationBody" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="AssessmentCriteria" class="control-label">Değerlendirme Kriterleri</label>
+                        <textarea asp-for="AssessmentCriteria" class="form-control" rows="3" placeholder="Bu becerinin nasıl değerlendirileceği..."></textarea>
+                        <span asp-validation-for="AssessmentCriteria" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Güncelle
+                        </button>
+                        <a asp-action="SkillTemplateDetails" asp-route-id="@Model.Id" class="btn btn-info">
+                            <i class="fas fa-eye"></i> Detaylar
+                        </a>
+                        <a asp-action="SkillTemplates" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Geri Dön
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle"></i> Yardımcı Bilgiler
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Beceri Türleri:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Teknik:</strong> Programlama, araç kullanımı</li>
+                    <li><strong>Yumuşak Beceri:</strong> İletişim, liderlik</li>
+                    <li><strong>Dil:</strong> İngilizce, Almanca</li>
+                    <li><strong>Sertifikasyon:</strong> Belgelenmiş beceriler</li>
+                </ul>
+                
+                <h6 class="mt-3">Seviye Örnekleri (1-5):</h6>
+                <ul class="list-unstyled">
+                    <li><strong>1:</strong> Başlangıç</li>
+                    <li><strong>2:</strong> Temel</li>
+                    <li><strong>3:</strong> Orta</li>
+                    <li><strong>4:</strong> İleri</li>
+                    <li><strong>5:</strong> Uzman</li>
+                </ul>
+                
+                <div class="alert alert-warning mt-3">
+                    <small>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Dikkat:</strong> Bu şablon kullanımda ise değişiklikler mevcut beceri değerlendirmelerini etkileyebilir.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Show/hide certification body field
+            $('#RequiresCertification').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#certificationBody').show();
+                } else {
+                    $('#certificationBody').hide();
+                }
+            });
+            
+            // Initialize state based on current value
+            if ($('#RequiresCertification').is(':checked')) {
+                $('#certificationBody').show();
+            }
+        });
+    </script>
+}

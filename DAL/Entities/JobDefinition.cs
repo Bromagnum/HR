@@ -88,6 +88,7 @@ public class JobDefinition : BaseEntity
 
     // Navigation Properties
     public virtual ICollection<JobDefinitionQualification> RequiredQualifications { get; set; } = new List<JobDefinitionQualification>();
+    public virtual ICollection<JobRequiredSkill> JobRequiredSkills { get; set; } = new List<JobRequiredSkill>();
     public virtual ICollection<QualificationMatchingResult> MatchingResults { get; set; } = new List<QualificationMatchingResult>();
 }
 

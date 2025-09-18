@@ -8,9 +8,14 @@ public class SkillAnalyticsViewModel
 {
     public int TotalSkillTemplates { get; set; }
     public int TotalPersonSkills { get; set; }
+    public int TotalAssessments { get; set; }
+    public decimal AverageSkillLevel { get; set; }
+    public int CertifiedSkillsCount { get; set; }
+    public int EndorsedSkillsCount { get; set; }
     public int ActiveSkillCategories { get; set; }
     public Dictionary<string, int> SkillsByCategory { get; set; } = new();
     public Dictionary<string, int> SkillsByType { get; set; } = new();
+    public Dictionary<string, int> AssessmentsByType { get; set; } = new();
     public List<TopSkillViewModel> TopSkills { get; set; } = new();
     public List<SkillGapViewModel> SkillGaps { get; set; } = new();
     public DateTime GeneratedAt { get; set; } = DateTime.Now;
@@ -77,6 +82,39 @@ public class SkillTemplateDetailViewModel
 
 public class SkillTemplateCreateViewModel
 {
+    [Required(ErrorMessage = "Beceri adı zorunludur")]
+    [StringLength(100, ErrorMessage = "Beceri adı en fazla 100 karakter olabilir")]
+    public string Name { get; set; } = string.Empty;
+    
+    [Required(ErrorMessage = "Açıklama zorunludur")]
+    [StringLength(500, ErrorMessage = "Açıklama en fazla 500 karakter olabilir")]
+    public string Description { get; set; } = string.Empty;
+    
+    [Required(ErrorMessage = "Kategori zorunludur")]
+    [StringLength(50, ErrorMessage = "Kategori en fazla 50 karakter olabilir")]
+    public string Category { get; set; } = string.Empty;
+    
+    [Required(ErrorMessage = "Beceri türü zorunludur")]
+    public SkillType Type { get; set; }
+    
+    [Range(1, 10, ErrorMessage = "Maksimum seviye 1-10 arasında olmalıdır")]
+    public int MaxLevel { get; set; } = 5;
+    
+    public bool RequiresCertification { get; set; }
+    
+    [StringLength(100, ErrorMessage = "Sertifika kurumu en fazla 100 karakter olabilir")]
+    public string? CertificationBody { get; set; }
+    
+    [StringLength(1000, ErrorMessage = "Değerlendirme kriterleri en fazla 1000 karakter olabilir")]
+    public string? AssessmentCriteria { get; set; }
+    
+    public bool IsActive { get; set; } = true;
+}
+
+public class SkillTemplateEditViewModel
+{
+    public int Id { get; set; }
+    
     [Required(ErrorMessage = "Beceri adı zorunludur")]
     [StringLength(100, ErrorMessage = "Beceri adı en fazla 100 karakter olabilir")]
     public string Name { get; set; } = string.Empty;

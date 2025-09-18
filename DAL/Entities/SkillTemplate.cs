@@ -115,6 +115,9 @@ public class PersonSkill : BaseEntity
     public bool IsCertificationExpiringSoon => CertificationExpiry.HasValue && 
                                                CertificationExpiry.Value > DateTime.Now && 
                                                CertificationExpiry.Value <= DateTime.Now.AddDays(90);
+
+    // Navigation Properties
+    public virtual ICollection<SkillAssessment> SkillAssessments { get; set; } = new List<SkillAssessment>();
 }
 
 /// <summary>

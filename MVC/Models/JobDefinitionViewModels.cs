@@ -89,7 +89,7 @@ public class JobDefinitionCreateViewModel
     
     [Required(ErrorMessage = "Açıklama zorunludur")]
     [StringLength(4000, ErrorMessage = "Açıklama en fazla 4000 karakter olabilir")]
-    public string Description { get; set; } = string.Empty;
+    public string DetailedDescription { get; set; } = string.Empty;
     
     [Required(ErrorMessage = "Pozisyon seçimi zorunludur")]
     public int PositionId { get; set; }

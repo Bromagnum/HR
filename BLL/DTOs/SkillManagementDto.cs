@@ -34,6 +34,7 @@ public class PersonSkillDto
     public int? AssessedById { get; set; }
     public string? AssessedByName { get; set; }
     public DateTime? AssessedAt { get; set; }
+    public DateTime? LastAssessmentDate { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
