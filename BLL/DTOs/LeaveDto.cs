@@ -144,3 +144,19 @@ public class LeaveCalendarDto
     public string Title => $"{PersonName} - {LeaveTypeName}";
     public string Tooltip => $"{PersonName}\n{LeaveTypeName}\n{StartDate:dd.MM.yyyy} - {EndDate:dd.MM.yyyy}\n{TotalDays} gün";
 }
+
+public class LeaveRejectionDto
+{
+    public int Id { get; set; }
+    public string RejectionReason { get; set; } = string.Empty;
+    public string? AdditionalNotes { get; set; }
+}
+
+public class LeaveConflictCheckDto
+{
+    public int? ExcludeLeaveId { get; set; }
+    public int PersonId { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public int? DepartmentId { get; set; }
+}

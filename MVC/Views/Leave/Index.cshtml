@@ -14,6 +14,29 @@
                         İzin Yönetimi
                     </h3>
                     <div class="btn-group">
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                        {
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-file-word me-1"></i> İzin Raporu
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a asp-action="ExportLeaveReportWord" class="dropdown-item">
+                                            <i class="fas fa-calendar-check"></i> Bu Ay İzin Raporu
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a asp-action="ExportLeaveReportWord" 
+                                           asp-route-startDate="@DateTime.Now.AddMonths(-3).ToString("yyyy-MM-dd")" 
+                                           asp-route-endDate="@DateTime.Now.ToString("yyyy-MM-dd")" 
+                                           class="dropdown-item">
+                                            <i class="fas fa-calendar-week"></i> Son 3 Ay İzin Raporu
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
                         <a asp-action="Create" class="btn btn-success">
                             <i class="fas fa-plus me-1"></i>
                             Yeni İzin

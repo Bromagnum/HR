@@ -35,6 +35,11 @@ public class UnitOfWork : IUnitOfWork
     private IPersonSkillRepository? _personSkills;
     private IJobRequiredSkillRepository? _jobRequiredSkills;
     private ISkillAssessmentRepository? _skillAssessments;
+    
+    // Performance Review Repositories
+    private IPerformanceReviewRepository? _performanceReviews;
+    private IReviewPeriodRepository? _reviewPeriods;
+    private IPerformanceGoalRepository? _performanceGoals;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -106,6 +111,16 @@ public class UnitOfWork : IUnitOfWork
 
     public ISkillAssessmentRepository SkillAssessments =>
         _skillAssessments ??= new SkillAssessmentRepository(_context);
+
+    // Performance Review Repository Properties
+    public IPerformanceReviewRepository PerformanceReviews =>
+        _performanceReviews ??= new PerformanceReviewRepository(_context);
+
+    public IReviewPeriodRepository ReviewPeriods =>
+        _reviewPeriods ??= new ReviewPeriodRepository(_context);
+
+    public IPerformanceGoalRepository PerformanceGoals =>
+        _performanceGoals ??= new PerformanceGoalRepository(_context);
 
     public async Task<int> SaveChangesAsync()
     {

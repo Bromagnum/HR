@@ -18,6 +18,7 @@ public class LeaveController : Controller
     private readonly IDepartmentService _departmentService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPdfExportService _pdfExportService;
+    private readonly IWordExportService _wordExportService;
     private readonly IMapper _mapper;
 
     public LeaveController(
@@ -27,6 +28,7 @@ public class LeaveController : Controller
         IDepartmentService departmentService,
         ICurrentUserService currentUserService,
         IPdfExportService pdfExportService,
+        IWordExportService wordExportService,
         IMapper mapper)
     {
         _leaveService = leaveService;
@@ -35,6 +37,7 @@ public class LeaveController : Controller
         _departmentService = departmentService;
         _currentUserService = currentUserService;
         _pdfExportService = pdfExportService;
+        _wordExportService = wordExportService;
         _mapper = mapper;
     }
 
@@ -834,6 +837,39 @@ public class LeaveController : Controller
         }
         
         return View(viewModels);
+    }
+
+    #endregion
+
+    #region Word Export Actions
+
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> ExportLeaveReportWord(DateTime? startDate, DateTime? endDate, int? departmentId = null)
+    {
+        try
+        {
+            var start = startDate ?? DateTime.Now.AddMonths(-1);
+            var end = endDate ?? DateTime.Now;
+            
+            var result = await _wordExportService.GenerateLeaveReportAsync(start, end, departmentId);
+            
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            var fileName = departmentId.HasValue 
+                ? $"IzinRaporu_Departman_{departmentId}_{start:yyyyMMdd}_{end:yyyyMMdd}.docx"
+                : $"IzinRaporu_{start:yyyyMMdd}_{end:yyyyMMdd}.docx";
+            
+            return File(result.Data!, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Word export error: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     #endregion

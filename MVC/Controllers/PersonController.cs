@@ -17,15 +17,18 @@ public class PersonController : Controller
     private readonly IDepartmentService _departmentService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPdfExportService _pdfExportService;
+    private readonly IWordExportService _wordExportService;
     private readonly IMapper _mapper;
 
     public PersonController(IPersonService personService, IDepartmentService departmentService, 
-        ICurrentUserService currentUserService, IPdfExportService pdfExportService, IMapper mapper)
+        ICurrentUserService currentUserService, IPdfExportService pdfExportService, 
+        IWordExportService wordExportService, IMapper mapper)
     {
         _personService = personService;
         _departmentService = departmentService;
         _currentUserService = currentUserService;
         _pdfExportService = pdfExportService;
+        _wordExportService = wordExportService;
         _mapper = mapper;
     }
 
@@ -363,6 +366,92 @@ public class PersonController : Controller
         catch (Exception ex)
         {
             TempData["Error"] = $"PDF export error: {ex.Message}";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+    }
+
+    // Word Export Actions
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> ExportPersonnelDetailWord(int id)
+    {
+        try
+        {
+            var result = await _wordExportService.GeneratePersonReportAsync(id);
+            
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var personResult = await _personService.GetByIdAsync(id);
+            var fileName = personResult.IsSuccess 
+                ? $"PersonelRaporu_{personResult.Data!.FirstName}_{personResult.Data.LastName}_{DateTime.Now:yyyyMMdd}.docx"
+                : $"PersonelRaporu_{id}_{DateTime.Now:yyyyMMdd}.docx";
+            
+            return File(result.Data!, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Word export error: {ex.Message}";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+    }
+
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> ExportPayrollWord(int id, int year, int month)
+    {
+        try
+        {
+            var result = await _wordExportService.GeneratePayrollReportAsync(id, year, month);
+            
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var personResult = await _personService.GetByIdAsync(id);
+            var fileName = personResult.IsSuccess 
+                ? $"Bordro_{personResult.Data!.FirstName}_{personResult.Data.LastName}_{year}_{month:00}.docx"
+                : $"Bordro_{id}_{year}_{month:00}.docx";
+            
+            return File(result.Data!, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Word export error: {ex.Message}";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+    }
+
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> ExportPerformanceReportWord(int id)
+    {
+        try
+        {
+            // Son 1 yıllık performans raporu
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddYears(-1);
+            
+            var result = await _wordExportService.GeneratePerformanceReportAsync(id, startDate, endDate);
+            
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var personResult = await _personService.GetByIdAsync(id);
+            var fileName = personResult.IsSuccess 
+                ? $"PerformansRaporu_{personResult.Data!.FirstName}_{personResult.Data.LastName}_{DateTime.Now:yyyyMMdd}.docx"
+                : $"PerformansRaporu_{id}_{DateTime.Now:yyyyMMdd}.docx";
+            
+            return File(result.Data!, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Word export error: {ex.Message}";
             return RedirectToAction(nameof(Details), new { id });
         }
     }

@@ -7,12 +7,38 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>@ViewData["Title"]</h1>
     <div class="btn-group">
-        <a asp-action="ExportDepartmentListPdf" class="btn btn-danger">
-            <i class="fas fa-file-pdf"></i> PDF Liste
-        </a>
-        <a asp-action="ExportOrganizationChartPdf" class="btn btn-warning">
-            <i class="fas fa-sitemap"></i> PDF Şema
-        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-file-pdf"></i> PDF Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a asp-action="ExportDepartmentListPdf" class="dropdown-item">
+                            <i class="fas fa-list"></i> PDF Liste
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="ExportOrganizationChartPdf" class="dropdown-item">
+                            <i class="fas fa-sitemap"></i> PDF Şema
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-file-word"></i> Word Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a asp-action="ExportOrganizationReportWord" class="dropdown-item">
+                            <i class="fas fa-building"></i> Organizasyon Raporu
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        }
         <a asp-action="Tree" class="btn btn-info">
             <i class="fas fa-sitemap"></i> Ağaç Görünümü
         </a>

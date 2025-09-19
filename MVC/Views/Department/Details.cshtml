@@ -7,9 +7,26 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>@ViewData["Title"]</h1>
     <div>
-        <a asp-action="ExportDetail" asp-route-id="@Model.Id" class="btn btn-success me-2">
-            <i class="fas fa-download"></i> Rapor Oluştur
-        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="btn-group me-2" role="group">
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-download"></i> Rapor Oluştur
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a asp-action="ExportDetail" asp-route-id="@Model.Id" class="dropdown-item">
+                            <i class="fas fa-file-excel"></i> Excel Raporu
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="ExportDepartmentDetailWord" asp-route-id="@Model.Id" class="dropdown-item">
+                            <i class="fas fa-file-word"></i> Word Raporu
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        }
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
             <i class="fas fa-edit"></i> Düzenle
         </a>

@@ -13,9 +13,91 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Database Context - Using InMemory database (temporary solution)
+// API Services
+builder.Services.AddControllers();
+
+// Swagger/OpenAPI Configuration
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "IKYS API",
+        Version = "v1",
+        Description = "İnsan Kaynakları Yönetim Sistemi API Dokümantasyonu",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "IKYS Team",
+            Email = "info@ikys.com"
+        }
+    });
+
+    // JWT Bearer Token Configuration
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token.",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+    // XML Documentation
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
+});
+
+// CORS Configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "https://localhost:3001") // React/Angular frontend URLs
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// Database Context - SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("IKYS"));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseSqlServer(connectionString);
+    
+    // Development ortamında detaylı EF loglama
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+});
 
 // Repository Pattern
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -45,6 +127,11 @@ builder.Services.AddScoped<IPersonSkillRepository, PersonSkillRepository>();
 builder.Services.AddScoped<IJobRequiredSkillRepository, JobRequiredSkillRepository>();
 builder.Services.AddScoped<ISkillAssessmentRepository, SkillAssessmentRepository>();
 
+// Performance Review Repositories
+builder.Services.AddScoped<IPerformanceReviewRepository, PerformanceReviewRepository>();
+builder.Services.AddScoped<IReviewPeriodRepository, ReviewPeriodRepository>();
+builder.Services.AddScoped<IPerformanceGoalRepository, PerformanceGoalRepository>();
+
 // Services
 builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
@@ -69,9 +156,13 @@ builder.Services.AddScoped<IJobPostingService, JobPostingService>();
 builder.Services.AddScoped<IJobDefinitionService, JobDefinitionService>();
 builder.Services.AddScoped<ISkillManagementService, SkillManagementService>();
 
+// Performance Review Services
+builder.Services.AddScoped<IPerformanceReviewService, PerformanceReviewService>();
+
 // Export Services
 builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
 builder.Services.AddScoped<IPdfExportService, PdfExportService>();
+builder.Services.AddScoped<IWordExportService, WordExportService>();
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -125,33 +216,43 @@ builder.Services.AddAuthorization(options =>
 });
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(MVC.Mapping.ViewModelMappingProfile));
+builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(MVC.Mapping.ViewModelMappingProfile), typeof(MVC.Mapping.MvcMappingProfile));
 
 var app = builder.Build();
 
-// Database initialization - ONLY for development
+// Database initialization with Migrations
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
     
-    // DEVELOPMENT ONLY: Recreate database with seed data
-    if (app.Environment.IsDevelopment())
+    try
     {
-        // WARNING: This will delete and recreate the database!
-        // Only use in development environment
-        context.Database.EnsureDeleted();
-        context.Database.EnsureCreated();
+        // Apply pending migrations automatically
+        context.Database.Migrate();
+        
+        // Seed Roles and Default Admin User
+        await SeedRolesAndAdminAsync(roleManager, userManager);
     }
-    else
+    catch (Exception ex)
     {
-        // PRODUCTION: Only ensure database exists, don't delete
-        context.Database.EnsureCreated();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Database migration veya seed data yüklenirken hata oluştu");
+        
+        // Development ortamında hata durumunda database'i yeniden oluştur
+        if (app.Environment.IsDevelopment())
+        {
+            logger.LogWarning("Development ortamında database yeniden oluşturuluyor...");
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
+            await SeedRolesAndAdminAsync(roleManager, userManager);
+        }
+        else
+        {
+            throw; // Production'da hatayı yukarı fırlat
+        }
     }
-    
-    // Seed Roles and Default Admin User
-    await SeedRolesAndAdminAsync(roleManager, userManager);
 }
 
 // Configure the HTTP request pipeline.
@@ -160,9 +261,25 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+else
+{
+    // Swagger only in development
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "IKYS API V1");
+        c.RoutePrefix = "api/docs"; // Swagger URL: /api/docs
+        c.DocumentTitle = "IKYS API Documentation";
+        c.DefaultModelsExpandDepth(-1); // Collapse models by default
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+    });
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// CORS
+app.UseCors(app.Environment.IsDevelopment() ? "AllowAll" : "AllowSpecificOrigins");
 
 app.UseRouting();
 
@@ -170,9 +287,13 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// MVC Routes
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// API Routes
+app.MapControllers();
 
 // Ensure seed data is applied
 using (var scope = app.Services.CreateScope())

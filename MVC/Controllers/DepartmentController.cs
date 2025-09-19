@@ -16,15 +16,18 @@ public class DepartmentController : Controller
     private readonly IPersonService _personService;
     private readonly IExcelExportService _excelExportService;
     private readonly IPdfExportService _pdfExportService;
+    private readonly IWordExportService _wordExportService;
     private readonly IMapper _mapper;
 
     public DepartmentController(IDepartmentService departmentService, IPersonService personService, 
-                              IExcelExportService excelExportService, IPdfExportService pdfExportService, IMapper mapper)
+                              IExcelExportService excelExportService, IPdfExportService pdfExportService, 
+                              IWordExportService wordExportService, IMapper mapper)
     {
         _departmentService = departmentService;
         _personService = personService;
         _excelExportService = excelExportService;
         _pdfExportService = pdfExportService;
+        _wordExportService = wordExportService;
         _mapper = mapper;
     }
 
@@ -593,6 +596,58 @@ public class DepartmentController : Controller
         catch (Exception ex)
         {
             TempData["Error"] = $"PDF export error: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    // Word Export Actions
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ExportDepartmentDetailWord(int id)
+    {
+        try
+        {
+            var result = await _wordExportService.GenerateDepartmentReportAsync(id);
+            
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var departmentResult = await _departmentService.GetByIdAsync(id);
+            var fileName = departmentResult.IsSuccess 
+                ? $"DepartmanRaporu_{departmentResult.Data!.Name}_{DateTime.Now:yyyyMMdd}.docx"
+                : $"DepartmanRaporu_{id}_{DateTime.Now:yyyyMMdd}.docx";
+            
+            return File(result.Data!, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Word export error: {ex.Message}";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+    }
+
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ExportOrganizationReportWord()
+    {
+        try
+        {
+            var result = await _wordExportService.GenerateOrganizationReportAsync();
+            
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            var fileName = $"OrganizasyonRaporu_{DateTime.Now:yyyyMMdd}.docx";
+            
+            return File(result.Data!, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Word export error: {ex.Message}";
             return RedirectToAction(nameof(Index));
         }
     }

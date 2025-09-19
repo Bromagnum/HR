@@ -540,5 +540,169 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+
+        // Performance Review Mappings
+        CreateMap<PerformanceReview, PerformanceReviewListDto>()
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : ""))
+            .ForMember(dest => dest.ReviewPeriodName, opt => opt.MapFrom(src => src.ReviewPeriod.Name))
+            .ForMember(dest => dest.ReviewerName, opt => opt.MapFrom(src => $"{src.Reviewer.FirstName} {src.Reviewer.LastName}"))
+            .ForMember(dest => dest.StatusText, opt => opt.MapFrom(src => GetStatusText(src.Status)));
+
+        CreateMap<PerformanceReview, PerformanceReviewDetailDto>()
+            .ForMember(dest => dest.PersonName, opt => opt.MapFrom(src => $"{src.Person.FirstName} {src.Person.LastName}"))
+            .ForMember(dest => dest.PersonEmail, opt => opt.MapFrom(src => src.Person.Email))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Person.Department != null ? src.Person.Department.Name : ""))
+            .ForMember(dest => dest.PositionName, opt => opt.MapFrom(src => src.Person.Position != null ? src.Person.Position.Name : ""))
+            .ForMember(dest => dest.ReviewPeriodName, opt => opt.MapFrom(src => src.ReviewPeriod.Name))
+            .ForMember(dest => dest.ReviewPeriodStart, opt => opt.MapFrom(src => src.ReviewPeriod.StartDate))
+            .ForMember(dest => dest.ReviewPeriodEnd, opt => opt.MapFrom(src => src.ReviewPeriod.EndDate))
+            .ForMember(dest => dest.ReviewerName, opt => opt.MapFrom(src => $"{src.Reviewer.FirstName} {src.Reviewer.LastName}"))
+            .ForMember(dest => dest.StatusText, opt => opt.MapFrom(src => GetStatusText(src.Status)))
+            .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => src.ApprovedBy != null ? $"{src.ApprovedBy.FirstName} {src.ApprovedBy.LastName}" : null))
+            .ForMember(dest => dest.Goals_List, opt => opt.MapFrom(src => src.Goals_Navigation));
+
+        CreateMap<PerformanceReviewCreateDto, PerformanceReview>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.Ignore())
+            .ForMember(dest => dest.SubmittedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedById, opt => opt.Ignore())
+            .ForMember(dest => dest.IsSelfAssessmentCompleted, opt => opt.Ignore())
+            .ForMember(dest => dest.SelfAssessmentCompletedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.SelfOverallScore, opt => opt.Ignore())
+            .ForMember(dest => dest.SelfAssessmentComments, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.ReviewPeriod, opt => opt.Ignore())
+            .ForMember(dest => dest.Reviewer, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.Goals_Navigation, opt => opt.Ignore());
+
+        CreateMap<PerformanceReviewUpdateDto, PerformanceReview>()
+            .ForMember(dest => dest.PersonId, opt => opt.Ignore())
+            .ForMember(dest => dest.ReviewPeriodId, opt => opt.Ignore())
+            .ForMember(dest => dest.ReviewerId, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.Ignore())
+            .ForMember(dest => dest.SubmittedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedById, opt => opt.Ignore())
+            .ForMember(dest => dest.IsSelfAssessmentCompleted, opt => opt.Ignore())
+            .ForMember(dest => dest.SelfAssessmentCompletedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.SelfOverallScore, opt => opt.Ignore())
+            .ForMember(dest => dest.SelfAssessmentComments, opt => opt.Ignore())
+            .ForMember(dest => dest.EmployeeComments, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Person, opt => opt.Ignore())
+            .ForMember(dest => dest.ReviewPeriod, opt => opt.Ignore())
+            .ForMember(dest => dest.Reviewer, opt => opt.Ignore())
+            .ForMember(dest => dest.ApprovedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.Goals_Navigation, opt => opt.Ignore());
+
+        // Review Period Mappings
+        CreateMap<ReviewPeriod, ReviewPeriodListDto>()
+            .ForMember(dest => dest.TypeText, opt => opt.MapFrom(src => GetPeriodTypeText(src.Type)))
+            .ForMember(dest => dest.ReviewCount, opt => opt.MapFrom(src => src.PerformanceReviews.Count))
+            .ForMember(dest => dest.CompletedReviewCount, opt => opt.MapFrom(src => src.PerformanceReviews.Count(r => r.Status == ReviewStatus.Completed || r.Status == ReviewStatus.Approved)))
+            .ForMember(dest => dest.IsCurrentPeriod, opt => opt.MapFrom(src => src.StartDate <= DateTime.Now && src.EndDate >= DateTime.Now));
+
+        CreateMap<ReviewPeriod, ReviewPeriodDetailDto>()
+            .ForMember(dest => dest.TypeText, opt => opt.MapFrom(src => GetPeriodTypeText(src.Type)))
+            .ForMember(dest => dest.PerformanceReviews, opt => opt.MapFrom(src => src.PerformanceReviews))
+            .ForMember(dest => dest.ReviewCount, opt => opt.MapFrom(src => src.PerformanceReviews.Count))
+            .ForMember(dest => dest.CompletedReviewCount, opt => opt.MapFrom(src => src.PerformanceReviews.Count(r => r.Status == ReviewStatus.Completed || r.Status == ReviewStatus.Approved)))
+            .ForMember(dest => dest.CompletionPercentage, opt => opt.MapFrom(src => src.PerformanceReviews.Count > 0 ? (decimal)src.PerformanceReviews.Count(r => r.Status == ReviewStatus.Completed || r.Status == ReviewStatus.Approved) / src.PerformanceReviews.Count * 100 : 0))
+            .ForMember(dest => dest.IsCurrentPeriod, opt => opt.MapFrom(src => src.StartDate <= DateTime.Now && src.EndDate >= DateTime.Now));
+
+        CreateMap<ReviewPeriodCreateDto, ReviewPeriod>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.PerformanceReviews, opt => opt.Ignore());
+
+        CreateMap<ReviewPeriodUpdateDto, ReviewPeriod>()
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.PerformanceReviews, opt => opt.Ignore());
+
+        // Performance Goal Mappings
+        CreateMap<PerformanceGoal, PerformanceGoalDto>()
+            .ForMember(dest => dest.StatusText, opt => opt.MapFrom(src => GetGoalStatusText(src.Status)))
+            .ForMember(dest => dest.PriorityText, opt => opt.MapFrom(src => GetGoalPriorityText(src.Priority)))
+            .ForMember(dest => dest.IsOverdue, opt => opt.MapFrom(src => src.TargetDate < DateTime.Now && src.Status != GoalStatus.Completed && src.Status != GoalStatus.Cancelled))
+            .ForMember(dest => dest.IsUpcoming, opt => opt.MapFrom(src => src.TargetDate >= DateTime.Now && src.TargetDate <= DateTime.Now.AddDays(30) && src.Status != GoalStatus.Completed && src.Status != GoalStatus.Cancelled));
+
+        CreateMap<PerformanceGoalCreateDto, PerformanceGoal>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.PerformanceReviewId, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.Ignore())
+            .ForMember(dest => dest.ProgressPercentage, opt => opt.MapFrom(src => 0))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.PerformanceReview, opt => opt.Ignore());
+
+        CreateMap<PerformanceGoalUpdateDto, PerformanceGoal>()
+            .ForMember(dest => dest.PerformanceReviewId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.PerformanceReview, opt => opt.Ignore());
+
+        // ViewModel mappings would be added to a separate MVC mapping profile
+        // These are handled in MVC layer with separate mapping profile
+    }
+
+    // Helper methods for enum to text conversion
+    private static string GetStatusText(ReviewStatus status)
+    {
+        return status switch
+        {
+            ReviewStatus.Draft => "Taslak",
+            ReviewStatus.InProgress => "Devam Ediyor",
+            ReviewStatus.EmployeeReview => "Çalışan Değerlendirmesi",
+            ReviewStatus.ManagerReview => "Yönetici Değerlendirmesi",
+            ReviewStatus.Completed => "Tamamlandı",
+            ReviewStatus.Approved => "Onaylandı",
+            _ => "Bilinmiyor"
+        };
+    }
+
+    private static string GetPeriodTypeText(ReviewPeriodType type)
+    {
+        return type switch
+        {
+            ReviewPeriodType.Monthly => "Aylık",
+            ReviewPeriodType.Quarterly => "Üç Aylık",
+            ReviewPeriodType.SemiAnnual => "Altı Aylık",
+            ReviewPeriodType.Annual => "Yıllık",
+            ReviewPeriodType.Custom => "Özel",
+            _ => "Bilinmiyor"
+        };
+    }
+
+    private static string GetGoalStatusText(GoalStatus status)
+    {
+        return status switch
+        {
+            GoalStatus.NotStarted => "Başlanmadı",
+            GoalStatus.InProgress => "Devam Ediyor",
+            GoalStatus.Completed => "Tamamlandı",
+            GoalStatus.OnHold => "Beklemede",
+            GoalStatus.Cancelled => "İptal Edildi",
+            _ => "Bilinmiyor"
+        };
+    }
+
+    private static string GetGoalPriorityText(GoalPriority priority)
+    {
+        return priority switch
+        {
+            GoalPriority.Low => "Düşük",
+            GoalPriority.Medium => "Orta",
+            GoalPriority.High => "Yüksek",
+            GoalPriority.Critical => "Kritik",
+            _ => "Bilinmiyor"
+        };
     }
 }

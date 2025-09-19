@@ -30,6 +30,11 @@ public interface IUnitOfWork : IDisposable
     IJobRequiredSkillRepository JobRequiredSkills { get; }
     ISkillAssessmentRepository SkillAssessments { get; }
     
+    // Performance Review Repositories
+    IPerformanceReviewRepository PerformanceReviews { get; }
+    IReviewPeriodRepository ReviewPeriods { get; }
+    IPerformanceGoalRepository PerformanceGoals { get; }
+    
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();
     Task CommitTransactionAsync();

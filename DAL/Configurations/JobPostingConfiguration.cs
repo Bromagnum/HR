@@ -106,13 +106,13 @@ public class JobPostingConfiguration : IEntityTypeConfiguration<JobPosting>
         builder.HasOne(x => x.CreatedBy)
             .WithMany()
             .HasForeignKey(x => x.CreatedById)
-            .OnDelete(DeleteBehavior.SetNull)
+            .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_JobPostings_CreatedBy");
 
         builder.HasOne(x => x.UpdatedBy)
             .WithMany()
             .HasForeignKey(x => x.UpdatedById)
-            .OnDelete(DeleteBehavior.SetNull)
+            .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_JobPostings_UpdatedBy");
 
         builder.HasMany(x => x.Applications)

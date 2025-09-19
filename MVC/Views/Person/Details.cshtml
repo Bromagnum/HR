@@ -7,6 +7,31 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>@ViewData["Title"]</h1>
     <div>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+        {
+            <div class="btn-group me-2" role="group">
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-file-word"></i> Word Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a asp-action="ExportPersonnelDetailWord" asp-route-id="@Model.Id" class="dropdown-item">
+                            <i class="fas fa-user"></i> Personel Raporu
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="ExportPerformanceReportWord" asp-route-id="@Model.Id" class="dropdown-item">
+                            <i class="fas fa-chart-line"></i> Performans Raporu
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="ExportPayrollWord" asp-route-id="@Model.Id" asp-route-year="@DateTime.Now.Year" asp-route-month="@DateTime.Now.Month" class="dropdown-item">
+                            <i class="fas fa-money-bill-wave"></i> Bordro (@DateTime.Now.ToString("yyyy/MM"))
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        }
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
             <i class="fas fa-edit"></i> Düzenle
         </a>

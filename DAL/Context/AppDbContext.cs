@@ -46,6 +46,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<JobRequiredSkill> JobRequiredSkills { get; set; }
     public DbSet<SkillAssessment> SkillAssessments { get; set; }
     
+    // Performance Review Tables
+    public DbSet<PerformanceReview> PerformanceReviews { get; set; }
+    public DbSet<ReviewPeriod> ReviewPeriods { get; set; }
+    public DbSet<PerformanceGoal> PerformanceGoals { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
