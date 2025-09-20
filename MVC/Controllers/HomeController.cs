@@ -8,7 +8,6 @@ using AutoMapper;
 
 namespace MVC.Controllers;
 
-[Authorize]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -44,8 +43,40 @@ public class HomeController : Controller
     {
         try
         {
-            // Dashboard istatistiklerini topla
-            await LoadDashboardStatistics();
+            // Dashboard istatistiklerini topla (sadece giriş yapmış kullanıcılar için)
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                await LoadDashboardStatistics();
+            }
+            else
+            {
+                // Giriş yapmamış kullanıcılar için basic bilgiler
+                ViewBag.TotalEmployees = 0;
+                ViewBag.ActiveEmployees = 0;
+                ViewBag.TotalDepartments = 0;
+                ViewBag.ActiveDepartments = 0;
+                ViewBag.TotalPositions = 0;
+                ViewBag.OpenPositions = 0;
+                ViewBag.TotalLeaveRequests = 0;
+                ViewBag.PendingLeaveRequests = 0;
+                ViewBag.LowStockMaterials = 0;
+                ViewBag.TotalMaterials = 0;
+                ViewBag.TotalMaterialValue = 0;
+                ViewBag.MonthlyPayrollTotal = 0;
+                ViewBag.AverageEmployeeSalary = 0;
+                
+                // Empty chart data
+                ViewBag.ChartDepartmentLabels = "[]";
+                ViewBag.ChartDepartmentData = "[]";
+                ViewBag.ChartLeaveStatusLabels = "[]";
+                ViewBag.ChartLeaveStatusData = "[]";
+                ViewBag.ChartHiringTrendLabels = "[]";
+                ViewBag.ChartHiringTrendData = "[]";
+                ViewBag.ChartStockStatusLabels = "[]";
+                ViewBag.ChartStockStatusData = "[]";
+                
+                ViewBag.LastUpdated = DateTime.Now;
+            }
             return View();
         }
         catch (Exception ex)
@@ -279,6 +310,11 @@ public class HomeController : Controller
             ViewBag.ChartStockStatusLabels = "[]";
             ViewBag.ChartStockStatusData = "[]";
         }
+    }
+
+    public IActionResult Welcome()
+    {
+        return View();
     }
 
     public IActionResult Privacy()

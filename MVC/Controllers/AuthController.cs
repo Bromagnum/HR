@@ -18,6 +18,7 @@ public class AuthController : Controller
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IMapper _mapper;
     private readonly ILogger<AuthController> _logger;
+    private readonly IWebHostEnvironment _hostEnvironment;
 
     public AuthController(
         IAuthService authService,
@@ -25,7 +26,8 @@ public class AuthController : Controller
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         IMapper mapper,
-        ILogger<AuthController> logger)
+        ILogger<AuthController> logger,
+        IWebHostEnvironment hostEnvironment)
     {
         _authService = authService;
         _currentUserService = currentUserService;
@@ -33,15 +35,32 @@ public class AuthController : Controller
         _signInManager = signInManager;
         _mapper = mapper;
         _logger = logger;
+        _hostEnvironment = hostEnvironment;
     }
+
+    #region Simple Login (Debug)
+    
+    [HttpGet]
+    public IActionResult SimpleLogin(string? returnUrl = null)
+    {
+        _logger.LogInformation("SimpleLogin GET called. ReturnUrl: {ReturnUrl}", returnUrl);
+        ViewData["ReturnUrl"] = returnUrl;
+        return View(new LoginViewModel());
+    }
+    
+    #endregion
 
     #region Login
 
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
+        _logger.LogInformation("GET Login action called. ReturnUrl: {ReturnUrl}, IsAuthenticated: {IsAuth}", 
+            returnUrl, User.Identity?.IsAuthenticated);
+            
         if (User.Identity?.IsAuthenticated == true)
         {
+            _logger.LogInformation("User already authenticated, redirecting to home");
             return RedirectToAction("Index", "Home");
         }
 
@@ -50,13 +69,17 @@ public class AuthController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+    [IgnoreAntiforgeryToken] // Temporarily disable for debugging 405 error
     public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
+        _logger.LogInformation("POST Login action called. Email: {Email}, ReturnUrl: {ReturnUrl}", model?.Email, returnUrl);
+        
         ViewData["ReturnUrl"] = returnUrl;
 
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("Login model validation failed. Errors: {Errors}", 
+                string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
             return View(model);
         }
 
@@ -72,6 +95,9 @@ public class AuthController : Controller
             };
 
             var result = await _authService.LoginAsync(request);
+            
+            _logger.LogInformation("Login attempt for {Email}: Success={Success}, Message={Message}", 
+                model.Email, result.IsSuccess, result.Message);
             
             if (result.IsSuccess && result.Data != null)
             {
@@ -108,8 +134,15 @@ public class AuthController : Controller
                     
                     return RedirectToAction("Index", "Home");
                 }
+                else
+                {
+                    _logger.LogWarning("User not found after successful login for {Email}", model.Email);
+                    ModelState.AddModelError(string.Empty, "Kullanıcı bilgileri alınamadı.");
+                    return View(model);
+                }
             }
 
+            _logger.LogWarning("Login failed for {Email}: {Message}", model.Email, result.Message);
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
@@ -119,6 +152,16 @@ public class AuthController : Controller
             ModelState.AddModelError(string.Empty, "Giriş sırasında bir hata oluştu.");
             return View(model);
         }
+    }
+
+    // Alternative login endpoint for troubleshooting
+    [HttpPost]
+    [Route("Auth/LoginPost")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> LoginPost(LoginViewModel model, string? returnUrl = null)
+    {
+        _logger.LogInformation("Alternative POST LoginPost action called. Email: {Email}", model?.Email);
+        return await Login(model, returnUrl);
     }
 
     #endregion

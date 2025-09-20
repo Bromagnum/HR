@@ -74,4 +74,9 @@ public class CurrentUserService : ICurrentUserService
     {
         return _httpContextAccessor.HttpContext?.User?.FindFirst(claimType)?.Value;
     }
+
+    public int GetCurrentUserId()
+    {
+        return UserId ?? 0;
+    }
 }

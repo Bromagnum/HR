@@ -1,0 +1,196 @@
+@model MVC.Models.ReviewPeriodCreateViewModel
+
+@{
+    ViewData["Title"] = "Yeni Değerlendirme Dönemi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <a asp-action="Periods" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <i class="fas fa-calendar-plus"></i> Değerlendirme Dönemi Oluştur
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="CreatePeriod" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <!-- Temel Bilgiler -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">Temel Bilgiler</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Name" class="form-label"></label>
+                                <input asp-for="Name" class="form-control" placeholder="Örn: 2025 Yıllık Değerlendirme" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Type" class="form-label"></label>
+                                <select asp-for="Type" class="form-select" asp-items="ViewBag.PeriodTypes">
+                                    <option value="">Dönem Türü Seçiniz</option>
+                                </select>
+                                <span asp-validation-for="Type" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="form-group mb-3">
+                                <label asp-for="Description" class="form-label"></label>
+                                <textarea asp-for="Description" class="form-control" rows="3" 
+                                          placeholder="Bu dönemin açıklaması, hedefleri ve kapsamı..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dönem Tarihleri -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">Dönem Tarihleri</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="StartDate" class="form-label"></label>
+                                <input asp-for="StartDate" class="form-control" type="date" />
+                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                                <div class="form-text">Performans döneminin başlangıç tarihi</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="EndDate" class="form-label"></label>
+                                <input asp-for="EndDate" class="form-control" type="date" />
+                                <span asp-validation-for="EndDate" class="text-danger"></span>
+                                <div class="form-text">Performans döneminin bitiş tarihi</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Değerlendirme Tarihleri -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">Değerlendirme Tarihleri</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="ReviewStartDate" class="form-label"></label>
+                                <input asp-for="ReviewStartDate" class="form-control" type="date" />
+                                <span asp-validation-for="ReviewStartDate" class="text-danger"></span>
+                                <div class="form-text">Değerlendirmelerin başlangıç tarihi</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="ReviewEndDate" class="form-label"></label>
+                                <input asp-for="ReviewEndDate" class="form-control" type="date" />
+                                <span asp-validation-for="ReviewEndDate" class="text-danger"></span>
+                                <div class="form-text">Değerlendirmelerin bitiş tarihi</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Durum -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label">
+                                    Aktif Dönem
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Dönemi Oluştur
+                        </button>
+                        <a asp-action="Periods" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle"></i> Dönem Oluşturma Rehberi
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Dönem Türleri:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Aylık:</strong> Her ay tekrarlanan değerlendirme</li>
+                    <li><strong>Üç Aylık:</strong> Çeyrek dönem değerlendirmesi</li>
+                    <li><strong>Altı Aylık:</strong> Yarı yıl değerlendirmesi</li>
+                    <li><strong>Yıllık:</strong> Yıllık performans değerlendirmesi</li>
+                    <li><strong>Özel:</strong> Özel projeler için</li>
+                </ul>
+                
+                <h6 class="mt-3">Önemli Notlar:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-info text-info"></i> Dönem tarihleri çakışmamalı</li>
+                    <li><i class="fas fa-info text-info"></i> Değerlendirme tarihleri dönem sonrasında olmalı</li>
+                    <li><i class="fas fa-info text-info"></i> Aktif dönem aynı anda birden fazla olabilir</li>
+                </ul>
+                
+                <div class="alert alert-warning mt-3">
+                    <small>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Dikkat:</strong> Dönem oluşturulduktan sonra tarihleri değiştirmek 
+                        mevcut değerlendirmeleri etkileyebilir.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Tarih validasyonu
+        $(document).ready(function() {
+            $('#EndDate, #ReviewStartDate, #ReviewEndDate').change(function() {
+                var startDate = new Date($('#StartDate').val());
+                var endDate = new Date($('#EndDate').val());
+                var reviewStartDate = new Date($('#ReviewStartDate').val());
+                var reviewEndDate = new Date($('#ReviewEndDate').val());
+                
+                if (endDate <= startDate) {
+                    alert('Bitiş tarihi başlangıç tarihinden sonra olmalıdır');
+                    return false;
+                }
+                
+                if (reviewStartDate <= endDate) {
+                    alert('Değerlendirme başlangıç tarihi dönem bitiş tarihinden sonra olmalıdır');
+                    return false;
+                }
+                
+                if (reviewEndDate <= reviewStartDate) {
+                    alert('Değerlendirme bitiş tarihi başlangıç tarihinden sonra olmalıdır');
+                    return false;
+                }
+            });
+        });
+    </script>
+}

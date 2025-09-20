@@ -191,9 +191,7 @@ public class PerformanceReviewRepository : Repository<PerformanceReview>, IPerfo
             .Include(pr => pr.ApprovedBy)
             .Include(pr => pr.Goals_Navigation)
             .Where(pr => pr.Status == ReviewStatus.Completed && 
-                        (pr.Person.Department != null && 
-                         pr.Person.Department.ManagerId == approverId || 
-                         pr.ReviewerId == approverId))
+                        pr.ReviewerId == approverId)
             .OrderBy(pr => pr.ReviewPeriod.ReviewEndDate)
             .ToListAsync();
     }

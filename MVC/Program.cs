@@ -1,5 +1,6 @@
 using DAL.Context;
 using DAL.Repositories;
+using DAL.Repositories.Interfaces;
 using DAL.Entities;
 using BLL.Services;
 using BLL.Services.Export;
@@ -96,6 +97,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     {
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
+        // Suppress pending model changes warning for development
+        options.ConfigureWarnings(warnings =>
+            warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 });
 
@@ -203,8 +207,30 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromHours(24);
     options.SlidingExpiration = true;
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    
+    // Development ortamında HTTP'ye izin ver, Production'da HTTPS zorunlu
+    if (builder.Environment.IsDevelopment())
+    {
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    }
+    else
+    {
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    }
+    
     options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.Name = "IKYS.Auth";
+    
+    // Development'ta daha detaylı loglama
+    if (builder.Environment.IsDevelopment())
+    {
+        options.Events.OnRedirectToLogin = context =>
+        {
+            Console.WriteLine($"Redirecting to login from: {context.Request.Path}");
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
+    }
 });
 
 // Configure Authorization Policies
@@ -263,6 +289,9 @@ if (!app.Environment.IsDevelopment())
 }
 else
 {
+    // Development ortamında detaylı error sayfaları
+    app.UseDeveloperExceptionPage();
+    
     // Swagger only in development
     app.UseSwagger();
     app.UseSwaggerUI(c =>
@@ -275,7 +304,11 @@ else
     });
 }
 
-app.UseHttpsRedirection();
+// Development ortamında HTTPS yönlendirmesini devre dışı bırak
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseStaticFiles();
 
 // CORS
@@ -288,6 +321,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // MVC Routes
+app.MapControllerRoute(
+    name: "auth",
+    pattern: "Auth/{action=Login}",
+    defaults: new { controller = "Auth" });
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

@@ -1,0 +1,266 @@
+@model MVC.Models.PerformanceReviewCreateViewModel
+
+@{
+    ViewData["Title"] = "Yeni Performans Değerlendirmesi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <i class="fas fa-plus-circle"></i> Performans Değerlendirmesi Oluştur
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <!-- Temel Bilgiler -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">Temel Bilgiler</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label asp-for="PersonId" class="form-label"></label>
+                                <select asp-for="PersonId" class="form-select" asp-items="ViewBag.Persons">
+                                    <option value="">Personel Seçiniz</option>
+                                </select>
+                                <span asp-validation-for="PersonId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label asp-for="ReviewPeriodId" class="form-label"></label>
+                                <select asp-for="ReviewPeriodId" class="form-select" asp-items="ViewBag.ReviewPeriods">
+                                    <option value="">Değerlendirme Dönemi Seçiniz</option>
+                                </select>
+                                <span asp-validation-for="ReviewPeriodId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label asp-for="ReviewerId" class="form-label"></label>
+                                <select asp-for="ReviewerId" class="form-select" asp-items="ViewBag.Reviewers">
+                                    <option value="">Değerlendiren Seçiniz</option>
+                                </select>
+                                <span asp-validation-for="ReviewerId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skorlar -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">Değerlendirme Skorları (1-5)</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="OverallScore" class="form-label"></label>
+                                <select asp-for="OverallScore" class="form-select">
+                                    <option value="1">1 - Yetersiz</option>
+                                    <option value="2">2 - Geliştirilmeli</option>
+                                    <option value="3" selected>3 - Yeterli</option>
+                                    <option value="4">4 - İyi</option>
+                                    <option value="5">5 - Mükemmel</option>
+                                </select>
+                                <span asp-validation-for="OverallScore" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="JobQualityScore" class="form-label"></label>
+                                <select asp-for="JobQualityScore" class="form-select">
+                                    <option value="1">1 - Yetersiz</option>
+                                    <option value="2">2 - Geliştirilmeli</option>
+                                    <option value="3" selected>3 - Yeterli</option>
+                                    <option value="4">4 - İyi</option>
+                                    <option value="5">5 - Mükemmel</option>
+                                </select>
+                                <span asp-validation-for="JobQualityScore" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="ProductivityScore" class="form-label"></label>
+                                <select asp-for="ProductivityScore" class="form-select">
+                                    <option value="1">1 - Yetersiz</option>
+                                    <option value="2">2 - Geliştirilmeli</option>
+                                    <option value="3" selected>3 - Yeterli</option>
+                                    <option value="4">4 - İyi</option>
+                                    <option value="5">5 - Mükemmel</option>
+                                </select>
+                                <span asp-validation-for="ProductivityScore" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="TeamworkScore" class="form-label"></label>
+                                <select asp-for="TeamworkScore" class="form-select">
+                                    <option value="1">1 - Yetersiz</option>
+                                    <option value="2">2 - Geliştirilmeli</option>
+                                    <option value="3" selected>3 - Yeterli</option>
+                                    <option value="4">4 - İyi</option>
+                                    <option value="5">5 - Mükemmel</option>
+                                </select>
+                                <span asp-validation-for="TeamworkScore" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="CommunicationScore" class="form-label"></label>
+                                <select asp-for="CommunicationScore" class="form-select">
+                                    <option value="1">1 - Yetersiz</option>
+                                    <option value="2">2 - Geliştirilmeli</option>
+                                    <option value="3" selected>3 - Yeterli</option>
+                                    <option value="4">4 - İyi</option>
+                                    <option value="5">5 - Mükemmel</option>
+                                </select>
+                                <span asp-validation-for="CommunicationScore" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="LeadershipScore" class="form-label"></label>
+                                <select asp-for="LeadershipScore" class="form-select">
+                                    <option value="1">1 - Yetersiz</option>
+                                    <option value="2">2 - Geliştirilmeli</option>
+                                    <option value="3" selected>3 - Yeterli</option>
+                                    <option value="4">4 - İyi</option>
+                                    <option value="5">5 - Mükemmel</option>
+                                </select>
+                                <span asp-validation-for="LeadershipScore" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="InitiativeScore" class="form-label"></label>
+                                <select asp-for="InitiativeScore" class="form-select">
+                                    <option value="1">1 - Yetersiz</option>
+                                    <option value="2">2 - Geliştirilmeli</option>
+                                    <option value="3" selected>3 - Yeterli</option>
+                                    <option value="4">4 - İyi</option>
+                                    <option value="5">5 - Mükemmel</option>
+                                </select>
+                                <span asp-validation-for="InitiativeScore" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="ProblemSolvingScore" class="form-label"></label>
+                                <select asp-for="ProblemSolvingScore" class="form-select">
+                                    <option value="1">1 - Yetersiz</option>
+                                    <option value="2">2 - Geliştirilmeli</option>
+                                    <option value="3" selected>3 - Yeterli</option>
+                                    <option value="4">4 - İyi</option>
+                                    <option value="5">5 - Mükemmel</option>
+                                </select>
+                                <span asp-validation-for="ProblemSolvingScore" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="AdaptabilityScore" class="form-label"></label>
+                                <select asp-for="AdaptabilityScore" class="form-select">
+                                    <option value="1">1 - Yetersiz</option>
+                                    <option value="2">2 - Geliştirilmeli</option>
+                                    <option value="3" selected>3 - Yeterli</option>
+                                    <option value="4">4 - İyi</option>
+                                    <option value="5">5 - Mükemmel</option>
+                                </select>
+                                <span asp-validation-for="AdaptabilityScore" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Yorumlar -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">Değerlendirme Yorumları</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Strengths" class="form-label"></label>
+                                <textarea asp-for="Strengths" class="form-control" rows="4" 
+                                          placeholder="Personelin güçlü yönlerini belirtin..."></textarea>
+                                <span asp-validation-for="Strengths" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="Achievements" class="form-label"></label>
+                                <textarea asp-for="Achievements" class="form-control" rows="4" 
+                                          placeholder="Bu dönemde elde edilen başarıları belirtin..."></textarea>
+                                <span asp-validation-for="Achievements" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="AreasForImprovement" class="form-label"></label>
+                                <textarea asp-for="AreasForImprovement" class="form-control" rows="4" 
+                                          placeholder="Geliştirilmesi gereken alanları belirtin..."></textarea>
+                                <span asp-validation-for="AreasForImprovement" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="Goals" class="form-label"></label>
+                                <textarea asp-for="Goals" class="form-control" rows="4" 
+                                          placeholder="Gelecek dönem için hedefleri belirtin..."></textarea>
+                                <span asp-validation-for="Goals" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Değerlendiren Yorumları -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="form-group mb-3">
+                                <label asp-for="ReviewerComments" class="form-label"></label>
+                                <textarea asp-for="ReviewerComments" class="form-control" rows="3" 
+                                          placeholder="Genel değerlendirme yorumlarınızı yazın..."></textarea>
+                                <span asp-validation-for="ReviewerComments" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Kaydet
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle"></i> Değerlendirme Rehberi
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Skor Açıklamaları:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>5 - Mükemmel:</strong> Beklentileri aşan performans</li>
+                    <li><strong>4 - İyi:</strong> Beklentileri karşılayan performans</li>
+                    <li><strong>3 - Yeterli:</strong> Kabul edilebilir performans</li>
+                    <li><strong>2 - Geliştirilmeli:</strong> Gelişim gerekli</li>
+                    <li><strong>1 - Yetersiz:</strong> Ciddi gelişim gerekli</li>
+                </ul>
+                
+                <h6 class="mt-3">Değerlendirme Kategorileri:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>İş Kalitesi:</strong> Yapılan işin kalitesi ve doğruluğu</li>
+                    <li><strong>Üretkenlik:</strong> İş hızı ve verimlilik</li>
+                    <li><strong>Ekip Çalışması:</strong> Takım içi işbirliği</li>
+                    <li><strong>İletişim:</strong> Sözlü ve yazılı iletişim becerileri</li>
+                    <li><strong>Liderlik:</strong> Liderlik ve yönlendirme becerileri</li>
+                    <li><strong>İnisiyatif:</strong> Proaktif yaklaşım</li>
+                    <li><strong>Problem Çözme:</strong> Analitik düşünme</li>
+                    <li><strong>Uyum:</strong> Değişime adaptasyon</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

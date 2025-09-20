@@ -399,6 +399,9 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <script>
+        // Global chart instances to track for proper cleanup
+        let chartInstances = {};
+        
         // Chart.js konfigürasyonu ve oluşturma
         function initializeCharts() {
             // Check if Chart.js is loaded
@@ -412,6 +415,14 @@
             }
             
             console.log('Chart.js loaded successfully, version:', Chart.version);
+            
+            // Destroy existing charts to prevent canvas reuse errors
+            Object.keys(chartInstances).forEach(function(key) {
+                if (chartInstances[key]) {
+                    chartInstances[key].destroy();
+                    delete chartInstances[key];
+                }
+            });
             
             // Chart.js defaults
             Chart.defaults.font.family = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
@@ -431,7 +442,7 @@
                     throw new Error('No department data available');
                 }
                 
-                new Chart(departmentCtx, {
+                chartInstances.departmentChart = new Chart(departmentCtx, {
                 type: 'pie',
                 data: {
                     labels: departmentLabels,
@@ -480,7 +491,7 @@
                 
                 console.log('Leave status chart data:', { labels: leaveLabels, data: leaveData });
                 
-                new Chart(leaveCtx, {
+                chartInstances.leaveStatusChart = new Chart(leaveCtx, {
                 type: 'bar',
                 data: {
                     labels: leaveLabels,
@@ -529,7 +540,7 @@
                 
                 console.log('Hiring trend chart data:', { labels: hiringLabels, data: hiringData });
                 
-                new Chart(hiringCtx, {
+                chartInstances.hiringTrendChart = new Chart(hiringCtx, {
                 type: 'line',
                 data: {
                     labels: hiringLabels,
@@ -584,7 +595,7 @@
                 
                 console.log('Stock status chart data:', { labels: stockLabels, data: stockData });
                 
-                new Chart(stockCtx, {
+                chartInstances.stockStatusChart = new Chart(stockCtx, {
                 type: 'doughnut',
                 data: {
                     labels: stockLabels,
@@ -624,26 +635,37 @@
             }
         }
         
+        // Initialize charts when DOM is ready - single initialization
+        let chartsInitialized = false;
+        
+        function safeInitializeCharts() {
+            if (chartsInitialized) {
+                console.log('Charts already initialized, skipping...');
+                return;
+            }
+            
+            if (typeof Chart !== 'undefined') {
+                console.log('Initializing charts...');
+                initializeCharts();
+                chartsInitialized = true;
+            } else {
+                console.warn('Chart.js not loaded yet, showing fallback...');
+                showStaticFallback();
+            }
+        }
+        
         // Initialize charts when DOM is ready
         $(document).ready(function() {
-            // Wait a bit for Chart.js to load if it's coming from backup CDN
-            setTimeout(function() {
-                initializeCharts();
-            }, 100);
+            setTimeout(safeInitializeCharts, 500);
         });
         
-        // Also try to initialize if Chart.js loads later
+        // Fallback initialization
         document.addEventListener('DOMContentLoaded', function() {
-            if (typeof Chart !== 'undefined') {
-                setTimeout(function() {
-                    initializeCharts();
-                }, 200);
-            } else {
-                // Show static fallback if Chart.js never loads
-                setTimeout(function() {
-                    showStaticFallback();
-                }, 2000);
-            }
+            setTimeout(function() {
+                if (!chartsInitialized) {
+                    safeInitializeCharts();
+                }
+            }, 1000);
         });
         
         // Static fallback function

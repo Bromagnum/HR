@@ -112,7 +112,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             _mapper.Map(dto, review);
             review.UpdatedAt = DateTime.Now;
 
-            await _unitOfWork.PerformanceReviews.UpdateAsync(review);
+            _unitOfWork.PerformanceReviews.Update(review);
             await _unitOfWork.SaveChangesAsync();
 
             var result = await GetByIdAsync(dto.Id);
@@ -137,7 +137,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             if (review.Status != ReviewStatus.Draft)
                 return Result.Fail("Sadece taslak durumundaki değerlendirmeler silinebilir");
 
-            await _unitOfWork.PerformanceReviews.DeleteAsync(review);
+            _unitOfWork.PerformanceReviews.Remove(review);
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Performance review deleted: {ReviewId}", id);
@@ -278,7 +278,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             review.SubmittedAt = DateTime.Now;
             review.UpdatedAt = DateTime.Now;
 
-            await _unitOfWork.PerformanceReviews.UpdateAsync(review);
+            _unitOfWork.PerformanceReviews.Update(review);
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Performance review submitted: {ReviewId}", reviewId);
@@ -311,7 +311,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             review.ApprovedById = approverId;
             review.UpdatedAt = DateTime.Now;
 
-            await _unitOfWork.PerformanceReviews.UpdateAsync(review);
+            _unitOfWork.PerformanceReviews.Update(review);
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Performance review approved: {ReviewId} by {ApproverId}", reviewId, approverId);
@@ -336,7 +336,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             review.ReviewerComments = $"Red nedeni: {reason}";
             review.UpdatedAt = DateTime.Now;
 
-            await _unitOfWork.PerformanceReviews.UpdateAsync(review);
+            _unitOfWork.PerformanceReviews.Update(review);
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Performance review rejected: {ReviewId}, Reason: {Reason}", reviewId, reason);
@@ -363,7 +363,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             review.Status = ReviewStatus.EmployeeReview;
             review.UpdatedAt = DateTime.Now;
 
-            await _unitOfWork.PerformanceReviews.UpdateAsync(review);
+            _unitOfWork.PerformanceReviews.Update(review);
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Employee review started: {ReviewId}", reviewId);
@@ -390,7 +390,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             review.Status = ReviewStatus.Completed;
             review.UpdatedAt = DateTime.Now;
 
-            await _unitOfWork.PerformanceReviews.UpdateAsync(review);
+            _unitOfWork.PerformanceReviews.Update(review);
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Performance review completed: {ReviewId}", reviewId);
@@ -427,7 +427,7 @@ public class PerformanceReviewService : IPerformanceReviewService
                 review.Status = ReviewStatus.ManagerReview;
             }
 
-            await _unitOfWork.PerformanceReviews.UpdateAsync(review);
+            _unitOfWork.PerformanceReviews.Update(review);
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Self assessment completed for review: {ReviewId}", dto.PerformanceReviewId);
@@ -639,7 +639,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             _mapper.Map(dto, period);
             period.UpdatedAt = DateTime.Now;
 
-            await _unitOfWork.ReviewPeriods.UpdateAsync(period);
+            _unitOfWork.ReviewPeriods.Update(period);
             await _unitOfWork.SaveChangesAsync();
 
             var result = await GetPeriodByIdAsync(dto.Id);
@@ -664,7 +664,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             if (period.PerformanceReviews.Any())
                 return Result.Fail("Bu dönemde değerlendirmeler mevcut, dönem silinemez");
 
-            await _unitOfWork.ReviewPeriods.DeleteAsync(period);
+            _unitOfWork.ReviewPeriods.Remove(period);
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Review period deleted: {PeriodId}", id);
@@ -782,7 +782,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             _mapper.Map(dto, goal);
             goal.UpdatedAt = DateTime.Now;
 
-            await _unitOfWork.PerformanceGoals.UpdateAsync(goal);
+            _unitOfWork.PerformanceGoals.Update(goal);
             await _unitOfWork.SaveChangesAsync();
 
             var resultDto = _mapper.Map<PerformanceGoalDto>(goal);
@@ -804,7 +804,7 @@ public class PerformanceReviewService : IPerformanceReviewService
             if (goal == null)
                 return Result.Fail("Performans hedefi bulunamadı");
 
-            await _unitOfWork.PerformanceGoals.DeleteAsync(goal);
+            _unitOfWork.PerformanceGoals.Remove(goal);
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Performance goal deleted: {GoalId}", goalId);

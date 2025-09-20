@@ -1,0 +1,75 @@
+@model MVC.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Basit Giriş";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IKYS - Giriş</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-sign-in-alt"></i> IKYS Giriş</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Manual Form - No Tag Helpers -->
+                        <form action="/Auth/Login" method="post">
+                            <input name="__RequestVerificationToken" type="hidden" value="@Html.AntiForgeryToken().ToString().Replace("<input name=\"__RequestVerificationToken\" type=\"hidden\" value=\"", "").Replace("\" />", "")" />
+                            
+                            <div class="mb-3">
+                                <label for="Email" class="form-label">Email Adresi</label>
+                                <input type="email" class="form-control" id="Email" name="Email" placeholder="admin@ikys.com" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="Password" class="form-label">Şifre</label>
+                                <input type="password" class="form-control" id="Password" name="Password" placeholder="Admin123!" required>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="RememberMe" name="RememberMe" value="true">
+                                <input type="hidden" name="RememberMe" value="false">
+                                <label class="form-check-label" for="RememberMe">Beni Hatırla</label>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                            </button>
+                        </form>
+                        
+                        <div class="mt-3">
+                            <div class="alert alert-info">
+                                <h6>Test Kullanıcıları:</h6>
+                                <ul class="mb-0">
+                                    <li><strong>Admin:</strong> admin@ikys.com / Admin123!</li>
+                                    <li><strong>Manager:</strong> manager@ikys.com / Manager123!</li>
+                                    <li><strong>Employee:</strong> employee@ikys.com / Employee123!</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>Debug Info:</strong><br>
+                                Port: 8080<br>
+                                Action: /Auth/Login<br>
+                                Method: POST<br>
+                                Path: @Context.Request.Path<br>
+                                Host: @Context.Request.Host
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

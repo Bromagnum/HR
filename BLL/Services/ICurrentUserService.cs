@@ -13,4 +13,5 @@ public interface ICurrentUserService
     bool IsInRole(string role);
     bool HasClaim(string claimType, string claimValue);
     string? GetClaimValue(string claimType);
+    int GetCurrentUserId();
 }

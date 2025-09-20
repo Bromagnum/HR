@@ -1,0 +1,113 @@
+@model MVC.Models.SelfAssessmentViewModel
+
+@{
+    ViewData["Title"] = "Öz Değerlendirme";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <a asp-action="SelfAssessment" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <i class="fas fa-user-check"></i> @Model.PersonName - @Model.ReviewPeriodName
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="CompleteSelfAssessment" method="post">
+                    <input asp-for="PerformanceReviewId" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <!-- Öz Değerlendirme Skoru -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2 mb-3">Öz Değerlendirme Skoru</h5>
+                        <div class="form-group mb-3">
+                            <label asp-for="SelfOverallScore" class="form-label"></label>
+                            <select asp-for="SelfOverallScore" class="form-select">
+                                <option value="1">1 - Yetersiz (Ciddi gelişim gerekli)</option>
+                                <option value="2">2 - Geliştirilmeli (Bazı alanlar geliştirilmeli)</option>
+                                <option value="3" selected>3 - Yeterli (Beklentileri karşılıyor)</option>
+                                <option value="4">4 - İyi (Beklentileri aşıyor)</option>
+                                <option value="5">5 - Mükemmel (Olağanüstü performans)</option>
+                            </select>
+                            <span asp-validation-for="SelfOverallScore" class="text-danger"></span>
+                            <div class="form-text">
+                                Genel performansınızı nasıl değerlendiriyorsunuz?
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Öz Değerlendirme Yorumları -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2 mb-3">Öz Değerlendirme Yorumları</h5>
+                        <div class="form-group mb-3">
+                            <label asp-for="SelfAssessmentComments" class="form-label"></label>
+                            <textarea asp-for="SelfAssessmentComments" class="form-control" rows="6" 
+                                      placeholder="Bu dönemdeki performansınızı değerlendirin:&#10;&#10;• Hangi konularda başarılı oldunuz?&#10;• Hangi zorluklar yaşadınız?&#10;• Hangi alanlarda gelişim gösterdiniz?&#10;• Hangi hedeflere ulaştınız?"></textarea>
+                            <span asp-validation-for="SelfAssessmentComments" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Ek Yorumlar -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2 mb-3">Ek Yorumlar ve Öneriler</h5>
+                        <div class="form-group mb-3">
+                            <label asp-for="EmployeeComments" class="form-label"></label>
+                            <textarea asp-for="EmployeeComments" class="form-control" rows="4" 
+                                      placeholder="Yöneticinize iletmek istediğiniz ek yorumlar, öneriler veya destek talepleri..."></textarea>
+                            <span asp-validation-for="EmployeeComments" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Öz Değerlendirmeyi Tamamla
+                        </button>
+                        <a asp-action="SelfAssessment" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-lightbulb"></i> Öz Değerlendirme İpuçları
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Etkili Öz Değerlendirme için:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Dürüst ve objektif olun</li>
+                    <li><i class="fas fa-check text-success"></i> Somut örnekler verin</li>
+                    <li><i class="fas fa-check text-success"></i> Hem başarıları hem de zorlukları belirtin</li>
+                    <li><i class="fas fa-check text-success"></i> Gelecek hedeflerinizi paylaşın</li>
+                    <li><i class="fas fa-check text-success"></i> Destek ihtiyaçlarınızı belirtin</li>
+                </ul>
+                
+                <div class="alert alert-info mt-3">
+                    <small>
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Not:</strong> Öz değerlendirmenizi tamamladıktan sonra değiştirilemez. 
+                        Lütfen dikkatlice doldurun.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

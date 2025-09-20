@@ -1,0 +1,371 @@
+@model BLL.DTOs.PerformanceReviewDetailDto
+
+@{
+    ViewData["Title"] = "Performans Değerlendirmesi Detayı";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@ViewData["Title"]</h1>
+    <div class="btn-group">
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+        {
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-file-word"></i> Word Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a asp-controller="Person" asp-action="ExportPerformanceReportWord" asp-route-id="@Model.PersonId" class="dropdown-item">
+                            <i class="fas fa-chart-line"></i> Performans Raporu
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        }
+        @if (Model.Status == DAL.Entities.ReviewStatus.Draft || Model.Status == DAL.Entities.ReviewStatus.InProgress)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Düzenle
+            </a>
+        }
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Geri Dön
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-user"></i> @Model.PersonName
+                    <span class="badge @(Model.Status switch {
+                        DAL.Entities.ReviewStatus.Draft => "bg-secondary",
+                        DAL.Entities.ReviewStatus.InProgress => "bg-info",
+                        DAL.Entities.ReviewStatus.EmployeeReview => "bg-warning",
+                        DAL.Entities.ReviewStatus.ManagerReview => "bg-primary",
+                        DAL.Entities.ReviewStatus.Completed => "bg-success",
+                        DAL.Entities.ReviewStatus.Approved => "bg-success",
+                        _ => "bg-secondary"
+                    }) ms-2">
+                        @Model.StatusText
+                    </span>
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Genel Bilgiler -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <strong>Personel:</strong> @Model.PersonName<br>
+                        <strong>E-posta:</strong> @Model.PersonEmail<br>
+                        <strong>Departman:</strong> @Model.DepartmentName<br>
+                        <strong>Pozisyon:</strong> @Model.PositionName
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Değerlendirme Dönemi:</strong> @Model.ReviewPeriodName<br>
+                        <strong>Dönem:</strong> @Model.ReviewPeriodStart.ToString("dd.MM.yyyy") - @Model.ReviewPeriodEnd.ToString("dd.MM.yyyy")<br>
+                        <strong>Değerlendiren:</strong> @Model.ReviewerName<br>
+                        @if (Model.ApprovedByName != null)
+                        {
+                            <strong>Onaylayan:</strong> @Model.ApprovedByName<br>
+                        }
+                    </div>
+                </div>
+
+                <!-- Skorlar -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2 mb-3">Değerlendirme Skorları</h5>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Genel Skor</label>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 25px;">
+                                    <div class="progress-bar @(Model.OverallScore >= 4 ? "bg-success" : Model.OverallScore >= 3 ? "bg-warning" : "bg-danger")" 
+                                         style="width: @((Model.OverallScore / 5.0) * 100)%"></div>
+                                </div>
+                                <strong>@Model.OverallScore/5</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">İş Kalitesi</label>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                    <div class="progress-bar bg-info" style="width: @((Model.JobQualityScore / 5.0) * 100)%"></div>
+                                </div>
+                                <span>@Model.JobQualityScore/5</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Üretkenlik</label>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                    <div class="progress-bar bg-info" style="width: @((Model.ProductivityScore / 5.0) * 100)%"></div>
+                                </div>
+                                <span>@Model.ProductivityScore/5</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ekip Çalışması</label>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                    <div class="progress-bar bg-info" style="width: @((Model.TeamworkScore / 5.0) * 100)%"></div>
+                                </div>
+                                <span>@Model.TeamworkScore/5</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">İletişim</label>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                    <div class="progress-bar bg-info" style="width: @((Model.CommunicationScore / 5.0) * 100)%"></div>
+                                </div>
+                                <span>@Model.CommunicationScore/5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Liderlik</label>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                    <div class="progress-bar bg-info" style="width: @((Model.LeadershipScore / 5.0) * 100)%"></div>
+                                </div>
+                                <span>@Model.LeadershipScore/5</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">İnisiyatif</label>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                    <div class="progress-bar bg-info" style="width: @((Model.InitiativeScore / 5.0) * 100)%"></div>
+                                </div>
+                                <span>@Model.InitiativeScore/5</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Problem Çözme</label>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                    <div class="progress-bar bg-info" style="width: @((Model.ProblemSolvingScore / 5.0) * 100)%"></div>
+                                </div>
+                                <span>@Model.ProblemSolvingScore/5</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Uyum</label>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                    <div class="progress-bar bg-info" style="width: @((Model.AdaptabilityScore / 5.0) * 100)%"></div>
+                                </div>
+                                <span>@Model.AdaptabilityScore/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yorumlar -->
+                @if (!string.IsNullOrEmpty(Model.Strengths))
+                {
+                    <div class="mb-3">
+                        <h6>Güçlü Yönler:</h6>
+                        <p class="text-muted">@Model.Strengths</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.AreasForImprovement))
+                {
+                    <div class="mb-3">
+                        <h6>Gelişim Alanları:</h6>
+                        <p class="text-muted">@Model.AreasForImprovement</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Achievements))
+                {
+                    <div class="mb-3">
+                        <h6>Başarılar:</h6>
+                        <p class="text-muted">@Model.Achievements</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.ReviewerComments))
+                {
+                    <div class="mb-3">
+                        <h6>Değerlendiren Yorumları:</h6>
+                        <p class="text-muted">@Model.ReviewerComments</p>
+                    </div>
+                }
+
+                <!-- Öz Değerlendirme -->
+                @if (Model.IsSelfAssessmentCompleted)
+                {
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-user-check"></i> Öz Değerlendirme Tamamlandı</h6>
+                        <p><strong>Öz Değerlendirme Skoru:</strong> @Model.SelfOverallScore/5</p>
+                        @if (!string.IsNullOrEmpty(Model.SelfAssessmentComments))
+                        {
+                            <p><strong>Öz Değerlendirme Yorumları:</strong> @Model.SelfAssessmentComments</p>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.EmployeeComments))
+                        {
+                            <p><strong>Çalışan Yorumları:</strong> @Model.EmployeeComments</p>
+                        }
+                    </div>
+                }
+                else if (Model.Status == DAL.Entities.ReviewStatus.EmployeeReview)
+                {
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-clock"></i> Öz Değerlendirme Bekleniyor</h6>
+                        <p>Bu değerlendirme için çalışanın öz değerlendirmesi beklenmektedir.</p>
+                        @if (Model.PersonId.ToString() == ViewContext.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                        {
+                            <a asp-action="CompleteSelfAssessment" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">
+                                <i class="fas fa-user-check"></i> Öz Değerlendirmeyi Tamamla
+                            </a>
+                        }
+                    </div>
+                }
+
+                <!-- Action Buttons -->
+                <div class="mt-4">
+                    @if (Model.Status == DAL.Entities.ReviewStatus.Draft || Model.Status == DAL.Entities.ReviewStatus.InProgress)
+                    {
+                        <form asp-action="Submit" asp-route-id="@Model.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-primary"
+                                    onclick="return confirm('Bu değerlendirmeyi göndermek istediğinizden emin misiniz?')">
+                                <i class="fas fa-paper-plane"></i> Gönder
+                            </button>
+                        </form>
+                    }
+                    
+                    @if (Model.Status == DAL.Entities.ReviewStatus.Completed && (User.IsInRole("Admin") || User.IsInRole("Manager")))
+                    {
+                        <form asp-action="Approve" asp-route-id="@Model.Id" method="post" class="d-inline me-2">
+                            <button type="submit" class="btn btn-success"
+                                    onclick="return confirm('Bu değerlendirmeyi onaylamak istediğinizden emin misiniz?')">
+                                <i class="fas fa-check"></i> Onayla
+                            </button>
+                        </form>
+                        
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                            <i class="fas fa-times"></i> Reddet
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Hedefler -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bullseye"></i> Performans Hedefleri
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Goals_List.Any())
+                {
+                    @foreach (var goal in Model.Goals_List)
+                    {
+                        <div class="border-bottom pb-2 mb-2">
+                            <h6 class="mb-1">@goal.Title</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">@goal.TargetDate.ToString("dd.MM.yyyy")</small>
+                                <span class="badge @(goal.Status switch {
+                                    DAL.Entities.GoalStatus.NotStarted => "bg-secondary",
+                                    DAL.Entities.GoalStatus.InProgress => "bg-info",
+                                    DAL.Entities.GoalStatus.Completed => "bg-success",
+                                    DAL.Entities.GoalStatus.OnHold => "bg-warning",
+                                    DAL.Entities.GoalStatus.Cancelled => "bg-danger",
+                                    _ => "bg-secondary"
+                                })">
+                                    @goal.StatusText
+                                </span>
+                            </div>
+                            <div class="progress mt-1" style="height: 8px;">
+                                <div class="progress-bar" style="width: @(goal.ProgressPercentage)%"></div>
+                            </div>
+                            <small class="text-muted">%@goal.ProgressPercentage tamamlandı</small>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted text-center">Henüz hedef belirlenmemiş</p>
+                }
+            </div>
+        </div>
+
+        <!-- İstatistikler -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie"></i> Özet
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <strong>Oluşturma Tarihi:</strong><br>
+                    <small class="text-muted">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                </div>
+                @if (Model.SubmittedAt.HasValue)
+                {
+                    <div class="mb-2">
+                        <strong>Gönderilme Tarihi:</strong><br>
+                        <small class="text-muted">@Model.SubmittedAt.Value.ToString("dd.MM.yyyy HH:mm")</small>
+                    </div>
+                }
+                @if (Model.ApprovedAt.HasValue)
+                {
+                    <div class="mb-2">
+                        <strong>Onaylanma Tarihi:</strong><br>
+                        <small class="text-muted">@Model.ApprovedAt.Value.ToString("dd.MM.yyyy HH:mm")</small>
+                    </div>
+                }
+                @if (Model.IsSelfAssessmentCompleted)
+                {
+                    <div class="mb-2">
+                        <strong>Öz Değerlendirme:</strong><br>
+                        <small class="text-success">
+                            <i class="fas fa-check"></i> Tamamlandı
+                            @if (Model.SelfAssessmentCompletedAt.HasValue)
+                            {
+                                <span>(@Model.SelfAssessmentCompletedAt.Value.ToString("dd.MM.yyyy"))</span>
+                            }
+                        </small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Değerlendirmeyi Reddet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Reject" asp-route-id="@Model.Id" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Red Nedeni</label>
+                        <textarea name="reason" id="reason" class="form-control" rows="3" required
+                                  placeholder="Değerlendirmenin neden reddedildiğini açıklayın..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-danger">Reddet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

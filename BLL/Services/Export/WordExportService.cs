@@ -11,20 +11,23 @@ namespace BLL.Services.Export
 {
     public class WordExportService : IWordExportService
     {
-        private readonly IPersonService _personService;
-        private readonly IDepartmentService _departmentService;
-        private readonly ILeaveService _leaveService;
-        private readonly ILogger<WordExportService> _logger;
+    private readonly IPersonService _personService;
+    private readonly IDepartmentService _departmentService;
+    private readonly ILeaveService _leaveService;
+    private readonly IPerformanceReviewService _performanceReviewService;
+    private readonly ILogger<WordExportService> _logger;
 
         public WordExportService(
             IPersonService personService,
             IDepartmentService departmentService,
             ILeaveService leaveService,
+            IPerformanceReviewService performanceReviewService,
             ILogger<WordExportService> logger)
         {
             _personService = personService;
             _departmentService = departmentService;
             _leaveService = leaveService;
+            _performanceReviewService = performanceReviewService;
             _logger = logger;
         }
 
@@ -226,9 +229,26 @@ namespace BLL.Services.Export
                     AddParagraph(body, $"Bitiş Tarihi: {endDate:dd.MM.yyyy}");
                     AddEmptyLine(body);
 
-                    // Performans değerlendirmesi (Bu kısım Performance Review modülü tamamlandığında güncellenecek)
+                    // Performans değerlendirmesi
                     AddHeading(body, "Performans Değerlendirmesi", 2);
-                    AddParagraph(body, "[Bu bölüm Personel Değerlendirme modülü tamamlandığında doldurulacaktır]");
+                    
+                    var performanceResult = await _performanceReviewService.GetByPersonIdAsync(personId);
+                    if (performanceResult.IsSuccess && performanceResult.Data!.Any())
+                    {
+                        var latestReview = performanceResult.Data!.OrderByDescending(r => r.CreatedAt).First();
+                        AddParagraph(body, $"Son Değerlendirme: {latestReview.ReviewPeriodName}");
+                        AddParagraph(body, $"Genel Skor: {latestReview.OverallScore}/5");
+                        AddParagraph(body, $"Durum: {latestReview.StatusText}");
+                        AddParagraph(body, $"Değerlendiren: {latestReview.ReviewerName}");
+                        if (latestReview.SubmittedAt.HasValue)
+                        {
+                            AddParagraph(body, $"Tamamlanma Tarihi: {latestReview.SubmittedAt.Value:dd.MM.yyyy}");
+                        }
+                    }
+                    else
+                    {
+                        AddParagraph(body, "Henüz performans değerlendirmesi bulunmamaktadır.");
+                    }
                     AddEmptyLine(body);
 
                     // Rapor tarihi

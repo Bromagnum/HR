@@ -120,7 +120,7 @@ public class ReviewPeriod : BaseEntity
     [Required]
     public DateTime ReviewEndDate { get; set; }
     
-    public bool IsActive { get; set; } = true;
+    public new bool IsActive { get; set; } = true;
     
     public ReviewPeriodType Type { get; set; } = ReviewPeriodType.Annual;
     

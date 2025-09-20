@@ -1,16 +1,27 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>@ViewData["Title"] - İKYS</title>
+    
+    <!-- Remove CSP that blocks local resources in development -->
+    
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+    
+    <!-- DataTables CSS with fallback -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" 
+          onerror="this.onerror=null;this.href='/lib/datatables/datatables.min.css';" />
+    
+    <!-- Font Awesome with fallback -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          onerror="this.onerror=null;this.href='/lib/fontawesome/css/all.min.css';" />
+    
+    <!-- Site CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MVC.styles.css" asp-append-version="true" />
-    <!-- Font Awesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -621,16 +632,47 @@
             &copy; 2025 - İnsan Kaynakları Yönetim Sistemi (İKYS)
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- DataTables for table functionality -->
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-    <!-- SheetJS for Excel export functionality -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Chart.js for dashboard charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- Core JavaScript Libraries -->
+    <script src="~/lib/jquery/dist/jquery.min.js" onerror="console.error('jQuery failed to load')"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" onerror="console.error('Bootstrap failed to load')"></script>
+    
+    <!-- DataTables with error handling -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js" 
+            onerror="console.warn('DataTables CDN failed, functionality may be limited')"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js" 
+            onerror="console.warn('DataTables Bootstrap CDN failed')"></script>
+    
+    <!-- SheetJS with error handling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" 
+            onerror="console.warn('SheetJS CDN failed, Excel export may not work')"></script>
+    
+    <!-- Chart.js with error handling -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js" 
+            onerror="console.warn('Chart.js CDN failed, charts will show fallback')"></script>
+    
+    <!-- Site JavaScript -->
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <!-- Error Handling Script -->
+    <script>
+        // Global error handler for missing resources
+        window.addEventListener('error', function(e) {
+            if (e.target !== window) {
+                console.warn('Resource failed to load:', e.target.src || e.target.href);
+            }
+        });
+        
+        // Check if critical libraries loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof jQuery === 'undefined') {
+                console.error('jQuery is not loaded! Some functionality may not work.');
+            }
+            if (typeof bootstrap === 'undefined') {
+                console.warn('Bootstrap JS is not loaded! Some UI components may not work.');
+            }
+        });
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
